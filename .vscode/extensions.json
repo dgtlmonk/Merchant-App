@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "msjsdiag.debugger-for-chrome",
+    "vscode-icons-team.vscode-icons",
+    "eg2.vscode-npm-script",
+    "dweizhe.docthis-customize-tags",
+    "drknoxy.eslint-disable-snippets",
+    "mike-co.import-sorter"
+  ]
+}
