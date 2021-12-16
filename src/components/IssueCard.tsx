@@ -87,13 +87,13 @@ function Index({ onDone }: Props) {
   }
 
   return (
-    <div className="flex flex-col  w-full p-4 max-w-md items-center justify-center h-full">
+    <div className="flex flex-col  p-4 max-w-md items-center justify-center h-full w-full">
       <div
-        className="border rounded-md relative"
-        style={{ width: "254px", height: "130px" }}
+        className="border rounded-md flex relative mt-12"
+        style={{ width: "254px", minHeight: "130px" }}
       >
         <span
-          className="text-6xl absolute opacity-5"
+          className="text-6xl opacity-5 absolute"
           style={{ left: "40px", top: "25px" }}
         >
           CARD

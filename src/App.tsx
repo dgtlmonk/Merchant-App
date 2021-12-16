@@ -6,7 +6,7 @@ import LoginForm from "./components/LoginForm";
 import { VIEWS } from "./types";
 
 function App() {
-  const [viewState, setViewState] = useState<VIEWS>(VIEWS.MENU);
+  const [viewState, setViewState] = useState<VIEWS>(VIEWS.ISSUE_CARD);
 
   const handleDone = () => {
     setViewState(VIEWS.MENU);
@@ -20,7 +20,9 @@ function App() {
     <div className="flex flex-col p-4 items-center h-full">
       {
         {
-          [VIEWS.LOGIN]: <LoginForm />,
+          [VIEWS.LOGIN]: (
+            <LoginForm onSuccess={() => handleMenuChange(VIEWS.MENU)} />
+          ),
           [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
           [VIEWS.ISSUE_CARD]: <IssueCard onDone={handleDone} />,
         }[viewState]
