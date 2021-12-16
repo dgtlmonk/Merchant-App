@@ -34,6 +34,7 @@ type Props = {
 
 export default ({ onSuccess }: Props) => {
   const Form = withTheme(Theme);
+  // const [isLoading, setIsLoading] = useState(false);
 
   function handleSubmit(
     { formData }: FormProps<any>,
@@ -41,33 +42,33 @@ export default ({ onSuccess }: Props) => {
   ) {
     e.preventDefault();
 
-    // setState({ ...state, loggingIn: true });
     client
       .post(host, {
         body: JSON.stringify(formData),
       })
+
       .then((res) => {
         if (res.error) {
           console.log(" Login failed");
           return;
         }
 
-        onSuccess();
+        // onSuccess();
       });
   }
 
   return (
     <div className="flex flex-col p-12 items-center justify-center max-w-md h-full">
       <Form
+        key="loginForm"
         uiSchema={uiSchema}
         //  @ts-ignore
         schema={schema}
         onSubmit={handleSubmit}
-        key="loginForm"
+        showErrorList={false}
       >
         <button
           type="submit"
-          key="loginButton"
           className="p-2 mt-4 rounded-md w-full bg-blue-400 text-white font-medium"
         >
           Login

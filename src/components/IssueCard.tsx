@@ -62,7 +62,6 @@ function Index({ onDone }: Props) {
       mobile,
     };
 
-    console.log(payload);
     setData(formData);
     setViewState(VIEW.confirm);
   };
