@@ -1,40 +1,34 @@
-import { withTheme } from "@rjsf/core";
-import { Theme } from "@rjsf/material-ui";
-
-// import JSONSchemaForm from "react-jsonschema-form";
-
-const Form = withTheme(Theme);
+import { useState } from "react";
+import "./App.css";
+import AppMenu from "./components/AppMenu";
+import IssueCard from "./components/IssueCard";
+import LoginForm from "./components/LoginForm";
+import { VIEWS } from "./types";
 
 function App() {
-  const schema = {
-    type: "object",
-    required: ["familyName"],
-    properties: {
-      name: {
-        title: "",
-        type: "object",
-        required: ["givenName", "familyName"],
-        properties: {
-          givenName: {
-            title: "given name",
-            type: "string",
-          },
-          familyName: {
-            title: "family name",
-            type: "string",
-          },
-        },
-      },
-    },
+  const [viewState, setViewState] = useState<VIEWS>(VIEWS.MENU);
+
+  const handleDone = () => {
+    setViewState(VIEWS.MENU);
+  };
+
+  const handleMenuChange = (menu: VIEWS) => {
+    setViewState(menu);
   };
 
   return (
-    <div style={{ padding: "2em" }}>
-      <Form schema={schema} onSubmit={({ formData }) => console.log(formData)}>
-        <button type="submit">Next</button>
-      </Form>
+    <div className="flex flex-col p-4 items-center h-full">
+      {
+        {
+          [VIEWS.LOGIN]: <LoginForm />,
+          [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
+          [VIEWS.ISSUE_CARD]: <IssueCard onDone={handleDone} />,
+        }[viewState]
+      }
     </div>
   );
 }
+// {/* <LoginForm /> */}
+// {/* <AppMenu /> */}
 
 export default App;
