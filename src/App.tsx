@@ -17,25 +17,17 @@ function App() {
     setViewState(menu);
   };
 
-  const handleOnLogin = () => {
-    setIsLoading(true);
-  };
-
-  const SubmitComp = () => (
-    <button
-      type="submit"
-      className="p-2 mt-4 rounded-md w-full bg-blue-400 text-white font-medium"
-    >
-      Login
-    </button>
-  );
-
   return (
     <div className="flex flex-col p-4 items-center h-full">
       {
         {
           [VIEWS.LOGIN]: (
-            <LoginForm onSuccess={() => handleMenuChange(VIEWS.MENU)} />
+            <LoginForm
+              onSuccess={() => {
+                console.log("on success!");
+                setViewState(VIEWS.MENU);
+              }}
+            />
           ),
           [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
           [VIEWS.ISSUE_CARD]: <IssueCard onDone={handleDone} />,

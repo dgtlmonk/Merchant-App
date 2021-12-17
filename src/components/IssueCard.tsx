@@ -125,7 +125,7 @@ function Index({ onDone }: Props) {
             <Form schema={schema} onSubmit={handleSubmit}>
               <button
                 type="submit"
-                className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
               >
                 Next
               </button>
