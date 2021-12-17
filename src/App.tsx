@@ -16,9 +16,8 @@ function useQuery() {
 
 function App() {
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
-
   const [module, setModule] = useState<any>(null);
-  const [token, setToken] = useState<any>(null);
+  const [_token, setToken] = useState<any>(null);
 
   const r = useQuery();
 
@@ -37,6 +36,7 @@ function App() {
       setViewState(VIEWS.MENU);
       return;
     }
+
     if (module === "1") {
       setViewState(VIEWS.ISSUE_CARD);
       return;
@@ -82,7 +82,5 @@ function App() {
     </div>
   );
 }
-// {/* <LoginForm /> */}
-// {/* <AppMenu /> */}
 
 export default App;
