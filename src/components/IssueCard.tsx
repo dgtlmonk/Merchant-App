@@ -80,11 +80,6 @@ function Index({ onDone }: Props) {
       });
   };
 
-  function getDisplayName() {
-    /* @ts-ignore */
-    return `${data?.name?.givenName} ${data?.name?.familyName}`;
-  }
-
   return (
     <div className="flex flex-col  p-4 max-w-md items-center justify-center h-full w-full">
       <div

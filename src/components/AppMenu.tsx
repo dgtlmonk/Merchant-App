@@ -12,7 +12,10 @@ export default ({ onMenuSelect }: Props) => (
         label="Issue Card"
         onSelect={() => onMenuSelect(VIEWS.ISSUE_CARD)}
       />
-      <AppMenuItem label="Add Sales" />
+      <AppMenuItem
+        label="Add Sales"
+        onSelect={() => onMenuSelect(VIEWS.ADD_SALES)}
+      />
       <AppMenuItem label="History" />
       <AppMenuItem label="Settings" />
     </div>

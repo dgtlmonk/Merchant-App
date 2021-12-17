@@ -1,15 +1,15 @@
+import "@/styles/App.css";
 import { useState } from "react";
-import "./App.css";
+import AddSales from "./components/AddSales";
 import AppMenu from "./components/AppMenu";
 import IssueCard from "./components/IssueCard";
 import LoginForm from "./components/LoginForm";
 import { VIEWS } from "./types";
 
 function App() {
-  const [viewState, setViewState] = useState<VIEWS>(VIEWS.ISSUE_CARD);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [viewState, setViewState] = useState<string>(VIEWS.ADD_SALES);
 
-  const handleDone = () => {
+  const handleBackToMenu = () => {
     setViewState(VIEWS.MENU);
   };
 
@@ -24,13 +24,13 @@ function App() {
           [VIEWS.LOGIN]: (
             <LoginForm
               onSuccess={() => {
-                console.log("on success!");
                 setViewState(VIEWS.MENU);
               }}
             />
           ),
           [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
-          [VIEWS.ISSUE_CARD]: <IssueCard onDone={handleDone} />,
+          [VIEWS.ADD_SALES]: <AddSales onDone={handleBackToMenu} />,
+          [VIEWS.ISSUE_CARD]: <IssueCard onDone={handleBackToMenu} />,
         }[viewState]
       }
     </div>
