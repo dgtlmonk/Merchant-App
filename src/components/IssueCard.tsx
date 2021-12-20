@@ -152,7 +152,10 @@ function Index({ onDone }: Props) {
                 <TextField defaultValue={data?.mobile} label="mobile" />
               </div>
               <div className="flex flex-row w-full items-center justify-center mt-8">
-                <button className="p-2 px-4 border rounded-md  bg-slate-400 text-white mr-4">
+                <button
+                  className="p-2 px-4 border rounded-md  bg-slate-400 text-white mr-4"
+                  onClick={() => setViewState(VIEW.fillup)}
+                >
                   Cancel
                 </button>
                 <button
