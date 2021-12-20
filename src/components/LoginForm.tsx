@@ -6,8 +6,8 @@ import { useRef, useState } from "react";
 import { client } from "../helpers/api-client";
 const Form = withTheme(Theme);
 
-const host =
-  "https://f1d3-2404-3c00-482e-99c0-18d0-d45a-3a01-1d78.ngrok.io/api/users/login";
+const ep = "https://bbab-2404-3c00-482e-99c0-c06c-bf4d-6f69-fb47.ngrok.io";
+const host = `${ep}/api/users/login`;
 // "http://d4b2-2404-3c00-482e-99c0-5d39-e26c-8a0a-2dbd.ngrok.io/api/users/login";
 
 // const host = "https://61bbe191e943920017784fd9.mockapi.io/login";
@@ -34,6 +34,13 @@ export default ({ onSuccess }: Props) => {
     setIsAuthenticating(true);
     setIsLoginFailed(false);
 
+    // fetch(host, {
+    //   method: "POST",
+    //   body: JSON.stringify({
+    //     email,
+    //     password,
+    //   }),
+    // })
     client
       .post(host, {
         body: JSON.stringify({
@@ -42,6 +49,7 @@ export default ({ onSuccess }: Props) => {
         }),
       })
       .then((res) => {
+        console.log("res ", res);
         if (res.error) {
           setIsLoginFailed(true);
           return;
@@ -60,12 +68,14 @@ export default ({ onSuccess }: Props) => {
           required
           disabled={isAuthenticating}
         />
-        <TextField
-          label="password"
-          inputRef={passwordRef}
-          required
-          disabled={isAuthenticating}
-        />
+        <span className="flex mt-4">
+          <TextField
+            label="password"
+            inputRef={passwordRef}
+            required
+            disabled={isAuthenticating}
+          />
+        </span>
         {isAuthenticating ? (
           <div className="flex justify-center pt-4">
             <CircularProgress size="1.5em" />

@@ -1,9 +1,9 @@
 // import { client } from "@/helpers/api-client";
 
-import { client } from "@/helpers/api-client";
 import { CircularProgress, InputAdornment, TextField } from "@material-ui/core";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
+import { client } from "../helpers/api-client";
 
 // TODO: finalize dynamic params
 const defaultParams = {
@@ -27,10 +27,10 @@ type Props = {
 
 function Index({ onDone }: Props) {
   const host = import.meta.env.VITE_API_HOST;
-  const cardNumberRef = useRef();
-  const qttyRef = useRef();
-  const receiptRef = useRef();
-  const amountRef = useRef();
+  const cardNumberRef = useRef<any>();
+  const qttyRef = useRef<any>();
+  const receiptRef = useRef<any>();
+  const amountRef = useRef<any>();
 
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchingSuccess, setIsSearchingSuccess] = useState(false);
@@ -87,9 +87,29 @@ function Index({ onDone }: Props) {
 
       setTimeout(() => {
         try {
+          // @ts-ignore
           cardNumberRef?.current?.focus();
+
+          // @ts-ignore
+          cardNumberRef?.current?.focus();
+
+          // @ts-ignore
           qttyRef.current.value = 0;
+          // @ts-ignore
+          cardNumberRef?.current?.focus();
+
+          // @ts-ignore
+          cardNumberRef?.current?.focus();
+
+          // @ts-ignore
+          cardNumberRef?.current?.focus();
+
+          // @ts-ignore
           receiptRef.current.value = 0;
+          // @ts-ignore
+          cardNumberRef?.current?.focus();
+
+          // @ts-ignore
           amountRef.current.value = 0;
         } catch {}
       }, 500);

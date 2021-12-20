@@ -1,10 +1,10 @@
-import { client } from "@/helpers/api-client";
 import { TextField } from "@material-ui/core";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { FormProps } from "react-jsonschema-form";
+import { client } from "../helpers/api-client";
 import { schema } from "../types";
 
 const Form = withTheme(Theme);
@@ -32,7 +32,7 @@ function Index({ onDone }: Props) {
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [cardDetail, setCardDetail] = useState(null);
-  const [data, setData] = useState({});
+  const [data, setData] = useState<any>({});
 
   let payload = {
     membershipId: "5d12e1a1e4a5c53fdd6fe352",
@@ -41,14 +41,17 @@ function Index({ onDone }: Props) {
 
   useEffect(() => {
     if (data) {
+      // @ts-config
       setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
     }
   }, [data]);
 
   useEffect(() => {
     if (!toggleDisplayName) {
+      // @ts-config
       setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
     } else {
+      // @ts-config
       setDisplayName(`${data?.name?.familyName} ${data?.name?.givenName}`);
     }
   }, [toggleDisplayName]);
@@ -106,6 +109,7 @@ function Index({ onDone }: Props) {
               <div>
                 <span className="text-xs mr-2">expire</span> {/* @ts-ignore */}
                 <span style={{ fontSize: ".9em" }}>
+                  {/* @ts-ignore */}
                   {getFormattedDate(`${cardDetail?.endTime}`)}
                 </span>
               </div>
@@ -144,6 +148,7 @@ function Index({ onDone }: Props) {
                 </div>
               </div>
               <div className="flex justify-center mt-6 w-full">
+                {/* @ts-ignore */}
                 <TextField defaultValue={data?.mobile} label="mobile" />
               </div>
               <div className="flex flex-row w-full items-center justify-center mt-8">
@@ -172,13 +177,14 @@ function Index({ onDone }: Props) {
                 <div className="flex w-full  text-gray-400 p-2 border-b border-gray-400 text-md items-center justify-between">
                   Mobile
                   <span className="flex pl-2 text-xl text-gray-700">
-                    +
+                    +{/* @ts-ignore */}
                     {`${cardDetail?.person?.mobile?.countryCode} ${cardDetail?.person?.mobile?.number}`}
                   </span>
                 </div>
                 <div className="flex w-full p-2  text-md text-gray-400 items-center justify-between">
                   Expire
                   <span className="flex pl-2 text-xl text-gray-700">
+                    {/* @ts-ignore */}
                     {getFormattedDate(`${cardDetail?.endTime}`)}
                   </span>
                 </div>
