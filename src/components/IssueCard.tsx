@@ -1,8 +1,8 @@
-import { TextField } from "@material-ui/core";
+import { CircularProgress, TextField } from "@material-ui/core";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { FormProps } from "react-jsonschema-form";
 import { client } from "../helpers/api-client";
 import { schema } from "../types";
@@ -24,15 +24,45 @@ type Props = {
 function Index({ onDone }: Props) {
   enum VIEW {
     fillup = "fillup",
+    card_select = "card_select",
     confirm = "confirm",
     fullfilled = "fullfilled",
   }
   const host = import.meta.env.VITE_API_HOST;
-  const [viewState, setViewState] = useState<VIEW>(VIEW.fillup);
+  const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
+  const [membershipCards, setMembershipCards] = useState([]);
+  const [selectedMembershipCard, setSelectedMembeshipCard] = useState(null);
+  const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [cardDetail, setCardDetail] = useState(null);
   const [data, setData] = useState<any>({});
+
+  useEffect(() => {
+    client
+      .get(`${host}/programs`, {
+        headers: {
+          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+        },
+      })
+      .then((res: any[]) => {
+        if (res.length) {
+          const [p] = res;
+          let cardList = [];
+          const tierList: [] = p?.tierList;
+
+          if (!tierList.length) {
+            console.warn("No Cards available!");
+          } else {
+            // @ts-ignore
+            cardList = tierList.filter((tier) => tier?.enableIssuance === true);
+
+            setMembershipCards(cardList);
+          }
+        }
+      })
+      .finally(() => setIsLoadingCards(false));
+  }, []);
 
   let payload = {
     membershipId: "5d12e1a1e4a5c53fdd6fe352",
@@ -41,17 +71,14 @@ function Index({ onDone }: Props) {
 
   useEffect(() => {
     if (data) {
-      // @ts-config
       setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
     }
   }, [data]);
 
   useEffect(() => {
     if (!toggleDisplayName) {
-      // @ts-config
       setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
     } else {
-      // @ts-config
       setDisplayName(`${data?.name?.familyName} ${data?.name?.givenName}`);
     }
   }, [toggleDisplayName]);
@@ -83,19 +110,31 @@ function Index({ onDone }: Props) {
       });
   };
 
+  function renderCardList() {
+    // TODO: react memo ?
+    return membershipCards.map((card) => {
+      return (
+        <div
+          key="card.digitalCard.masterId"
+          role="button"
+          onClick={() => {
+            setSelectedMembeshipCard(card);
+            setViewState(VIEW.fillup);
+          }}
+        >
+          <img src={card.digitalCard.image.front} />
+        </div>
+      );
+    });
+  }
+
   return (
     <div className="flex flex-col  p-4 max-w-md items-center justify-center h-full w-full">
-      <div
-        className="border rounded-md flex relative mt-12"
-        style={{ width: "254px", minHeight: "130px" }}
-      >
-        <span
-          className="text-6xl opacity-5 absolute"
-          style={{ left: "40px", top: "25px" }}
+      {viewState === VIEW.fullfilled ? (
+        <div
+          className="border rounded-md flex relative mt-12"
+          style={{ width: "254px", minHeight: "130px" }}
         >
-          CARD
-        </span>
-        {viewState === VIEW.fullfilled ? (
           <div className="flex flex-col w-full h-full items-center justify-end">
             <div className="flex w-full justify-center text-xl">S11232 </div>
             <div className="flex w-full items-center justify-between p-2">
@@ -115,20 +154,44 @@ function Index({ onDone }: Props) {
               </div>
             </div>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
       {
         {
-          [VIEW.fillup]: (
-            /* @ts-ignore */
-            <Form schema={schema} onSubmit={handleSubmit}>
-              <button
-                type="submit"
-                className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
+          [VIEW.card_select]: isLoadingCards ? (
+            <CircularProgress size="2rem" />
+          ) : (
+            <div
+              className="border rounded-md flex relative mt-12"
+              style={{ width: "254px", minHeight: "130px" }}
+            >
+              {renderCardList()}
+              {/* <span
+                className="text-4xl opacity-5 absolute"
+                style={{ left: "40px", top: "25px" }}
               >
-                Next
-              </button>
-            </Form>
+                CARD SELECT
+              </span> */}
+            </div>
+          ),
+          [VIEW.fillup]: (
+            <Fragment>
+              <div style={{ width: "220px" }} className="mt-16">
+                <img
+                  src={selectedMembershipCard?.digitalCard?.image.front}
+                  className="mt-12"
+                />
+              </div>
+              {/* @ts-ignore  */}{" "}
+              <Form schema={schema} onSubmit={handleSubmit}>
+                <button
+                  type="submit"
+                  className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
+                >
+                  Next
+                </button>
+              </Form>
+            </Fragment>
           ),
           [VIEW.confirm]: (
             <div className="flex flex-col w-full items-center">
