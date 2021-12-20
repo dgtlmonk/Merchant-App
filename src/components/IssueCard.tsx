@@ -57,6 +57,8 @@ function Index({ onDone }: Props) {
             // @ts-ignore
             cardList = tierList.filter((tier) => tier?.enableIssuance === true);
 
+            console.log(" card list ", cardList);
+
             setMembershipCards(cardList);
           }
         }
@@ -115,14 +117,16 @@ function Index({ onDone }: Props) {
     return membershipCards.map((card) => {
       return (
         <div
-          key="card.digitalCard.masterId"
+          className="rounded-md flex relative mt-8"
+          style={{ width: "220px", minHeight: "130px" }}
+          key={card?.digitalCard?.masterId}
           role="button"
           onClick={() => {
             setSelectedMembeshipCard(card);
             setViewState(VIEW.fillup);
           }}
         >
-          <img src={card.digitalCard.image.front} />
+          <img src={card.digitalCard.image.front} className="w-full h-full" />
         </div>
       );
     });
@@ -161,18 +165,7 @@ function Index({ onDone }: Props) {
           [VIEW.card_select]: isLoadingCards ? (
             <CircularProgress size="2rem" />
           ) : (
-            <div
-              className="border rounded-md flex relative mt-12"
-              style={{ width: "254px", minHeight: "130px" }}
-            >
-              {renderCardList()}
-              {/* <span
-                className="text-4xl opacity-5 absolute"
-                style={{ left: "40px", top: "25px" }}
-              >
-                CARD SELECT
-              </span> */}
-            </div>
+            <Fragment>{renderCardList()}</Fragment>
           ),
           [VIEW.fillup]: (
             <Fragment>
