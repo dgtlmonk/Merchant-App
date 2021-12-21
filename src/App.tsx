@@ -1,12 +1,16 @@
 import "@/styles/App.css";
 import { CircularProgress } from "@material-ui/core";
-import { useEffect, useMemo, useState } from "react";
+import { withTheme } from "@rjsf/core";
+import { Theme } from "@rjsf/material-ui";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import AddSales from "./components/AddSales";
 import AppMenu from "./components/AppMenu";
 import IssueCard from "./components/IssueCard";
 import LoginForm from "./components/LoginForm";
 import { VIEWS } from "./types";
+
+const Form = withTheme(Theme);
 
 function useQuery() {
   const { search } = useLocation();
@@ -18,8 +22,9 @@ function App() {
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
   const [module, setModule] = useState<any>(null);
   const [_token, setToken] = useState<any>(null);
-
   const r = useQuery();
+
+  const formDataRef = useRef<any>();
 
   useEffect(() => {
     if (r.getAll("module")) {
@@ -47,7 +52,7 @@ function App() {
       return;
     }
 
-    setViewState(VIEWS.LOGIN);
+    setViewState(VIEWS.IDLE);
   }, [module]);
 
   const handleBackToMenu = () => {
@@ -57,6 +62,10 @@ function App() {
   const handleMenuChange = (menu: VIEWS) => {
     setViewState(menu);
   };
+
+  function handleFormChange(e) {
+    formDataRef.current = e.formData;
+  }
 
   return (
     <div className="flex flex-col items-center h-full w-full">

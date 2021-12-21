@@ -9,9 +9,23 @@ export enum VIEWS {
   SETTINGS = "settings",
 }
 
+export const uiSchema = {
+  // done: {
+  //   "ui:widget": "select", // could also be "select"
+  // },
+  // mobile: {
+  //   phoneNumber: {
+  //     "ui:widget": "select", // could also be "select"
+  //   },
+  // },
+};
+
 export const schema = {
   type: "object",
-  required: ["name", "mobile"],
+  required: [
+    "name",
+    //  "mobile"
+  ],
   properties: {
     name: {
       title: "",
@@ -28,12 +42,12 @@ export const schema = {
         },
       },
     },
-    mobile: {
-      type: "string",
-      phoneNumber: {
-        type: "mobile",
-      },
-      title: "mobile",
-    },
+    // mobile: {
+    //   type: "string",
+    //   number: {
+    //     title: "mobile",
+    //     type: "string",
+    //   },
+    // },
   },
 };
