@@ -49,7 +49,7 @@ function Index({ onDone }: Props) {
 
   const formDataRef = useRef<any>();
 
-  const MemoizedPhoneInput = () => (
+  const MemoizedPhoneInput = (
     <div className="flex w-full justify-center items-center p-4">
       {/* TODO: pass country from header or url */}
       <PhoneInput
@@ -59,6 +59,7 @@ function Index({ onDone }: Props) {
         inputProps={{
           name: "mobile",
         }}
+        value={formDataRef?.current?.mobile}
         onChange={(phone) => {
           formDataRef.current = {
             ...formDataRef.current.value,
@@ -122,15 +123,15 @@ function Index({ onDone }: Props) {
 
   useEffect(() => {
     if (data) {
-      setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
+      setDisplayName(`${data?.givenName} ${data?.familyName}`);
     }
   }, [data]);
 
   useEffect(() => {
     if (!toggleDisplayName) {
-      setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
+      setDisplayName(`${data?.givenName} ${data?.familyName}`);
     } else {
-      setDisplayName(`${data?.name?.familyName} ${data?.name?.givenName}`);
+      setDisplayName(`${data?.familyName} ${data?.givenName}`);
     }
   }, [toggleDisplayName]);
 
@@ -140,18 +141,30 @@ function Index({ onDone }: Props) {
   ) => {
     const { name } = formData;
 
-    if (!formDataRef.current.mobile) {
-      e.target["mobile"].focus();
-      return;
+    console.log(" formDataRef?.current ", formDataRef?.current.value);
+    console.log(" data ", data);
+
+    if (!formDataRef?.current?.mobile) {
+      if (data?.mobile) {
+        formDataRef.current = {
+          ...formDataRef.current.value,
+          mobile: data.mobile,
+        };
+      } else {
+        e.target["mobile"].focus();
+        return;
+      }
     }
 
     payload = {
       ...payload,
       ...name,
-      mobile: formDataRef.current.mobile,
+      mobile: formDataRef?.current?.mobile,
     };
 
-    setData(formData);
+    console.log(" payload ", payload);
+
+    setData(payload);
     setViewState(VIEW.confirm);
   };
 
@@ -190,6 +203,7 @@ function Index({ onDone }: Props) {
   }
 
   function handleDone() {
+    formDataRef.current = null;
     setViewState(VIEW.card_select);
   }
 
@@ -276,7 +290,7 @@ function Index({ onDone }: Props) {
                     widgets={widgets}
                     className="px-8"
                   >
-                    {MemoizedPhoneInput()}
+                    {MemoizedPhoneInput}
                     <button
                       type="submit"
                       className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
@@ -321,10 +335,10 @@ function Index({ onDone }: Props) {
                       inputProps={{
                         name: "mobile",
                       }}
-                      value={formDataRef.current.mobile}
+                      value={formDataRef?.current?.mobile}
                       onChange={(phone) => {
                         formDataRef.current = {
-                          ...formDataRef.current.value,
+                          ...formDataRef?.current?.value,
                           mobile: phone,
                         };
                       }}
