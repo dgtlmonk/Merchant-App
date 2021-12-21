@@ -1,8 +1,10 @@
 import { CircularProgress, TextField } from "@material-ui/core";
+import { ArrowBack } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { format } from "date-fns";
 import { Fragment, useEffect, useState } from "react";
+import Barcode from "react-barcode";
 import { FormProps } from "react-jsonschema-form";
 import { client } from "../helpers/api-client";
 import { schema } from "../types";
@@ -31,10 +33,12 @@ function Index({ onDone }: Props) {
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
   const [membershipCards, setMembershipCards] = useState([]);
-  const [selectedMembershipCard, setSelectedMembeshipCard] = useState(null);
+  const [selectedMembershipCard, setSelectedMembeshipCard] =
+    useState<any>(null);
   const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
+
   const [cardDetail, setCardDetail] = useState(null);
   const [data, setData] = useState<any>({});
 
@@ -114,7 +118,7 @@ function Index({ onDone }: Props) {
 
   function renderCardList() {
     // TODO: react memo ?
-    return membershipCards.map((card) => {
+    return membershipCards.map((card: any) => {
       return (
         <div
           className="rounded-md flex relative mt-8"
@@ -132,133 +136,173 @@ function Index({ onDone }: Props) {
     });
   }
 
+  function handleDone() {
+    setViewState(VIEW.card_select);
+  }
+
   return (
-    <div className="flex flex-col  p-4 max-w-md items-center justify-center h-full w-full">
-      {viewState === VIEW.fullfilled ? (
-        <div
-          className="border rounded-md flex relative mt-12"
-          style={{ width: "254px", minHeight: "130px" }}
-        >
-          <div className="flex flex-col w-full h-full items-center justify-end">
-            <div className="flex w-full justify-center text-xl">S11232 </div>
-            <div className="flex w-full items-center justify-between p-2">
-              <div>
-                <span className="text-xs mr-2">join</span>
-                <span style={{ fontSize: ".9em" }}>
-                  {/* @ts-ignore */}
-                  {getFormattedDate(`${cardDetail?.startTime}`)}
-                </span>
+    <div className="flex flex-col w-full h-full items-center">
+      <div className="sticky top-0 w-full z-20 bg-white mb-2">
+        <div className="flex flex-row justify-center items-center relative w-full h-16">
+          <button className="absolute top-0 left-0 h-16 w-16">
+            <ArrowBack className="opacity-50" />
+          </button>
+          <div className="p-4">Issue Card</div>
+        </div>
+      </div>
+      <div className="flex flex-col items-center justify-center  w-full z-10">
+        {viewState === VIEW.fullfilled ? (
+          <div className="flex flex-col max-w-sm  justify-center w-full items-center">
+            <div className="flex flex-col justify-center align-center  bg-white shadow-md rounded-md w-2/3 ">
+              <div className="px-2">
+                {/* @ts-ignore */}
+                <Barcode value={`${cardDetail?.cardNumber}`} />
               </div>
-              <div>
-                <span className="text-xs mr-2">expire</span> {/* @ts-ignore */}
-                <span style={{ fontSize: ".9em" }}>
-                  {/* @ts-ignore */}
-                  {getFormattedDate(`${cardDetail?.endTime}`)}
-                </span>
+              <div className="flex w-full border-t py-1 justify-between">
+                <div className="pl-2">
+                  <div className=" text-gray-400" style={{ fontSize: ".7rem" }}>
+                    join
+                    <span
+                      className="pl-1 font-medium text-gray-700 tracking-tighter"
+                      style={{ fontSize: ".8rem" }}
+                    >
+                      {/* @ts-ignore */}
+                      {getFormattedDate(`${cardDetail?.startTime}`)}
+                    </span>
+                  </div>
+                </div>
+                <div className="pr-2">
+                  <div
+                    className="pl-2 text-gray-400"
+                    style={{ fontSize: ".7rem" }}
+                  >
+                    exprire
+                    <span
+                      className="pl-1 font-medium text-gray-700 tracking-tighter"
+                      style={{ fontSize: ".8rem" }}
+                    >
+                      {/* @ts-ignore */}
+                      {getFormattedDate(`${cardDetail?.endTime}`)}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ) : null}
-      {
+        ) : null}
         {
-          [VIEW.card_select]: isLoadingCards ? (
-            <CircularProgress size="2rem" />
-          ) : (
-            <Fragment>{renderCardList()}</Fragment>
-          ),
-          [VIEW.fillup]: (
-            <Fragment>
-              <div style={{ width: "220px" }} className="mt-16">
-                <img
-                  src={selectedMembershipCard?.digitalCard?.image.front}
-                  className="mt-12"
-                />
-              </div>
-              {/* @ts-ignore  */}{" "}
-              <Form schema={schema} onSubmit={handleSubmit}>
-                <button
-                  type="submit"
-                  className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
-                >
-                  Next
-                </button>
-              </Form>
-            </Fragment>
-          ),
-          [VIEW.confirm]: (
-            <div className="flex flex-col w-full items-center">
-              <div className="mt-6">
-                <span className="font-normal text-xs text-slate-500">
-                  display as
-                </span>
-                <div className="flex flex-row items-center">
-                  <div className="-mt-1 text-2xl ">{displayName}</div>
-                  <span
-                    role="button"
-                    onClick={() => setToggleDisplayName(!toggleDisplayName)}
-                    className="border py-2 px-3 rounded-md ml-4"
+          {
+            [VIEW.card_select]: isLoadingCards ? (
+              <CircularProgress size="2rem" />
+            ) : (
+              <Fragment>{renderCardList()}</Fragment>
+            ),
+            [VIEW.fillup]: (
+              <Fragment>
+                <div className="flex flex-col max-w-sm  justify-center w-full items-center">
+                  <div className="w-2/3">
+                    <img
+                      src={selectedMembershipCard?.digitalCard?.image.front}
+                      className="mt-12"
+                    />
+                  </div>
+                  {/* @ts-ignore  */}{" "}
+                  <Form
+                    schema={schema}
+                    onSubmit={handleSubmit}
+                    className="px-8"
                   >
-                    {`<->`}{" "}
-                  </span>
+                    <button
+                      type="submit"
+                      className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
+                    >
+                      Next
+                    </button>
+                  </Form>
                 </div>
-              </div>
-              <div className="flex justify-center mt-6 w-full">
-                {/* @ts-ignore */}
-                <TextField defaultValue={data?.mobile} label="mobile" />
-              </div>
-              <div className="flex flex-row w-full items-center justify-center mt-8">
-                <button
-                  className="p-2 px-4 border rounded-md  bg-slate-400 text-white mr-4"
-                  onClick={() => setViewState(VIEW.fillup)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="p-2 px-4 border rounded-md  bg-blue-400 text-white"
-                  onClick={handleConfirmSubmit}
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          ),
-          [VIEW.fullfilled]: (
-            <div className="flex flex-col">
-              <div className="flex w-full px-4 py-2 border  rounded-md bg-orange-400 text-white text-sm mt-4">
-                Remember to scan the barcode on the card
-              </div>
-              <div className="text-5xl mt-6 flex w-full justify-center">
-                {/* @ts-ignore */}
-                {`${cardDetail?.person?.fullName}`}
-              </div>
-              <div className="flex flex-col w-full  text-gray-600 mt-4">
-                <div className="flex w-full  text-gray-400 p-2 border-b border-gray-400 text-md items-center justify-between">
-                  Mobile
-                  <span className="flex pl-2 text-xl text-gray-700">
-                    +{/* @ts-ignore */}
-                    {`${cardDetail?.person?.mobile?.countryCode} ${cardDetail?.person?.mobile?.number}`}
-                  </span>
+              </Fragment>
+            ),
+            [VIEW.confirm]: (
+              <div className="flex flex-col w-full max-w-md items-center">
+                <div className="w-2/3">
+                  <img
+                    src={selectedMembershipCard?.digitalCard?.image.front}
+                    className="mt-12"
+                  />
                 </div>
-                <div className="flex w-full p-2  text-md text-gray-400 items-center justify-between">
-                  Expire
-                  <span className="flex pl-2 text-xl text-gray-700">
-                    {/* @ts-ignore */}
-                    {getFormattedDate(`${cardDetail?.endTime}`)}
-                  </span>
-                </div>
-              </div>
 
-              <button
-                className="p-2 mt-4 border rounded-md w-full bg-blue-400 text-white font-medium"
-                onClick={onDone}
-              >
-                Done
-              </button>
-            </div>
-          ),
-        }[viewState]
-      }
+                <div className="mt-6">
+                  <span className="font-normal text-xs text-slate-500">
+                    display as
+                  </span>
+                  <div className="flex flex-row items-center">
+                    <div className="-mt-1 text-2xl ">{displayName}</div>
+                    <span
+                      role="button"
+                      onClick={() => setToggleDisplayName(!toggleDisplayName)}
+                      className="border py-2 px-3 rounded-md ml-4"
+                    >
+                      {`<->`}{" "}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-center mt-6 w-full">
+                  {/* @ts-ignore */}
+                  <TextField defaultValue={data?.mobile} label="mobile" />
+                </div>
+                <div className="flex flex-row w-full items-center justify-center mt-8">
+                  <button
+                    className="p-2 px-4 border rounded-md  bg-slate-400 text-white mr-4"
+                    onClick={() => setViewState(VIEW.card_select)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="p-2 px-4 border rounded-md  bg-blue-400 text-white"
+                    onClick={handleConfirmSubmit}
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            ),
+            [VIEW.fullfilled]: (
+              <div className="flex flex-col">
+                <div className="flex w-full px-4 py-2 border  rounded-md bg-orange-400 text-white text-sm mt-4">
+                  Remember to scan the barcode on the card
+                </div>
+                <div className="text-5xl mt-6 flex w-full justify-center">
+                  {/* @ts-ignore */}
+                  {`${cardDetail?.person?.fullName}`}
+                </div>
+                <div className="flex flex-col w-full  text-gray-600 mt-4">
+                  <div className="flex w-full  text-gray-400 p-2 border-b border-gray-400 text-md items-center justify-between">
+                    Mobile
+                    <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
+                      +{/* @ts-ignore */}
+                      {`${cardDetail?.person?.mobile?.countryCode} ${cardDetail?.person?.mobile?.number}`}
+                    </span>
+                  </div>
+                  <div className="flex w-full p-2  text-md text-gray-400 items-center justify-between">
+                    Expire
+                    <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
+                      {/* @ts-ignore */}
+                      {getFormattedDate(`${cardDetail?.endTime}`)}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  className="p-2 mt-4 border rounded-md w-full bg-blue-400 text-white font-medium"
+                  onClick={handleDone}
+                >
+                  Done
+                </button>
+              </div>
+            ),
+          }[viewState]
+        }
+      </div>
     </div>
   );
 }

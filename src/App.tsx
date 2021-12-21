@@ -59,7 +59,7 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col p-4 items-center h-full">
+    <div className="flex flex-col items-center h-full w-full">
       {
         {
           [VIEWS.IDLE]: (
