@@ -1,15 +1,24 @@
-import { CircularProgress, TextField } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { format } from "date-fns";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Barcode from "react-barcode";
 import { FormProps } from "react-jsonschema-form";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/material.css";
 import { client } from "../helpers/api-client";
-import { schema } from "../types";
+import { schema, uiSchema } from "../types";
+
+type Props = {
+  onDone: () => void;
+};
 
 const Form = withTheme(Theme);
+const widgets = {
+  PhoneWidget: PhoneInput,
+};
 
 // console.log("import.meta.env.VITE_API_KEY ", import.meta.env.VITE_API_KEY);
 // console.log("import.meta.env.VITE_API_HOST ", import.meta.env.VITE_API_HOST);
@@ -18,10 +27,6 @@ function getFormattedDate(date: string) {
   if (!date || date === "undefined") return;
   return format(new Date(date), "d MMM yyyy");
 }
-
-type Props = {
-  onDone: () => void;
-};
 
 function Index({ onDone }: Props) {
   enum VIEW {
@@ -38,9 +43,51 @@ function Index({ onDone }: Props) {
   const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
-
+  const [stateFormData, setStateFormData] = useState<any>({});
   const [cardDetail, setCardDetail] = useState(null);
   const [data, setData] = useState<any>({});
+
+  const formDataRef = useRef<any>();
+
+  const MemoizedPhoneInput = () => (
+    <div className="flex w-full justify-center items-center p-4">
+      {/* TODO: pass country from header or url */}
+      <PhoneInput
+        country={"sg"}
+        enableSearch
+        specialLabel="mobile"
+        inputProps={{
+          name: "mobile",
+        }}
+        onChange={(phone) => {
+          formDataRef.current = {
+            ...formDataRef.current.value,
+            mobile: phone,
+          };
+        }}
+      />
+    </div>
+  );
+
+  function getPreviousView() {
+    if (viewState === VIEW.card_select) return;
+  }
+
+  function handleFormChange(e) {
+    formDataRef.current = e.formData;
+  }
+
+  function handlePreviousView() {
+    if (viewState === VIEW.confirm) {
+      setViewState(VIEW.fillup);
+      return;
+    }
+
+    if (viewState === VIEW.fillup) {
+      setViewState(VIEW.card_select);
+      return;
+    }
+  }
 
   useEffect(() => {
     client
@@ -60,8 +107,6 @@ function Index({ onDone }: Props) {
           } else {
             // @ts-ignore
             cardList = tierList.filter((tier) => tier?.enableIssuance === true);
-
-            console.log(" card list ", cardList);
 
             setMembershipCards(cardList);
           }
@@ -89,13 +134,21 @@ function Index({ onDone }: Props) {
     }
   }, [toggleDisplayName]);
 
-  const handleSubmit = ({ formData }: FormProps<any>) => {
-    const { name, mobile } = formData;
+  const handleSubmit = (
+    { formData }: FormProps<any>,
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    const { name } = formData;
+
+    if (!formDataRef.current.mobile) {
+      e.target["mobile"].focus();
+      return;
+    }
 
     payload = {
       ...payload,
       ...name,
-      mobile,
+      mobile: formDataRef.current.mobile,
     };
 
     setData(formData);
@@ -142,9 +195,15 @@ function Index({ onDone }: Props) {
 
   return (
     <div className="flex flex-col w-full h-full items-center">
-      <div className="sticky top-0 w-full z-20 bg-white mb-2">
+      <div
+        className="header sticky top-0 w-full z-20 mb-2"
+        style={{ backgroundColor: "#f8f8ff" }}
+      >
         <div className="flex flex-row justify-center items-center relative w-full h-16">
-          <button className="absolute top-0 left-0 h-16 w-16">
+          <button
+            className="absolute top-0 left-0 h-16 w-16"
+            onClick={handlePreviousView}
+          >
             <ArrowBack className="opacity-50" />
           </button>
           <div className="p-4">Issue Card</div>
@@ -208,10 +267,16 @@ function Index({ onDone }: Props) {
                   </div>
                   {/* @ts-ignore  */}{" "}
                   <Form
+                    key="cardIssueForm"
                     schema={schema}
+                    uiSchema={uiSchema}
+                    onChange={handleFormChange}
                     onSubmit={handleSubmit}
+                    formData={formDataRef?.current?.value}
+                    widgets={widgets}
                     className="px-8"
                   >
+                    {MemoizedPhoneInput()}
                     <button
                       type="submit"
                       className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
@@ -246,9 +311,25 @@ function Index({ onDone }: Props) {
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-center mt-6 w-full">
-                  {/* @ts-ignore */}
-                  <TextField defaultValue={data?.mobile} label="mobile" />
+                <div>
+                  <div className="flex w-full justify-center items-center p-4">
+                    {/* TODO: pass country from header or url */}
+                    <PhoneInput
+                      country={"sg"}
+                      enableSearch
+                      specialLabel="mobile"
+                      inputProps={{
+                        name: "mobile",
+                      }}
+                      value={formDataRef.current.mobile}
+                      onChange={(phone) => {
+                        formDataRef.current = {
+                          ...formDataRef.current.value,
+                          mobile: phone,
+                        };
+                      }}
+                    />
+                  </div>
                 </div>
                 <div className="flex flex-row w-full items-center justify-center mt-8">
                   <button

@@ -205,13 +205,13 @@ function Index({ onDone }: Props) {
         )}
         <div className="flex flex-row mt-8">
           <span className="flex mr-2">
-            <TextField label="Receipt #" inputRef={receiptRef} />
+            <TextField label="Receipt Number" inputRef={receiptRef} />
           </span>
 
           <span className="flex mr-2">
             <TextField
               inputRef={qttyRef}
-              label="Qtty"
+              label="Quantity"
               type="number"
               defaultValue="0"
             />
