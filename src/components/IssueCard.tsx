@@ -43,7 +43,6 @@ function Index({ onDone }: Props) {
   const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
-  const [stateFormData, setStateFormData] = useState<any>({});
   const [cardDetail, setCardDetail] = useState(null);
   const [data, setData] = useState<any>({});
 
@@ -123,15 +122,15 @@ function Index({ onDone }: Props) {
 
   useEffect(() => {
     if (data) {
-      setDisplayName(`${data?.givenName} ${data?.familyName}`);
+      setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
     }
   }, [data]);
 
   useEffect(() => {
     if (!toggleDisplayName) {
-      setDisplayName(`${data?.givenName} ${data?.familyName}`);
+      setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
     } else {
-      setDisplayName(`${data?.familyName} ${data?.givenName}`);
+      setDisplayName(`${data?.name?.familyName} ${data?.name?.givenName}`);
     }
   }, [toggleDisplayName]);
 
@@ -158,11 +157,10 @@ function Index({ onDone }: Props) {
 
     payload = {
       ...payload,
-      ...name,
+      // @ts-ignore
+      name,
       mobile: formDataRef?.current?.mobile,
     };
-
-    console.log(" payload ", payload);
 
     setData(payload);
     setViewState(VIEW.confirm);
@@ -204,6 +202,7 @@ function Index({ onDone }: Props) {
 
   function handleDone() {
     formDataRef.current = null;
+    setData(null);
     setViewState(VIEW.card_select);
   }
 
@@ -286,7 +285,7 @@ function Index({ onDone }: Props) {
                     uiSchema={uiSchema}
                     onChange={handleFormChange}
                     onSubmit={handleSubmit}
-                    formData={formDataRef?.current?.value}
+                    formData={data}
                     widgets={widgets}
                     className="px-8"
                   >
@@ -348,7 +347,7 @@ function Index({ onDone }: Props) {
                 <div className="flex flex-row w-full items-center justify-center mt-8">
                   <button
                     className="p-2 px-4 border rounded-md  bg-slate-400 text-white mr-4"
-                    onClick={() => setViewState(VIEW.card_select)}
+                    onClick={handleDone}
                   >
                     Cancel
                   </button>
