@@ -33,7 +33,8 @@ function Index({ onDone }: Props) {
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
   const [membershipCards, setMembershipCards] = useState([]);
-  const [selectedMembershipCard, setSelectedMembeshipCard] = useState(null);
+  const [selectedMembershipCard, setSelectedMembeshipCard] =
+    useState<any>(null);
   const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
@@ -117,7 +118,7 @@ function Index({ onDone }: Props) {
 
   function renderCardList() {
     // TODO: react memo ?
-    return membershipCards.map((card) => {
+    return membershipCards.map((card: any) => {
       return (
         <div
           className="rounded-md flex relative mt-8"
