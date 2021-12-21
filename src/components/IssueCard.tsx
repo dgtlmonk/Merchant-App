@@ -211,7 +211,9 @@ function Index({ onDone }: Props) {
       >
         <div className="flex flex-row justify-center items-center relative w-full h-16">
           <button
-            className="absolute top-0 left-0 h-16 w-16"
+            className={`absolute top-0 left-0 h-16 w-16 ${
+              viewState === VIEW.fullfilled ? "hidden" : "visible"
+            }`}
             onClick={handlePreviousView}
           >
             <ArrowBack className="opacity-50" />
@@ -219,10 +221,10 @@ function Index({ onDone }: Props) {
           <div className="p-4">Issue Card</div>
         </div>
       </div>
-      <div className="flex flex-col items-center justify-center  w-full z-10">
+      <div className="flex flex-col items-center justify-center  w-full h-full z-10">
         {viewState === VIEW.fullfilled ? (
-          <div className="flex flex-col max-w-sm  justify-center w-full items-center">
-            <div className="flex flex-col justify-center align-center  bg-white shadow-md rounded-md w-2/3 ">
+          <div className="flex flex-col max-w-sm  justify-center w-full  items-center">
+            <div className="flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md w-2/3 ">
               <div className="px-2">
                 {/* @ts-ignore */}
                 <Barcode value={`${cardDetail?.cardNumber}`} />
@@ -245,7 +247,7 @@ function Index({ onDone }: Props) {
                     className="pl-2 text-gray-400"
                     style={{ fontSize: ".7rem" }}
                   >
-                    exprire
+                    expire
                     <span
                       className="pl-1 font-medium text-gray-700 tracking-tighter"
                       style={{ fontSize: ".8rem" }}
