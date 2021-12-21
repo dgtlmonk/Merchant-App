@@ -1,5 +1,5 @@
 import { CircularProgress } from "@material-ui/core";
-import { ArrowBack } from "@material-ui/icons";
+import { ArrowBack, Loop } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { format } from "date-fns";
@@ -139,9 +139,6 @@ function Index({ onDone }: Props) {
     e: React.FormEvent<HTMLFormElement>
   ) => {
     const { name } = formData;
-
-    console.log(" formDataRef?.current ", formDataRef?.current.value);
-    console.log(" data ", data);
 
     if (!formDataRef?.current?.mobile) {
       if (data?.mobile) {
@@ -313,15 +310,14 @@ function Index({ onDone }: Props) {
                   <span className="font-normal text-xs text-slate-500">
                     display as
                   </span>
-                  <div className="flex flex-row items-center">
+                  <div className="flex flex-row items-center -mt-2">
                     <div className="-mt-1 text-2xl ">{displayName}</div>
-                    <span
-                      role="button"
+                    <button
+                      className="h-16 w-16"
                       onClick={() => setToggleDisplayName(!toggleDisplayName)}
-                      className="border py-2 px-3 rounded-md ml-4"
                     >
-                      {`<->`}{" "}
-                    </span>
+                      <Loop className="opacity-80 text-blue-500" />
+                    </button>
                   </div>
                 </div>
                 <div>
