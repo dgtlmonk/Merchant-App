@@ -1,7 +1,7 @@
 // import { client } from "@/helpers/api-client";
 
 import { CircularProgress, InputAdornment, TextField } from "@material-ui/core";
-import { ArrowBack } from "@material-ui/icons";
+import { ArrowBack, Close } from "@material-ui/icons";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { client } from "../helpers/api-client";
@@ -185,7 +185,7 @@ function Index({ onDone }: Props) {
         style={{ backgroundColor: "#f8f8ff" }}
       >
         <div className="flex flex-row justify-center items-center relative w-full h-16">
-          <button className={`absolute top-0 left-0 h-16 w-16`}>
+          <button className={`absolute top-0 left-0 h-16 w-16 hidden`}>
             <ArrowBack className="opacity-50" />
           </button>
           <div className="p-4">Sales</div>
@@ -202,9 +202,11 @@ function Index({ onDone }: Props) {
 
         <div className="flex flex-col w-full">
           {isSearchingSuccess ? (
-            <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-between items-center">
               {person}
-              <button onClick={handleReset}>X</button>
+              <button onClick={handleReset} className="w-8 h-8">
+                <Close className="opacity-50" />
+              </button>
             </div>
           ) : (
             <TextField
@@ -276,7 +278,10 @@ function Index({ onDone }: Props) {
             <div className="flex flex-row w-full items-center justify-center mt-8">
               <button
                 disabled={isSubmitting}
-                className="p-2 px-8 border rounded-md  bg-slate-400 text-white mr-4"
+                className={`p-2 px-8 border rounded-md  bg-slate-400 text-white mr-4 hidden
+                ${isSubmitSuccess ? "hidden" : "visible"}
+                `}
+                onClick={handleReset}
               >
                 Cancel
               </button>
@@ -284,7 +289,7 @@ function Index({ onDone }: Props) {
                 className={`p-2 px-8 border rounded-md  bg-blue-400 text-white`}
                 onClick={handleConfirm}
               >
-                {isSubmitSuccess ? "New" : "Confirm"}
+                {isSubmitSuccess ? "Add New" : "Confirm"}
               </button>
             </div>
           ) : null}
