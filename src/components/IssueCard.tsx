@@ -302,7 +302,25 @@ function Index({ onDone }: Props) {
                     widgets={widgets}
                     className="px-8"
                   >
-                    {/* {PhoneInputJSX} */}
+                    <div className="flex w-full justify-center items-center p-4">
+                      {/* TODO: pass country from header or url */}
+                      <PhoneInput
+                        country={"sg"}
+                        enableSearch
+                        specialLabel="mobile"
+                        inputProps={{
+                          name: "mobile",
+                        }}
+                        value={formDataRef?.current?.mobile}
+                        onChange={(phone) => {
+                          formDataRef.current = {
+                            ...formDataRef.current.value,
+                            mobile: phone,
+                          };
+                        }}
+                      />
+                    </div>
+
                     <button
                       type="submit"
                       className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
