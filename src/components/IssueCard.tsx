@@ -106,7 +106,7 @@ function Index({ onDone }: Props) {
             console.warn("No Cards available!");
           } else {
             // @ts-ignore
-            cardList = tierList; //.filter((tier) => tier?.enableIssuance === true);
+            cardList = tierList.filter((tier) => tier?.enableIssuance === true);
 
             setMembershipCards(cardList);
           }
