@@ -4,6 +4,7 @@ import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { format } from "date-fns";
 import { Fragment, useEffect, useRef, useState } from "react";
+import Barcode from "react-barcode";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
 import PhoneInput from "react-phone-input-2";
@@ -205,19 +206,12 @@ function Index({ onDone }: Props) {
 
   return (
     <Fragment>
-      <div
-        className="grid grid-cols-1 grid-rows-6 gap-0 overflow-hidden"
-        style={{
-          height: "100vh",
-          width: "100vw",
-          gridTemplateRows: "4rem 1fr",
-        }}
-      >
+      <div className="container grid grid-cols-1 grid-rows-2 border">
         <div
-          className="module__header col-span-1 row-start-1 z-20"
+          className="module__header col-span-1 border  z-20 mb-2"
           style={{ backgroundColor: "#f8f8ff" }}
         >
-          <div className="flex flex-row justify-center items-center relative w-full h-16 border">
+          <div className="flex flex-row justify-center items-center relative w-full h-16">
             <button
               className={`absolute top-0 left-0 h-16 w-16 ${
                 viewState === VIEW.fullfilled ? "hidden" : "visible"
@@ -230,13 +224,59 @@ function Index({ onDone }: Props) {
           </div>
         </div>
 
-        <div className="p-12 overflow-y-scroll">
+        <div>content</div>
+      </div>
+
+      <div className="flex flex-col w-full h-full items-center">
+        <div className="flex flex-col items-center justify-center  w-full h-full z-10">
+          {viewState === VIEW.fullfilled ? (
+            <div className="flex flex-col max-w-sm  justify-center w-full  items-center">
+              <div className="flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md w-2/3 ">
+                <div className="px-2">
+                  {/* @ts-ignore */}
+                  <Barcode value={`${cardDetail?.cardNumber}`} />
+                </div>
+                <div className="flex w-full border-t py-1 justify-between">
+                  <div className="pl-2">
+                    <div
+                      className=" text-gray-400"
+                      style={{ fontSize: ".7rem" }}
+                    >
+                      join
+                      <span
+                        className="pl-1 font-medium text-gray-700 tracking-tighter"
+                        style={{ fontSize: ".8rem" }}
+                      >
+                        {/* @ts-ignore */}
+                        {getFormattedDate(`${cardDetail?.startTime}`)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="pr-2">
+                    <div
+                      className="pl-2 text-gray-400"
+                      style={{ fontSize: ".7rem" }}
+                    >
+                      expire
+                      <span
+                        className="pl-1 font-medium text-gray-700 tracking-tighter"
+                        style={{ fontSize: ".8rem" }}
+                      >
+                        {/* @ts-ignore */}
+                        {getFormattedDate(`${cardDetail?.endTime}`)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
           {
             {
               [VIEW.card_select]: isLoadingCards ? (
                 <CircularProgress size="2rem" />
               ) : (
-                <div>
+                <div className="w-5/6">
                   <div className="flex flex-row w-full">
                     <button
                       className="h-16 justify-around flex border items-center
@@ -324,7 +364,7 @@ function Index({ onDone }: Props) {
                     </div>
                   </div>
                   <div>
-                    <div className="flex w-full justify-center items-center p-4">
+                    <div className="flex w-full justify-center items-center p-4 hidden">
                       {/* TODO: pass country from header or url */}
                       <PhoneInput
                         country={"sg"}
