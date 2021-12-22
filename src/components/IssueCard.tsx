@@ -290,6 +290,7 @@ function Index({ onDone }: Props) {
                       className="mt-12"
                     />
                   </div>
+                  {PhoneInputJSX}
                   {/* @ts-ignore  */}{" "}
                   {/* <Form
                     key="cardIssueForm"
