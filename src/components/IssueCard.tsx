@@ -282,12 +282,12 @@ function Index({ onDone }: Props) {
                 <Fragment>
                   <div className="flex flex-col mt-8">
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
-                      <div className="w-5/6">
+                      <div className="w-4/6">
                         <img
                           src={selectedMembershipCard?.digitalCard?.image.front}
                         />
                       </div>
-                      <div className="w-4/6">
+                      <div className="w-4/6 flex px-12 justify-center">
                         {/* @ts-ignore */}
                         <Form
                           key="cardIssueForm"
