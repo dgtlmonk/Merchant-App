@@ -246,7 +246,11 @@ function Index({ onDone }: Props) {
               ),
 
               [VIEW.search]: (
-                <div className="flex flex-col mt-8 w-full px-8">
+                <div className="flex flex-col mt-4 w-full px-8">
+                  <div className="flex flex-col justify-center  items-center">
+                    <h2>Existing member found: </h2>
+                    <span>David Lee</span>
+                  </div>
                   <div className="flex flex-col justify-center  items-center">
                     <TextField
                       className="w-4/6"
