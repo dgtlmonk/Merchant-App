@@ -1,5 +1,5 @@
 import { CircularProgress } from "@material-ui/core";
-import { ArrowBack, Loop } from "@material-ui/icons";
+import { ArrowBack, ArrowRightTwoTone, Loop } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { format } from "date-fns";
@@ -266,7 +266,21 @@ function Index({ onDone }: Props) {
             [VIEW.card_select]: isLoadingCards ? (
               <CircularProgress size="2rem" />
             ) : (
-              <Fragment>{renderCardList()}</Fragment>
+              <div>
+                <div className="flex flex-row w-full">
+                  <button
+                    className="h-16 justify-around flex border items-center
+                    p-2 rounded-md w-full text-gray-700 mb-8
+                    "
+                    onClick={() => setToggleDisplayName(!toggleDisplayName)}
+                  >
+                    {" "}
+                    Existing Member
+                    <ArrowRightTwoTone className="opacity-70 text-gray-400" />
+                  </button>
+                </div>
+                {renderCardList()}
+              </div>
             ),
             [VIEW.fillup]: (
               <Fragment>
