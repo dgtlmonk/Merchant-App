@@ -52,7 +52,7 @@ function App() {
       return;
     }
 
-    setViewState(VIEWS.IDLE);
+    setViewState(VIEWS.LOGIN);
   }, [module]);
 
   const handleBackToMenu = () => {
