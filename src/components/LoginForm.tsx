@@ -49,7 +49,6 @@ export default ({ onSuccess }: Props) => {
         }),
       })
       .then((res) => {
-        console.log("res ", res);
         if (res.error) {
           setIsLoginFailed(true);
           return;
