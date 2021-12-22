@@ -9,7 +9,6 @@ import { FormProps } from "react-jsonschema-form";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/material.css";
 import { client } from "../helpers/api-client";
-import { schema, uiSchema } from "../types";
 
 type Props = {
   onDone: () => void;
@@ -292,7 +291,7 @@ function Index({ onDone }: Props) {
                     />
                   </div>
                   {/* @ts-ignore  */}{" "}
-                  <Form
+                  {/* <Form
                     key="cardIssueForm"
                     schema={schema}
                     uiSchema={uiSchema}
@@ -309,7 +308,7 @@ function Index({ onDone }: Props) {
                     >
                       Next
                     </button>
-                  </Form>
+                  </Form> */}
                 </div>
               </Fragment>
             ),
