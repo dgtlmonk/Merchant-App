@@ -49,7 +49,7 @@ function Index({ onDone }: Props) {
   const formDataRef = useRef<any>();
 
   const PhoneInputJSX = (
-    <div className="hidden w-full justify-center items-center p-4">
+    <div className="flex w-full justify-center items-center p-4">
       {/* TODO: pass country from header or url */}
       <PhoneInput
         country={"sg"}
@@ -106,7 +106,7 @@ function Index({ onDone }: Props) {
             console.warn("No Cards available!");
           } else {
             // @ts-ignore
-            cardList = tierList.filter((tier) => tier?.enableIssuance === true);
+            cardList = tierList; //.filter((tier) => tier?.enableIssuance === true);
 
             setMembershipCards(cardList);
           }
@@ -179,10 +179,10 @@ function Index({ onDone }: Props) {
 
   function renderCardList() {
     // TODO: react memo ?
-    return membershipCards.map((card: any) => {
+    return membershipCards.map((card: any, i: number) => {
       return (
         <div
-          className="rounded-md flex relative mt-8"
+          className={`rounded-md flex relative ${i > 0 ? "mt-8" : ""}`}
           style={{ width: "220px", minHeight: "130px" }}
           key={card?.digitalCard?.masterId}
           role="button"
@@ -302,10 +302,7 @@ function Index({ onDone }: Props) {
             [VIEW.confirm]: (
               <div className="flex flex-col w-full max-w-md items-center">
                 <div className="w-2/3">
-                  <img
-                    src={selectedMembershipCard?.digitalCard?.image.front}
-                    className="mt-12"
-                  />
+                  <img src={selectedMembershipCard?.digitalCard?.image.front} />
                 </div>
 
                 <div className="mt-6">
