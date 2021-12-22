@@ -65,7 +65,6 @@ function Index({ onDone }: Props) {
       .then((res: any) => {
         const [detail] = res;
 
-        console.log(" res ", detail);
         const { fullName } = detail.person;
         setPerson(fullName);
         setIsSearchingSuccess(true);
@@ -77,8 +76,6 @@ function Index({ onDone }: Props) {
   };
 
   const handleConfirm = () => {
-    console.log(" handle confirm ");
-
     if (isSubmitSuccess) {
       setIsSubmitSuccess(false);
       setIsSubmitting(false);

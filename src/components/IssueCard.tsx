@@ -48,8 +48,8 @@ function Index({ onDone }: Props) {
 
   const formDataRef = useRef<any>();
 
-  const MemoizedPhoneInput = (
-    <div className="flex w-full justify-center items-center p-4">
+  const PhoneInputJSX = (
+    <div className="hidden w-full justify-center items-center p-4">
       {/* TODO: pass country from header or url */}
       <PhoneInput
         country={"sg"}
@@ -206,7 +206,7 @@ function Index({ onDone }: Props) {
   return (
     <div className="flex flex-col w-full h-full items-center">
       <div
-        className="header sticky top-0 w-full z-20 mb-2"
+        className="module__header sticky top-0 w-full z-20 mb-2"
         style={{ backgroundColor: "#f8f8ff" }}
       >
         <div className="flex flex-row justify-center items-center relative w-full h-16">
@@ -288,7 +288,7 @@ function Index({ onDone }: Props) {
                     widgets={widgets}
                     className="px-8"
                   >
-                    {MemoizedPhoneInput}
+                    {PhoneInputJSX}
                     <button
                       type="submit"
                       className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
@@ -323,7 +323,7 @@ function Index({ onDone }: Props) {
                   </div>
                 </div>
                 <div>
-                  <div className="flex w-full justify-center items-center p-4">
+                  <div className="flex w-full justify-center items-center p-4 hidden">
                     {/* TODO: pass country from header or url */}
                     <PhoneInput
                       country={"sg"}
