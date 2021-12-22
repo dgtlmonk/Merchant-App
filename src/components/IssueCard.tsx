@@ -9,6 +9,7 @@ import { FormProps } from "react-jsonschema-form";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/material.css";
 import { client } from "../helpers/api-client";
+import { schema, uiSchema } from "../types";
 
 type Props = {
   onDone: () => void;
@@ -290,9 +291,8 @@ function Index({ onDone }: Props) {
                       className="mt-12"
                     />
                   </div>
-                  {PhoneInputJSX}
                   {/* @ts-ignore  */}{" "}
-                  {/* <Form
+                  <Form
                     key="cardIssueForm"
                     schema={schema}
                     uiSchema={uiSchema}
@@ -302,14 +302,14 @@ function Index({ onDone }: Props) {
                     widgets={widgets}
                     className="px-8"
                   >
-                    {PhoneInputJSX}
+                    {/* {PhoneInputJSX} */}
                     <button
                       type="submit"
                       className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
                     >
                       Next
                     </button>
-                  </Form> */}
+                  </Form>
                 </div>
               </Fragment>
             ),
