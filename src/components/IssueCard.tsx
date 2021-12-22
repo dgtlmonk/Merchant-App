@@ -1,4 +1,4 @@
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress, TextField } from "@material-ui/core";
 import { ArrowBack, Loop } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
@@ -35,6 +35,7 @@ function Index({ onDone }: Props) {
     card_select = "card_select",
     confirm = "confirm",
     fullfilled = "fullfilled",
+    search = "search",
   }
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
@@ -48,31 +49,10 @@ function Index({ onDone }: Props) {
   const [data, setData] = useState<any>({});
 
   const formDataRef = useRef<any>();
-
-  const PhoneInputJSX = (
-    <div className="flex w-full justify-center items-center p-4">
-      {/* TODO: pass country from header or url */}
-      <PhoneInput
-        country={"sg"}
-        enableSearch
-        specialLabel="mobile"
-        inputProps={{
-          name: "mobile",
-        }}
-        value={formDataRef?.current?.mobile}
-        onChange={(phone) => {
-          formDataRef.current = {
-            ...formDataRef.current.value,
-            mobile: phone,
-          };
-        }}
-      />
-    </div>
-  );
-
-  function getPreviousView() {
-    if (viewState === VIEW.card_select) return;
-  }
+  const familyNameRef = useRef<any>();
+  const giveNameRef = useRef<any>();
+  const birthDateRef = useRef<any>();
+  const mobileRef = useRef<any>();
 
   function handleFormChange(e) {
     formDataRef.current = e.formData;
@@ -81,6 +61,11 @@ function Index({ onDone }: Props) {
   function handlePreviousView() {
     if (viewState === VIEW.confirm) {
       setViewState(VIEW.fillup);
+      return;
+    }
+
+    if (viewState === VIEW.search) {
+      setViewState(VIEW.card_select);
       return;
     }
 
@@ -204,6 +189,8 @@ function Index({ onDone }: Props) {
     setViewState(VIEW.card_select);
   }
 
+  function handleSearchMember() {}
+
   return (
     <Fragment>
       <div
@@ -235,7 +222,9 @@ function Index({ onDone }: Props) {
           {
             {
               [VIEW.card_select]: isLoadingCards ? (
-                <CircularProgress size="2rem" />
+                <div className="flex h-full items-center">
+                  <CircularProgress size="2rem" />
+                </div>
               ) : (
                 <div className="flex flex-col mt-4">
                   <div className="flex flex-row w-full p-8">
@@ -243,7 +232,7 @@ function Index({ onDone }: Props) {
                       className="h-16 justify-around flex border items-center
                     p-2 rounded-md w-full text-gray-700 
                     "
-                      onClick={() => setToggleDisplayName(!toggleDisplayName)}
+                      onClick={() => setViewState(VIEW.search)}
                     >
                       {" "}
                       Existing Member
@@ -255,16 +244,51 @@ function Index({ onDone }: Props) {
                   </div>
                 </div>
               ),
+
+              [VIEW.search]: (
+                <div className="flex flex-col mt-4 w-full px-8">
+                  <div className="flex flex-col justify-center  items-center">
+                    <h2>Existing member found: </h2>
+                    <span>David Lee</span>
+                  </div>
+                  <div className="flex flex-col justify-center  items-center">
+                    <TextField
+                      className="w-4/6"
+                      label="family name"
+                      inputRef={familyNameRef}
+                    />
+                    <TextField
+                      className="w-4/6"
+                      label="given name"
+                      inputRef={giveNameRef}
+                    />
+                    <TextField
+                      className="w-4/6"
+                      label="birth date"
+                      inputRef={birthDateRef}
+                    />
+                    <TextField
+                      className="w-4/6"
+                      label="mobile"
+                      inputRef={mobileRef}
+                    />
+                  </div>
+                  <button className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-8">
+                    Search
+                  </button>
+                </div>
+              ),
               [VIEW.fillup]: (
                 <Fragment>
                   <div className="flex flex-col mt-8">
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
-                      <div className="w-5/6">
+                      <div className="w-4/6">
                         <img
                           src={selectedMembershipCard?.digitalCard?.image.front}
                         />
                       </div>
-                      <div className="w-5/6">
+
+                      <div className="w-4/6 flex px-12 justify-center">
                         {/* @ts-ignore */}
                         <Form
                           key="cardIssueForm"
@@ -281,6 +305,7 @@ function Index({ onDone }: Props) {
                               country={"sg"}
                               enableSearch
                               specialLabel="mobile"
+                              inputStyle={{ width: "auto" }}
                               inputProps={{
                                 name: "mobile",
                               }}
@@ -318,7 +343,8 @@ function Index({ onDone }: Props) {
                     <span className="font-normal text-xs text-slate-500">
                       display as
                     </span>
-                    <div className="flex flex-row items-center -mt-2">
+
+                    <div className="flex flex-row items-center -mt-4">
                       <div className="-mt-1 text-2xl ">{displayName}</div>
                       <button
                         className="h-16 w-16"
@@ -335,6 +361,7 @@ function Index({ onDone }: Props) {
                         country={"sg"}
                         enableSearch
                         specialLabel="mobile"
+                        inputStyle={{ width: "auto" }}
                         inputProps={{
                           name: "mobile",
                         }}
