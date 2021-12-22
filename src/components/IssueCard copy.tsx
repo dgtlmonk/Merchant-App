@@ -1,4 +1,4 @@
-import { CircularProgress, TextField } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
 import { ArrowBack, Loop } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
@@ -35,7 +35,6 @@ function Index({ onDone }: Props) {
     card_select = "card_select",
     confirm = "confirm",
     fullfilled = "fullfilled",
-    search = "search",
   }
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
@@ -49,10 +48,31 @@ function Index({ onDone }: Props) {
   const [data, setData] = useState<any>({});
 
   const formDataRef = useRef<any>();
-  const familyNameRef = useRef<any>();
-  const giveNameRef = useRef<any>();
-  const birthDateRef = useRef<any>();
-  const mobileRef = useRef<any>();
+
+  const PhoneInputJSX = (
+    <div className="flex w-full justify-center items-center p-4">
+      {/* TODO: pass country from header or url */}
+      <PhoneInput
+        country={"sg"}
+        enableSearch
+        specialLabel="mobile"
+        inputProps={{
+          name: "mobile",
+        }}
+        value={formDataRef?.current?.mobile}
+        onChange={(phone) => {
+          formDataRef.current = {
+            ...formDataRef.current.value,
+            mobile: phone,
+          };
+        }}
+      />
+    </div>
+  );
+
+  function getPreviousView() {
+    if (viewState === VIEW.card_select) return;
+  }
 
   function handleFormChange(e) {
     formDataRef.current = e.formData;
@@ -61,11 +81,6 @@ function Index({ onDone }: Props) {
   function handlePreviousView() {
     if (viewState === VIEW.confirm) {
       setViewState(VIEW.fillup);
-      return;
-    }
-
-    if (viewState === VIEW.search) {
-      setViewState(VIEW.card_select);
       return;
     }
 
@@ -92,7 +107,7 @@ function Index({ onDone }: Props) {
             console.warn("No Cards available!");
           } else {
             // @ts-ignore
-            cardList = tierList.filter((tier) => tier?.enableIssuance === true);
+            cardList = tierList; //.filter((tier) => tier?.enableIssuance === true);
 
             setMembershipCards(cardList);
           }
@@ -189,23 +204,14 @@ function Index({ onDone }: Props) {
     setViewState(VIEW.card_select);
   }
 
-  function handleSearchMember() {}
-
   return (
     <Fragment>
-      <div
-        className="grid grid-cols-1 grid-rows-6 gap-0 overflow-hidden"
-        style={{
-          height: "100vh",
-          width: "100vw",
-          gridTemplateRows: "4rem 1fr",
-        }}
-      >
+      <div className="container grid grid-cols-1 grid-rows-2 border">
         <div
-          className="module__header col-span-1 row-start-1 z-20"
+          className="module__header col-span-1 border  z-20 mb-2"
           style={{ backgroundColor: "#f8f8ff" }}
         >
-          <div className="flex flex-row justify-center items-center relative w-full h-16 border">
+          <div className="flex flex-row justify-center items-center relative w-full h-16">
             <button
               className={`absolute top-0 left-0 h-16 w-16 ${
                 viewState === VIEW.fullfilled ? "hidden" : "visible"
@@ -218,121 +224,125 @@ function Index({ onDone }: Props) {
           </div>
         </div>
 
-        <div className="overflow-y-scroll flex justify-center ">
+        <div>content</div>
+      </div>
+
+      <div className="flex flex-col w-full h-full items-center">
+        <div className="flex flex-col items-center justify-center  w-full h-full z-10">
+          {viewState === VIEW.fullfilled ? (
+            <div className="flex flex-col max-w-sm  justify-center w-full  items-center">
+              <div className="flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md w-2/3 ">
+                <div className="px-2">
+                  {/* @ts-ignore */}
+                  <Barcode value={`${cardDetail?.cardNumber}`} />
+                </div>
+                <div className="flex w-full border-t py-1 justify-between">
+                  <div className="pl-2">
+                    <div
+                      className=" text-gray-400"
+                      style={{ fontSize: ".7rem" }}
+                    >
+                      join
+                      <span
+                        className="pl-1 font-medium text-gray-700 tracking-tighter"
+                        style={{ fontSize: ".8rem" }}
+                      >
+                        {/* @ts-ignore */}
+                        {getFormattedDate(`${cardDetail?.startTime}`)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="pr-2">
+                    <div
+                      className="pl-2 text-gray-400"
+                      style={{ fontSize: ".7rem" }}
+                    >
+                      expire
+                      <span
+                        className="pl-1 font-medium text-gray-700 tracking-tighter"
+                        style={{ fontSize: ".8rem" }}
+                      >
+                        {/* @ts-ignore */}
+                        {getFormattedDate(`${cardDetail?.endTime}`)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
           {
             {
               [VIEW.card_select]: isLoadingCards ? (
-                <div className="flex h-full items-center">
-                  <CircularProgress size="2rem" />
-                </div>
+                <CircularProgress size="2rem" />
               ) : (
-                <div className="flex flex-col mt-4">
-                  <div className="flex flex-row w-full p-8">
+                <div className="w-5/6">
+                  <div className="flex flex-row w-full">
                     <button
                       className="h-16 justify-around flex border items-center
-                    p-2 rounded-md w-full text-gray-700 
+                    p-2 rounded-md w-full text-gray-700 mb-8
                     "
-                      onClick={() => setViewState(VIEW.search)}
+                      onClick={() => setToggleDisplayName(!toggleDisplayName)}
                     >
                       {" "}
                       Existing Member
                       <MdPersonSearch className="opacity-70 text-gray-800 w-6 h-6" />
                     </button>
                   </div>
-                  <div className="flex  justify-center px-8">
-                    {renderCardList()}
-                  </div>
-                </div>
-              ),
-
-              [VIEW.search]: (
-                <div className="flex flex-col mt-4 w-full px-8">
-                  <div className="flex flex-col justify-center  items-center">
-                    <h2>Existing member found: </h2>
-                    <span>David Lee</span>
-                  </div>
-                  <div className="flex flex-col justify-center  items-center">
-                    <TextField
-                      className="w-4/6"
-                      label="family name"
-                      inputRef={familyNameRef}
-                    />
-                    <TextField
-                      className="w-4/6"
-                      label="given name"
-                      inputRef={giveNameRef}
-                    />
-                    <TextField
-                      className="w-4/6"
-                      label="birth date"
-                      inputRef={birthDateRef}
-                    />
-                    <TextField
-                      className="w-4/6"
-                      label="mobile"
-                      inputRef={mobileRef}
-                    />
-                  </div>
-                  <button className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-8">
-                    Search
-                  </button>
+                  {renderCardList()}
                 </div>
               ),
               [VIEW.fillup]: (
                 <Fragment>
-                  <div className="flex flex-col mt-8">
-                    <div className="flex flex-col max-w-sm  justify-center  items-center">
-                      <div className="w-4/6">
-                        <img
-                          src={selectedMembershipCard?.digitalCard?.image.front}
+                  <div className="flex flex-col max-w-sm  justify-center w-full items-center ">
+                    <div className="w-5/6 ">
+                      <img
+                        src={selectedMembershipCard?.digitalCard?.image.front}
+                        className="mt-12"
+                      />
+                    </div>
+                    {/* @ts-ignore  */}{" "}
+                    <Form
+                      key="cardIssueForm"
+                      schema={schema}
+                      uiSchema={uiSchema}
+                      onChange={handleFormChange}
+                      onSubmit={handleSubmit}
+                      formData={data}
+                      widgets={widgets}
+                      className="px-8"
+                    >
+                      <div className="flex w-full justify-center items-center p-4">
+                        {/* TODO: pass country from header or url */}
+                        <PhoneInput
+                          country={"sg"}
+                          enableSearch
+                          specialLabel="mobile"
+                          inputProps={{
+                            name: "mobile",
+                          }}
+                          value={formDataRef?.current?.mobile}
+                          onChange={(phone) => {
+                            formDataRef.current = {
+                              ...formDataRef.current.value,
+                              mobile: phone,
+                            };
+                          }}
                         />
                       </div>
 
-                      <div className="w-4/6 flex px-12 justify-center">
-                        {/* @ts-ignore */}
-                        <Form
-                          key="cardIssueForm"
-                          schema={schema}
-                          uiSchema={uiSchema}
-                          onChange={handleFormChange}
-                          onSubmit={handleSubmit}
-                          formData={data}
-                          widgets={widgets}
-                        >
-                          <div className="flex w-full justify-center items-center mb-4">
-                            {/* TODO: pass country from header or url */}
-                            <PhoneInput
-                              country={"sg"}
-                              enableSearch
-                              specialLabel="mobile"
-                              inputStyle={{ width: "auto" }}
-                              inputProps={{
-                                name: "mobile",
-                              }}
-                              value={formDataRef?.current?.mobile}
-                              onChange={(phone) => {
-                                formDataRef.current = {
-                                  ...formDataRef.current.value,
-                                  mobile: phone,
-                                };
-                              }}
-                            />
-                          </div>
-
-                          <button
-                            type="submit"
-                            className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
-                          >
-                            Next
-                          </button>
-                        </Form>
-                      </div>
-                    </div>
+                      <button
+                        type="submit"
+                        className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
+                      >
+                        Next
+                      </button>
+                    </Form>
                   </div>
                 </Fragment>
               ),
               [VIEW.confirm]: (
-                <div className="flex flex-col w-full max-w-md items-center mt-8">
+                <div className="flex flex-col w-full max-w-md items-center">
                   <div className="w-2/3">
                     <img
                       src={selectedMembershipCard?.digitalCard?.image.front}
@@ -343,8 +353,7 @@ function Index({ onDone }: Props) {
                     <span className="font-normal text-xs text-slate-500">
                       display as
                     </span>
-
-                    <div className="flex flex-row items-center -mt-4">
+                    <div className="flex flex-row items-center -mt-2">
                       <div className="-mt-1 text-2xl ">{displayName}</div>
                       <button
                         className="h-16 w-16"
@@ -355,13 +364,12 @@ function Index({ onDone }: Props) {
                     </div>
                   </div>
                   <div>
-                    <div className="flex w-full justify-center items-center p-4">
+                    <div className="flex w-full justify-center items-center p-4 hidden">
                       {/* TODO: pass country from header or url */}
                       <PhoneInput
                         country={"sg"}
                         enableSearch
                         specialLabel="mobile"
-                        inputStyle={{ width: "auto" }}
                         inputProps={{
                           name: "mobile",
                         }}
@@ -392,48 +400,7 @@ function Index({ onDone }: Props) {
                 </div>
               ),
               [VIEW.fullfilled]: (
-                <div className="flex flex-col mt-8">
-                  <div className="flex flex-col  justify-center w-full  items-center">
-                    <div className="flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md">
-                      <div className="px-2">
-                        {/* @ts-ignore */}
-                        <Barcode value={`${cardDetail?.cardNumber}`} />
-                      </div>
-                      <div className="flex w-full border-t py-1 justify-between">
-                        <div className="pl-2">
-                          <div
-                            className=" text-gray-400"
-                            style={{ fontSize: ".7rem" }}
-                          >
-                            join
-                            <span
-                              className="pl-1 font-medium text-gray-700 tracking-tighter"
-                              style={{ fontSize: ".8rem" }}
-                            >
-                              {/* @ts-ignore */}
-                              {getFormattedDate(`${cardDetail?.startTime}`)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="pr-2">
-                          <div
-                            className="pl-2 text-gray-400"
-                            style={{ fontSize: ".7rem" }}
-                          >
-                            expire
-                            <span
-                              className="pl-1 font-medium text-gray-700 tracking-tighter"
-                              style={{ fontSize: ".8rem" }}
-                            >
-                              {/* @ts-ignore */}
-                              {getFormattedDate(`${cardDetail?.endTime}`)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
+                <div className="flex flex-col">
                   <div className="flex w-full px-4 py-2 border  rounded-md bg-orange-400 text-white text-sm mt-4">
                     Remember to scan the barcode on the card
                   </div>
