@@ -12,6 +12,13 @@ import "react-phone-input-2/lib/material.css";
 import { client } from "../helpers/api-client";
 import { schema, uiSchema } from "../types";
 
+enum MATCH_STATUS {
+  found = "found",
+  no_result = "no_result",
+  searching = "searching",
+  idle = "idle",
+}
+
 type Props = {
   onDone: () => void;
 };
@@ -38,11 +45,14 @@ function Index({ onDone }: Props) {
     search = "search",
   }
   const host = import.meta.env.VITE_API_HOST;
-  const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
+  const [viewState, setViewState] = useState<VIEW>(VIEW.search);
   const [membershipCards, setMembershipCards] = useState([]);
   const [selectedMembershipCard, setSelectedMembeshipCard] =
     useState<any>(null);
   const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
+  const [matchStatus, setMatchStatus] = useState<MATCH_STATUS>(
+    MATCH_STATUS.idle
+  );
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [cardDetail, setCardDetail] = useState(null);
@@ -50,7 +60,7 @@ function Index({ onDone }: Props) {
 
   const formDataRef = useRef<any>();
   const familyNameRef = useRef<any>();
-  const giveNameRef = useRef<any>();
+  const givenNameRef = useRef<any>();
   const birthDateRef = useRef<any>();
   const mobileRef = useRef<any>();
 
@@ -189,7 +199,30 @@ function Index({ onDone }: Props) {
     setViewState(VIEW.card_select);
   }
 
-  function handleSearchMember() {}
+  function handleMatchPerson() {
+    const payload = {
+      giveName: givenNameRef.current.value,
+      familyName: familyNameRef.current.value,
+      mobile: mobileRef.current.value,
+    };
+
+    setMatchStatus(MATCH_STATUS.searching);
+
+    client
+      .post(`${host}/memberships/match`, {
+        headers: {
+          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+        },
+        body: JSON.stringify(payload),
+      })
+      .then((res: any[]) => {
+        if (res.length) {
+          setMatchStatus(MATCH_STATUS.found);
+        } else {
+          setMatchStatus(MATCH_STATUS.no_result);
+        }
+      });
+  }
 
   return (
     <Fragment>
@@ -246,23 +279,54 @@ function Index({ onDone }: Props) {
               ),
 
               [VIEW.search]: (
-                <div className="flex flex-col mt-4 w-full px-8">
-                  <div className="flex flex-col justify-center  items-center">
+                <div
+                  className={`flex flex-col  h-full  w-full ${
+                    matchStatus !== MATCH_STATUS.idle
+                      ? "justify-start"
+                      : "justify-center"
+                  }`}
+                >
+                  <div
+                    className={`flex pt-4 flex-col justify-center items-center ${
+                      matchStatus === MATCH_STATUS.idle ? "hidden" : "visible"
+                    }`}
+                    style={{ backgroundColor: "#ffea8a" }}
+                  >
                     <h2>Existing member found: </h2>
-                    <span>David Lee</span>
+                    <div className="flex flex-col  items-center">
+                      <h1 className="text-2xl">David Lee</h1>
+                      <span className="font-light text-sm text-gray-500">
+                        with the same mobile number
+                      </span>
+                    </div>
+                    <div className="mt-4 mb-4 flex flex-col items-center">
+                      <h2>Is this the same person?</h2>
+                      <div className="flex flex-row w-full p-2 justify-around ">
+                        <button className="px-2 py-1 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium">
+                          Yes
+                        </button>
+
+                        <button className="px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium ">
+                          No
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-col justify-center  items-center">
+                  <div className="flex flex-col justify-center  items-center px-4 mt-4">
                     <TextField
+                      style={{ marginBottom: "1rem" }}
                       className="w-4/6"
                       label="family name"
                       inputRef={familyNameRef}
                     />
                     <TextField
-                      className="w-4/6"
+                      style={{ marginBottom: "1rem" }}
+                      className="w-4/6 mb-4"
                       label="given name"
-                      inputRef={giveNameRef}
+                      inputRef={givenNameRef}
                     />
                     <TextField
+                      style={{ marginBottom: "1rem" }}
                       className="w-4/6"
                       label="birth date"
                       inputRef={birthDateRef}
@@ -273,9 +337,30 @@ function Index({ onDone }: Props) {
                       inputRef={mobileRef}
                     />
                   </div>
-                  <button className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-8">
-                    Search
-                  </button>
+                  <div className="flex w-full mt-8 px-8">
+                    <span
+                      className={`w-full flex justify-center ${
+                        matchStatus === MATCH_STATUS.searching
+                          ? "visible"
+                          : "hidden"
+                      }`}
+                    >
+                      <CircularProgress size="2rem" />
+                    </span>
+                    <button
+                      className={`p-2 border w-full rounded-md bg-blue-400 text-white font-medium
+                      ${
+                        matchStatus !== MATCH_STATUS.searching
+                          ? "visible"
+                          : "hidden"
+                      }
+                      
+                      `}
+                      onClick={handleMatchPerson}
+                    >
+                      Search
+                    </button>
+                  </div>
                 </div>
               ),
               [VIEW.fillup]: (
