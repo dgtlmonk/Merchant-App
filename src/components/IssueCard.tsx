@@ -14,7 +14,7 @@ import { schema, uiSchema } from "../types";
 
 enum MATCH_STATUS {
   found = "found",
-  no_result = "no_result",
+  not_found = "not found",
   searching = "searching",
   idle = "idle",
 }
@@ -44,11 +44,12 @@ function Index({ onDone }: Props) {
     fullfilled = "fullfilled",
     search = "search",
   }
+
   const host = import.meta.env.VITE_API_HOST;
-  const [viewState, setViewState] = useState<VIEW>(VIEW.search);
+  const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
   const [membershipCards, setMembershipCards] = useState([]);
-  const [selectedMembershipCard, setSelectedMembeshipCard] =
-    useState<any>(null);
+  const [programs, setPrograms] = useState<any[] | null>(null);
+  const [selectedMembership, setSelectedMembership] = useState<any>(null);
   const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
   const [matchStatus, setMatchStatus] = useState<MATCH_STATUS>(
     MATCH_STATUS.idle
@@ -64,12 +65,21 @@ function Index({ onDone }: Props) {
   const givenNameRef = useRef<any>();
   const birthDateRef = useRef<any>();
   const mobileRef = useRef<any>();
+  const prevViewRef = useRef<VIEW>();
 
   function handleFormChange(e) {
     formDataRef.current = e.formData;
   }
 
   function handlePreviousView() {
+    if (prevViewRef.current === VIEW.search) {
+      prevViewRef.current = viewState;
+      setViewState(VIEW.search);
+      return;
+    }
+
+    // setViewState(prevViewRef.current);
+
     if (viewState === VIEW.confirm) {
       setViewState(VIEW.fillup);
       return;
@@ -85,6 +95,10 @@ function Index({ onDone }: Props) {
       return;
     }
   }
+
+  useEffect(() => {
+    console.log(" prev view ", prevViewRef.current);
+  }, [prevViewRef.current]);
 
   useEffect(() => {
     client
@@ -107,6 +121,8 @@ function Index({ onDone }: Props) {
 
             setMembershipCards(cardList);
           }
+
+          setPrograms(res);
         }
       })
       .finally(() => setIsLoadingCards(false));
@@ -122,6 +138,22 @@ function Index({ onDone }: Props) {
       setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (matchData) {
+      // setDisplayName(`${matchData?.person?.fullName}`);
+      setData({
+        ...data,
+        name: {
+          ...matchData.person,
+        },
+      });
+      formDataRef.current = {
+        ...data,
+        mobile: matchData?.person?.mobile?.fullNumber,
+      };
+    }
+  }, [matchData]);
 
   useEffect(() => {
     if (!toggleDisplayName) {
@@ -149,14 +181,14 @@ function Index({ onDone }: Props) {
       }
     }
 
-    payload = {
+    const params = Object.assign(Object.create(null, {}), {
       ...payload,
       // @ts-ignore
       name,
       mobile: formDataRef?.current?.mobile,
-    };
+    });
 
-    setData(payload);
+    setData(params);
     setViewState(VIEW.confirm);
   };
 
@@ -174,21 +206,52 @@ function Index({ onDone }: Props) {
       });
   };
 
+  function getCurrentMembership(programId: string, tierLevel: number) {
+    if (!programs || !programs.length) return null;
+
+    const membership = programs.filter(
+      (program) => program.programId === programId
+    );
+
+    console.log("membership found ", membership);
+
+    // @ts-ignore
+    if (membership.length && membership[0]?.tierList) {
+      // @ts-ignore
+      const { tierList } = membership[0];
+      console.log(" tier list ", tierList);
+
+      if (tierList && tierList.length) {
+        const currentMembership = tierList.filter(
+          (tier) => tier.level == tierLevel
+        )[0];
+
+        console.log(" current membership ?? ", currentMembership);
+
+        return currentMembership;
+      }
+
+      return null;
+    }
+
+    return null;
+  }
+
   function renderCardList() {
     // TODO: react memo ?
-    return membershipCards.map((card: any, i: number) => {
+    return membershipCards.map((membership: any, i: number) => {
       return (
         <div
           className={`rounded-md flex w-full ${i > 0 ? "mt-8" : ""}`}
           style={{ minHeight: "130px" }}
-          key={card?.digitalCard?.masterId}
+          key={membership?.digitalCard?.masterId}
           role="button"
           onClick={() => {
-            setSelectedMembeshipCard(card);
+            setSelectedMembership(membership);
             setViewState(VIEW.fillup);
           }}
         >
-          <img src={card.digitalCard.image.front} />
+          <img src={membership.digitalCard.image.front} />
         </div>
       );
     });
@@ -218,13 +281,58 @@ function Index({ onDone }: Props) {
       })
       .then((res: any[]) => {
         if (res.length) {
+          const [program] = res;
+
+          const personMembership = getCurrentMembership(
+            program.programId,
+            program.tierLevel
+          );
+
+          personMembership && setSelectedMembership(personMembership);
+
           setMatchStatus(MATCH_STATUS.found);
-          setMatchData(res[0]);
+          setMatchData(program);
         } else {
-          setMatchStatus(MATCH_STATUS.no_result);
+          setMatchStatus(MATCH_STATUS.not_found);
         }
       });
   }
+
+  const handleConfirmMatch = (confirm: boolean) => (e) => {
+    console.log("confirm ", confirm);
+
+    prevViewRef.current = VIEW.search;
+
+    const params = Object.assign(Object.create(null, {}), {
+      membershipId: matchData?.membershipId,
+      placeId: payload.placeId,
+    });
+
+    // revoke
+    if (!confirm) {
+      // revoke
+
+      client
+        .post(`${host}/cards/revoke`, {
+          headers: {
+            "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          },
+          body: JSON.stringify(params),
+        })
+        .then(() => {
+          setMatchStatus(MATCH_STATUS.idle);
+          setViewState(VIEW.confirm);
+        });
+    } else {
+      // issue
+      setMatchStatus(MATCH_STATUS.idle);
+      setViewState(VIEW.confirm);
+    }
+  };
+
+  useEffect(() => {
+    console.log(" match status ", matchStatus);
+  }, [matchStatus]);
 
   return (
     <Fragment>
@@ -265,8 +373,7 @@ function Index({ onDone }: Props) {
                   <div className="flex flex-row w-full p-8">
                     <button
                       className="h-16 justify-around flex border items-center
-                    p-2 rounded-md w-full text-gray-700 
-                    "
+                    p-2 rounded-md w-full text-gray-700"
                       onClick={() => {
                         setViewState(VIEW.search);
                         setMatchStatus(MATCH_STATUS.idle);
@@ -284,16 +391,29 @@ function Index({ onDone }: Props) {
               ),
 
               [VIEW.search]: (
-                <div
-                  className={`flex flex-col  h-full  w-full ${
-                    matchStatus !== MATCH_STATUS.idle
-                      ? "justify-start"
-                      : "justify-center"
-                  }`}
-                >
+                <div className={`flex flex-col  h-full  w-full`}>
                   <div
                     className={`flex pt-4 flex-col justify-center items-center ${
-                      matchStatus === MATCH_STATUS.idle ? "hidden" : "visible"
+                      matchStatus === MATCH_STATUS.not_found
+                        ? "visible"
+                        : "hidden"
+                    }`}
+                  >
+                    <span
+                      className="text-red-600  p-2"
+                      style={{ fontSize: "1.4rem" }}
+                    >
+                      Member not found
+                    </span>
+                  </div>
+
+                  <div
+                    className={`flex pt-4 flex-col justify-center items-center ${
+                      matchStatus === MATCH_STATUS.idle ||
+                      matchStatus === MATCH_STATUS.not_found ||
+                      matchStatus === MATCH_STATUS.searching
+                        ? "hidden"
+                        : "visible"
                     }`}
                     style={{ backgroundColor: "#ffea8a" }}
                   >
@@ -309,18 +429,24 @@ function Index({ onDone }: Props) {
                     <div className="flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4">
                       <div className="px-2">
                         {/* @ts-ignore */}
-                        <Barcode value={`${matchData?.cardNumber}`} />
+                        <Barcode value={`${matchData?.cardNumber || "..."}`} />
                       </div>
                     </div>
 
                     <div className="mt-4 mb-4 flex flex-col items-center">
                       <h2>Is this the same person?</h2>
                       <div className="flex flex-row w-full p-2 justify-around ">
-                        <button className="px-2 py-1 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium">
+                        <button
+                          className="px-2 py-1 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                          onClick={handleConfirmMatch(true)}
+                        >
                           Yes
                         </button>
 
-                        <button className="px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium ">
+                        <button
+                          className="px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium"
+                          onClick={handleConfirmMatch(false)}
+                        >
                           No
                         </button>
                       </div>
@@ -383,7 +509,7 @@ function Index({ onDone }: Props) {
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
                       <div className="w-4/6">
                         <img
-                          src={selectedMembershipCard?.digitalCard?.image.front}
+                          src={selectedMembership?.digitalCard?.image.front}
                         />
                       </div>
 
@@ -433,20 +559,28 @@ function Index({ onDone }: Props) {
               [VIEW.confirm]: (
                 <div className="flex flex-col w-full max-w-md items-center mt-8">
                   <div className="w-2/3">
-                    <img
-                      src={selectedMembershipCard?.digitalCard?.image.front}
-                    />
+                    <img src={selectedMembership?.digitalCard?.image.front} />
                   </div>
 
                   <div className="mt-6">
-                    <span className="font-normal text-xs text-slate-500">
+                    <span
+                      className={`font-normal text-xs text-slate-500 ${
+                        prevViewRef.current === VIEW.search
+                          ? "hidden"
+                          : "visible"
+                      }`}
+                    >
                       display as
                     </span>
 
                     <div className="flex flex-row items-center -mt-4">
                       <div className="-mt-1 text-2xl ">{displayName}</div>
                       <button
-                        className="h-16 w-16"
+                        className={`h-16 w-16 ${
+                          prevViewRef.current === VIEW.search
+                            ? "hidden"
+                            : "visible"
+                        }`}
                         onClick={() => setToggleDisplayName(!toggleDisplayName)}
                       >
                         <Loop className="opacity-80 text-blue-500" />
