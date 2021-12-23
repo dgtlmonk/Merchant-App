@@ -57,6 +57,7 @@ function Index({ onDone }: Props) {
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [cardDetail, setCardDetail] = useState(null);
   const [data, setData] = useState<any>({});
+  const [matchData, setMatchData] = useState<any>({});
 
   const formDataRef = useRef<any>();
   const familyNameRef = useRef<any>();
@@ -218,6 +219,7 @@ function Index({ onDone }: Props) {
       .then((res: any[]) => {
         if (res.length) {
           setMatchStatus(MATCH_STATUS.found);
+          setMatchData(res[0]);
         } else {
           setMatchStatus(MATCH_STATUS.no_result);
         }
@@ -265,7 +267,10 @@ function Index({ onDone }: Props) {
                       className="h-16 justify-around flex border items-center
                     p-2 rounded-md w-full text-gray-700 
                     "
-                      onClick={() => setViewState(VIEW.search)}
+                      onClick={() => {
+                        setViewState(VIEW.search);
+                        setMatchStatus(MATCH_STATUS.idle);
+                      }}
                     >
                       {" "}
                       Existing Member
@@ -294,11 +299,20 @@ function Index({ onDone }: Props) {
                   >
                     <h2>Existing member found: </h2>
                     <div className="flex flex-col  items-center">
-                      <h1 className="text-2xl">David Lee</h1>
-                      <span className="font-light text-sm text-gray-500">
+                      <h1 className="text-2xl text-gray-500">
+                        {matchData.person?.fullName}
+                      </h1>
+                      <span className="font-light text-sm text-gray-400">
                         with the same mobile number
                       </span>
                     </div>
+                    <div className="flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4">
+                      <div className="px-2">
+                        {/* @ts-ignore */}
+                        <Barcode value={`${matchData?.cardNumber}`} />
+                      </div>
+                    </div>
+
                     <div className="mt-4 mb-4 flex flex-col items-center">
                       <h2>Is this the same person?</h2>
                       <div className="flex flex-row w-full p-2 justify-around ">
