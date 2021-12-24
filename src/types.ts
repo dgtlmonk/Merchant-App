@@ -10,6 +10,7 @@ export enum VIEWS {
 }
 
 export const uiSchema = {
+  "ui:options": { label: false },
   // done: {
   //   "ui:widget": "select", // could also be "select"
   // },
@@ -22,32 +23,19 @@ export const uiSchema = {
 
 export const schema = {
   type: "object",
-  required: [
-    "name",
-    //  "mobile"
-  ],
+  required: ["givenName", "familyName", "mobile"],
   properties: {
-    name: {
-      title: "",
-      type: "object",
-      required: ["givenName", "familyName"],
-      properties: {
-        familyName: {
-          title: "family name",
-          type: "string",
-        },
-        givenName: {
-          title: "given name",
-          type: "string",
-        },
-      },
+    givenName: {
+      title: "given name",
+      type: "string",
     },
-    // mobile: {
-    //   type: "string",
-    //   number: {
-    //     title: "mobile",
-    //     type: "string",
-    //   },
-    // },
+    familyName: {
+      title: "family name",
+      type: "string",
+    },
+    mobile: {
+      type: "string",
+      title: "mobile",
+    },
   },
 };

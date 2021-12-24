@@ -7,8 +7,9 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import Barcode from "react-barcode";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/material.css";
+import { useMediaQuery } from "react-responsive";
+// import PhoneInput from "react-phone-input-2";
+// import "react-phone-input-2/lib/material.css";
 import { client } from "../helpers/api-client";
 import { schema, uiSchema } from "../types";
 
@@ -24,9 +25,6 @@ type Props = {
 };
 
 const Form = withTheme(Theme);
-const widgets = {
-  PhoneWidget: PhoneInput,
-};
 
 // console.log("import.meta.env.VITE_API_KEY ", import.meta.env.VITE_API_KEY);
 // console.log("import.meta.env.VITE_API_HOST ", import.meta.env.VITE_API_HOST);
@@ -44,6 +42,9 @@ function Index({ onDone }: Props) {
     fullfilled = "fullfilled",
     search = "search",
   }
+
+  const isTabletOrMobile = useMediaQuery({ query: "(max-width: 1224px)" });
+  const isPortrait = useMediaQuery({ query: "(orientation: portrait)" });
 
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
@@ -66,6 +67,10 @@ function Index({ onDone }: Props) {
   const birthDateRef = useRef<any>();
   const mobileRef = useRef<any>();
   const prevViewRef = useRef<VIEW>();
+
+  useEffect(() => {
+    console.log("is port ", isPortrait);
+  }, [isPortrait]);
 
   function handleFormChange(e) {
     formDataRef.current = e.formData;
@@ -135,7 +140,7 @@ function Index({ onDone }: Props) {
 
   useEffect(() => {
     if (data) {
-      setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
+      setDisplayName(`${data?.givenName} ${data?.familyName}`);
     }
   }, [data]);
 
@@ -157,9 +162,9 @@ function Index({ onDone }: Props) {
 
   useEffect(() => {
     if (!toggleDisplayName) {
-      setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
+      setDisplayName(`${data?.givenName} ${data?.familyName}`);
     } else {
-      setDisplayName(`${data?.name?.familyName} ${data?.name?.givenName}`);
+      setDisplayName(`${data?.familyName} ${data?.givenName}`);
     }
   }, [toggleDisplayName]);
 
@@ -167,28 +172,28 @@ function Index({ onDone }: Props) {
     { formData }: FormProps<any>,
     e: React.FormEvent<HTMLFormElement>
   ) => {
-    const { name } = formData;
+    console.log(" form data ", formData);
 
-    if (!formDataRef?.current?.mobile) {
-      if (data?.mobile) {
-        formDataRef.current = {
-          ...formDataRef.current.value,
-          mobile: data.mobile,
-        };
-      } else {
-        e.target["mobile"].focus();
-        return;
-      }
-    }
+    // if (!formDataRef?.current?.mobile) {
+    //   if (data?.mobile) {
+    //     formDataRef.current = {
+    //       ...formDataRef.current.value,
+    //       mobile: data.mobile,
+    //     };
+    //   }
+    //   else {
+    //     e.target["mobile"].focus();
+    //     return;
+    //   }
+    // }
 
-    const params = Object.assign(Object.create(null, {}), {
-      ...payload,
-      // @ts-ignore
-      name,
-      mobile: formDataRef?.current?.mobile,
-    });
+    // // const params = Object.assign(Object.create(null, {}), {
+    // //   ...payload,
+    //   // @ts-ignore
+    // });
 
-    setData(params);
+    // formDataRef
+    setData({ ...formData });
     setViewState(VIEW.confirm);
   };
 
@@ -357,7 +362,7 @@ function Index({ onDone }: Props) {
             >
               <ArrowBack className="opacity-50" />
             </button>
-            <div className="p-4">Issue Card</div>
+            <div className="p-4">Issue Card:[CARD NAME]</div>
           </div>
         </div>
 
@@ -407,6 +412,7 @@ function Index({ onDone }: Props) {
                     </span>
                   </div>
 
+                  {/* match confirm start */}
                   <div
                     className={`flex pt-4 flex-col justify-center items-center ${
                       matchStatus === MATCH_STATUS.idle ||
@@ -426,10 +432,18 @@ function Index({ onDone }: Props) {
                         with the same mobile number
                       </span>
                     </div>
-                    <div className="flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4">
-                      <div className="px-2">
+
+                    <div className="w-4/6 mt-4">
+                      <img src={selectedMembership?.digitalCard?.image.front} />
+                    </div>
+                    <div className="w-4/6 flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4 ">
+                      <div className="flex px-2 w-full h-full justify-center">
                         {/* @ts-ignore */}
-                        <Barcode value={`${matchData?.cardNumber || "..."}`} />
+                        <Barcode
+                          value={`${matchData?.cardNumber || "..."}`}
+                          width="4"
+                          height={`${isPortrait ? "150" : "200"}`}
+                        />
                       </div>
                     </div>
 
@@ -452,6 +466,8 @@ function Index({ onDone }: Props) {
                       </div>
                     </div>
                   </div>
+                  {/* match confirm ends */}
+
                   <div className="flex flex-col justify-center  items-center px-4 mt-4">
                     <TextField
                       style={{ marginBottom: "1rem" }}
@@ -513,7 +529,7 @@ function Index({ onDone }: Props) {
                         />
                       </div>
 
-                      <div className="w-4/6 flex px-12 justify-center">
+                      <div className="w-5/6 flex px-12 justify-center">
                         {/* @ts-ignore */}
                         <Form
                           key="cardIssueForm"
@@ -522,12 +538,10 @@ function Index({ onDone }: Props) {
                           onChange={handleFormChange}
                           onSubmit={handleSubmit}
                           formData={data}
-                          widgets={widgets}
                         >
-                          <div className="flex w-full justify-center items-center mb-4">
-                            {/* TODO: pass country from header or url */}
+                          {/* <div className="flex w-full justify-center items-center mb-4">
                             <PhoneInput
-                              country={"sg"}
+                              country={"ph"}
                               enableSearch
                               specialLabel="mobile"
                               inputStyle={{ width: "auto" }}
@@ -543,10 +557,10 @@ function Index({ onDone }: Props) {
                               }}
                             />
                           </div>
-
+ */}
                           <button
                             type="submit"
-                            className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
+                            className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-4"
                           >
                             Next
                           </button>
@@ -589,8 +603,9 @@ function Index({ onDone }: Props) {
                   </div>
                   <div>
                     <div className="flex w-full justify-center items-center p-4">
+                      <TextField label="mobile" value={data.mobile} disabled />
                       {/* TODO: pass country from header or url */}
-                      <PhoneInput
+                      {/* <PhoneInput
                         country={"sg"}
                         enableSearch
                         specialLabel="mobile"
@@ -605,7 +620,7 @@ function Index({ onDone }: Props) {
                             mobile: phone,
                           };
                         }}
-                      />
+                      /> */}
                     </div>
                   </div>
                   <div className="flex flex-row w-full items-center justify-center mt-8">

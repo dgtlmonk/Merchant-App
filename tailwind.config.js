@@ -9,6 +9,9 @@ module.exports = {
       xs: "475px",
       ...defaultTheme.screens,
     },
+    fontFamily: {
+      melbourne: ["melbourne"],
+    },
     extend: {},
   },
   variants: {
