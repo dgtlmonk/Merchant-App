@@ -7,19 +7,24 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import Barcode from "react-barcode";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/material.css";
+import { useMediaQuery } from "react-responsive";
+// import PhoneInput from "react-phone-input-2";
+// import "react-phone-input-2/lib/material.css";
 import { client } from "../helpers/api-client";
 import { schema, uiSchema } from "../types";
+
+enum MATCH_STATUS {
+  found = "found",
+  not_found = "not found",
+  searching = "searching",
+  idle = "idle",
+}
 
 type Props = {
   onDone: () => void;
 };
 
 const Form = withTheme(Theme);
-const widgets = {
-  PhoneWidget: PhoneInput,
-};
 
 // console.log("import.meta.env.VITE_API_KEY ", import.meta.env.VITE_API_KEY);
 // console.log("import.meta.env.VITE_API_HOST ", import.meta.env.VITE_API_HOST);
@@ -37,28 +42,49 @@ function Index({ onDone }: Props) {
     fullfilled = "fullfilled",
     search = "search",
   }
+
+  const isTabletOrMobile = useMediaQuery({ query: "(max-width: 1224px)" });
+  const isPortrait = useMediaQuery({ query: "(orientation: portrait)" });
+
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
   const [membershipCards, setMembershipCards] = useState([]);
-  const [selectedMembershipCard, setSelectedMembeshipCard] =
-    useState<any>(null);
+  const [programs, setPrograms] = useState<any[] | null>(null);
+  const [selectedMembership, setSelectedMembership] = useState<any>(null);
   const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
+  const [matchStatus, setMatchStatus] = useState<MATCH_STATUS>(
+    MATCH_STATUS.idle
+  );
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [cardDetail, setCardDetail] = useState(null);
   const [data, setData] = useState<any>({});
+  const [matchData, setMatchData] = useState<any>({});
 
   const formDataRef = useRef<any>();
   const familyNameRef = useRef<any>();
-  const giveNameRef = useRef<any>();
+  const givenNameRef = useRef<any>();
   const birthDateRef = useRef<any>();
   const mobileRef = useRef<any>();
+  const prevViewRef = useRef<VIEW>();
+
+  useEffect(() => {
+    console.log("is port ", isPortrait);
+  }, [isPortrait]);
 
   function handleFormChange(e) {
     formDataRef.current = e.formData;
   }
 
   function handlePreviousView() {
+    if (prevViewRef.current === VIEW.search) {
+      prevViewRef.current = viewState;
+      setViewState(VIEW.search);
+      return;
+    }
+
+    // setViewState(prevViewRef.current);
+
     if (viewState === VIEW.confirm) {
       setViewState(VIEW.fillup);
       return;
@@ -74,6 +100,10 @@ function Index({ onDone }: Props) {
       return;
     }
   }
+
+  useEffect(() => {
+    console.log(" prev view ", prevViewRef.current);
+  }, [prevViewRef.current]);
 
   useEffect(() => {
     client
@@ -96,6 +126,8 @@ function Index({ onDone }: Props) {
 
             setMembershipCards(cardList);
           }
+
+          setPrograms(res);
         }
       })
       .finally(() => setIsLoadingCards(false));
@@ -108,15 +140,31 @@ function Index({ onDone }: Props) {
 
   useEffect(() => {
     if (data) {
-      setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
+      setDisplayName(`${data?.givenName} ${data?.familyName}`);
     }
   }, [data]);
 
   useEffect(() => {
+    if (matchData) {
+      // setDisplayName(`${matchData?.person?.fullName}`);
+      setData({
+        ...data,
+        name: {
+          ...matchData.person,
+        },
+      });
+      formDataRef.current = {
+        ...data,
+        mobile: matchData?.person?.mobile?.fullNumber,
+      };
+    }
+  }, [matchData]);
+
+  useEffect(() => {
     if (!toggleDisplayName) {
-      setDisplayName(`${data?.name?.givenName} ${data?.name?.familyName}`);
+      setDisplayName(`${data?.givenName} ${data?.familyName}`);
     } else {
-      setDisplayName(`${data?.name?.familyName} ${data?.name?.givenName}`);
+      setDisplayName(`${data?.familyName} ${data?.givenName}`);
     }
   }, [toggleDisplayName]);
 
@@ -124,28 +172,28 @@ function Index({ onDone }: Props) {
     { formData }: FormProps<any>,
     e: React.FormEvent<HTMLFormElement>
   ) => {
-    const { name } = formData;
+    console.log(" form data ", formData);
 
-    if (!formDataRef?.current?.mobile) {
-      if (data?.mobile) {
-        formDataRef.current = {
-          ...formDataRef.current.value,
-          mobile: data.mobile,
-        };
-      } else {
-        e.target["mobile"].focus();
-        return;
-      }
-    }
+    // if (!formDataRef?.current?.mobile) {
+    //   if (data?.mobile) {
+    //     formDataRef.current = {
+    //       ...formDataRef.current.value,
+    //       mobile: data.mobile,
+    //     };
+    //   }
+    //   else {
+    //     e.target["mobile"].focus();
+    //     return;
+    //   }
+    // }
 
-    payload = {
-      ...payload,
-      // @ts-ignore
-      name,
-      mobile: formDataRef?.current?.mobile,
-    };
+    // // const params = Object.assign(Object.create(null, {}), {
+    // //   ...payload,
+    //   // @ts-ignore
+    // });
 
-    setData(payload);
+    // formDataRef
+    setData({ ...formData });
     setViewState(VIEW.confirm);
   };
 
@@ -163,21 +211,52 @@ function Index({ onDone }: Props) {
       });
   };
 
+  function getCurrentMembership(programId: string, tierLevel: number) {
+    if (!programs || !programs.length) return null;
+
+    const membership = programs.filter(
+      (program) => program.programId === programId
+    );
+
+    console.log("membership found ", membership);
+
+    // @ts-ignore
+    if (membership.length && membership[0]?.tierList) {
+      // @ts-ignore
+      const { tierList } = membership[0];
+      console.log(" tier list ", tierList);
+
+      if (tierList && tierList.length) {
+        const currentMembership = tierList.filter(
+          (tier) => tier.level == tierLevel
+        )[0];
+
+        console.log(" current membership ?? ", currentMembership);
+
+        return currentMembership;
+      }
+
+      return null;
+    }
+
+    return null;
+  }
+
   function renderCardList() {
     // TODO: react memo ?
-    return membershipCards.map((card: any, i: number) => {
+    return membershipCards.map((membership: any, i: number) => {
       return (
         <div
           className={`rounded-md flex w-full ${i > 0 ? "mt-8" : ""}`}
           style={{ minHeight: "130px" }}
-          key={card?.digitalCard?.masterId}
+          key={membership?.digitalCard?.masterId}
           role="button"
           onClick={() => {
-            setSelectedMembeshipCard(card);
+            setSelectedMembership(membership);
             setViewState(VIEW.fillup);
           }}
         >
-          <img src={card.digitalCard.image.front} />
+          <img src={membership.digitalCard.image.front} />
         </div>
       );
     });
@@ -189,7 +268,76 @@ function Index({ onDone }: Props) {
     setViewState(VIEW.card_select);
   }
 
-  function handleSearchMember() {}
+  function handleMatchPerson() {
+    const payload = {
+      giveName: givenNameRef.current.value,
+      familyName: familyNameRef.current.value,
+      mobile: mobileRef.current.value,
+    };
+
+    setMatchStatus(MATCH_STATUS.searching);
+
+    client
+      .post(`${host}/memberships/match`, {
+        headers: {
+          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+        },
+        body: JSON.stringify(payload),
+      })
+      .then((res: any[]) => {
+        if (res.length) {
+          const [program] = res;
+
+          const personMembership = getCurrentMembership(
+            program.programId,
+            program.tierLevel
+          );
+
+          personMembership && setSelectedMembership(personMembership);
+
+          setMatchStatus(MATCH_STATUS.found);
+          setMatchData(program);
+        } else {
+          setMatchStatus(MATCH_STATUS.not_found);
+        }
+      });
+  }
+
+  const handleConfirmMatch = (confirm: boolean) => (e) => {
+    console.log("confirm ", confirm);
+
+    prevViewRef.current = VIEW.search;
+
+    const params = Object.assign(Object.create(null, {}), {
+      membershipId: matchData?.membershipId,
+      placeId: payload.placeId,
+    });
+
+    // revoke
+    if (!confirm) {
+      // revoke
+
+      client
+        .post(`${host}/cards/revoke`, {
+          headers: {
+            "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          },
+          body: JSON.stringify(params),
+        })
+        .then(() => {
+          setMatchStatus(MATCH_STATUS.idle);
+          setViewState(VIEW.confirm);
+        });
+    } else {
+      // issue
+      setMatchStatus(MATCH_STATUS.idle);
+      setViewState(VIEW.confirm);
+    }
+  };
+
+  useEffect(() => {
+    console.log(" match status ", matchStatus);
+  }, [matchStatus]);
 
   return (
     <Fragment>
@@ -214,7 +362,7 @@ function Index({ onDone }: Props) {
             >
               <ArrowBack className="opacity-50" />
             </button>
-            <div className="p-4">Issue Card</div>
+            <div className="p-4">Issue Card:[CARD NAME]</div>
           </div>
         </div>
 
@@ -230,9 +378,11 @@ function Index({ onDone }: Props) {
                   <div className="flex flex-row w-full p-8">
                     <button
                       className="h-16 justify-around flex border items-center
-                    p-2 rounded-md w-full text-gray-700 
-                    "
-                      onClick={() => setViewState(VIEW.search)}
+                    p-2 rounded-md w-full text-gray-700"
+                      onClick={() => {
+                        setViewState(VIEW.search);
+                        setMatchStatus(MATCH_STATUS.idle);
+                      }}
                     >
                       {" "}
                       Existing Member
@@ -246,23 +396,93 @@ function Index({ onDone }: Props) {
               ),
 
               [VIEW.search]: (
-                <div className="flex flex-col mt-4 w-full px-8">
-                  <div className="flex flex-col justify-center  items-center">
-                    <h2>Existing member found: </h2>
-                    <span>David Lee</span>
+                <div className={`flex flex-col  h-full  w-full`}>
+                  <div
+                    className={`flex pt-4 flex-col justify-center items-center ${
+                      matchStatus === MATCH_STATUS.not_found
+                        ? "visible"
+                        : "hidden"
+                    }`}
+                  >
+                    <span
+                      className="text-red-600  p-2"
+                      style={{ fontSize: "1.4rem" }}
+                    >
+                      Member not found
+                    </span>
                   </div>
-                  <div className="flex flex-col justify-center  items-center">
+
+                  {/* match confirm start */}
+                  <div
+                    className={`flex pt-4 flex-col justify-center items-center ${
+                      matchStatus === MATCH_STATUS.idle ||
+                      matchStatus === MATCH_STATUS.not_found ||
+                      matchStatus === MATCH_STATUS.searching
+                        ? "hidden"
+                        : "visible"
+                    }`}
+                    style={{ backgroundColor: "#ffea8a" }}
+                  >
+                    <h2>Existing member found: </h2>
+                    <div className="flex flex-col  items-center">
+                      <h1 className="text-2xl text-gray-500">
+                        {matchData.person?.fullName}
+                      </h1>
+                      <span className="font-light text-sm text-gray-400">
+                        with the same mobile number
+                      </span>
+                    </div>
+
+                    <div className="w-4/6 mt-4">
+                      <img src={selectedMembership?.digitalCard?.image.front} />
+                    </div>
+                    <div className="w-4/6 flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4 ">
+                      <div className="flex px-2 w-full h-full justify-center">
+                        {/* @ts-ignore */}
+                        <Barcode
+                          value={`${matchData?.cardNumber || "..."}`}
+                          width="4"
+                          height={`${isPortrait ? "150" : "200"}`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4 mb-4 flex flex-col items-center">
+                      <h2>Is this the same person?</h2>
+                      <div className="flex flex-row w-full p-2 justify-around ">
+                        <button
+                          className="px-2 py-1 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                          onClick={handleConfirmMatch(true)}
+                        >
+                          Yes
+                        </button>
+
+                        <button
+                          className="px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium"
+                          onClick={handleConfirmMatch(false)}
+                        >
+                          No
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {/* match confirm ends */}
+
+                  <div className="flex flex-col justify-center  items-center px-4 mt-4">
                     <TextField
+                      style={{ marginBottom: "1rem" }}
                       className="w-4/6"
                       label="family name"
                       inputRef={familyNameRef}
                     />
                     <TextField
-                      className="w-4/6"
+                      style={{ marginBottom: "1rem" }}
+                      className="w-4/6 mb-4"
                       label="given name"
-                      inputRef={giveNameRef}
+                      inputRef={givenNameRef}
                     />
                     <TextField
+                      style={{ marginBottom: "1rem" }}
                       className="w-4/6"
                       label="birth date"
                       inputRef={birthDateRef}
@@ -273,9 +493,30 @@ function Index({ onDone }: Props) {
                       inputRef={mobileRef}
                     />
                   </div>
-                  <button className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-8">
-                    Search
-                  </button>
+                  <div className="flex w-full mt-8 px-8">
+                    <span
+                      className={`w-full flex justify-center ${
+                        matchStatus === MATCH_STATUS.searching
+                          ? "visible"
+                          : "hidden"
+                      }`}
+                    >
+                      <CircularProgress size="2rem" />
+                    </span>
+                    <button
+                      className={`p-2 border w-full rounded-md bg-blue-400 text-white font-medium
+                      ${
+                        matchStatus !== MATCH_STATUS.searching
+                          ? "visible"
+                          : "hidden"
+                      }
+                      
+                      `}
+                      onClick={handleMatchPerson}
+                    >
+                      Search
+                    </button>
+                  </div>
                 </div>
               ),
               [VIEW.fillup]: (
@@ -284,11 +525,11 @@ function Index({ onDone }: Props) {
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
                       <div className="w-4/6">
                         <img
-                          src={selectedMembershipCard?.digitalCard?.image.front}
+                          src={selectedMembership?.digitalCard?.image.front}
                         />
                       </div>
 
-                      <div className="w-4/6 flex px-12 justify-center">
+                      <div className="w-5/6 flex px-12 justify-center">
                         {/* @ts-ignore */}
                         <Form
                           key="cardIssueForm"
@@ -297,12 +538,10 @@ function Index({ onDone }: Props) {
                           onChange={handleFormChange}
                           onSubmit={handleSubmit}
                           formData={data}
-                          widgets={widgets}
                         >
-                          <div className="flex w-full justify-center items-center mb-4">
-                            {/* TODO: pass country from header or url */}
+                          {/* <div className="flex w-full justify-center items-center mb-4">
                             <PhoneInput
-                              country={"sg"}
+                              country={"ph"}
                               enableSearch
                               specialLabel="mobile"
                               inputStyle={{ width: "auto" }}
@@ -318,10 +557,10 @@ function Index({ onDone }: Props) {
                               }}
                             />
                           </div>
-
+ */}
                           <button
                             type="submit"
-                            className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mb-8"
+                            className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-4"
                           >
                             Next
                           </button>
@@ -334,20 +573,28 @@ function Index({ onDone }: Props) {
               [VIEW.confirm]: (
                 <div className="flex flex-col w-full max-w-md items-center mt-8">
                   <div className="w-2/3">
-                    <img
-                      src={selectedMembershipCard?.digitalCard?.image.front}
-                    />
+                    <img src={selectedMembership?.digitalCard?.image.front} />
                   </div>
 
                   <div className="mt-6">
-                    <span className="font-normal text-xs text-slate-500">
+                    <span
+                      className={`font-normal text-xs text-slate-500 ${
+                        prevViewRef.current === VIEW.search
+                          ? "hidden"
+                          : "visible"
+                      }`}
+                    >
                       display as
                     </span>
 
                     <div className="flex flex-row items-center -mt-4">
                       <div className="-mt-1 text-2xl ">{displayName}</div>
                       <button
-                        className="h-16 w-16"
+                        className={`h-16 w-16 ${
+                          prevViewRef.current === VIEW.search
+                            ? "hidden"
+                            : "visible"
+                        }`}
                         onClick={() => setToggleDisplayName(!toggleDisplayName)}
                       >
                         <Loop className="opacity-80 text-blue-500" />
@@ -356,8 +603,9 @@ function Index({ onDone }: Props) {
                   </div>
                   <div>
                     <div className="flex w-full justify-center items-center p-4">
+                      <TextField label="mobile" value={data.mobile} disabled />
                       {/* TODO: pass country from header or url */}
-                      <PhoneInput
+                      {/* <PhoneInput
                         country={"sg"}
                         enableSearch
                         specialLabel="mobile"
@@ -372,7 +620,7 @@ function Index({ onDone }: Props) {
                             mobile: phone,
                           };
                         }}
-                      />
+                      /> */}
                     </div>
                   </div>
                   <div className="flex flex-row w-full items-center justify-center mt-8">
