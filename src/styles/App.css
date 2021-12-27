@@ -1,13 +1,3 @@
-@font-face {
-  font-family: melbourne;
-  src: url("assets/fonts/Melbourne.otf");
-}
-
-@font-face {
-  font-family: picon;
-  src: url("assets/fonts/picon.ttf");
-}
-
 html,
 body,
 #root {
@@ -20,4 +10,53 @@ body {
   background-color: #fff;
   overflow: hidden;
   font-family: melbourne;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@font-face {
+  font-family: "melbourne";
+  src: url("fonts/Melbourne.otf");
+}
+
+@font-face {
+  font-family: "picon";
+  src: url("fonts/picon.ttf?ybt6q0") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="picon-"],
+[class*=" picon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: "picon" !important;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.picon-barcode:before {
+  content: "\e637";
+}
+.picon-order:before {
+  content: "\e643";
+}
+
+.picon-setting-outline:before {
+  content: "\e632";
+}
+
+.picon-clock-outline:before {
+  content: "\e943";
+}
+
+.icon-menu {
+  font-size: 4rem;
 }
