@@ -15,11 +15,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "noUnusedLocals": true,
     "jsx": "react-jsx",
     "baseUrl": "./src",
     "paths": {
       "*": ["src/*", "node_modules/*"]
-    }
+    },
+    "types": ["cypress", "@testing-library/cypress"]
   },
   "include": ["./src"]
 }

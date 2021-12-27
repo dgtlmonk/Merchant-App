@@ -22,6 +22,11 @@ export default ({ onSuccess }: Props) => {
   const emailRef = useRef();
   const passwordRef = useRef();
 
+  // TODO: get settings
+  // useEffect(() => {
+  //   getSettings()
+  // },[])
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -34,13 +39,6 @@ export default ({ onSuccess }: Props) => {
     setIsAuthenticating(true);
     setIsLoginFailed(false);
 
-    // fetch(host, {
-    //   method: "POST",
-    //   body: JSON.stringify({
-    //     email,
-    //     password,
-    //   }),
-    // })
     client
       .post(host, {
         body: JSON.stringify({
