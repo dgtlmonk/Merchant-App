@@ -1,0 +1,33 @@
+{
+  "cardNumber": "S0651022479",
+  "programId": "5d12e1a1e4a5c53fdd6fe352",
+  "programPriority": 1,
+  "tierLevel": 1,
+  "startTime": "2021-12-09T11:37:02.983Z",
+  "endTime": "2022-12-08T15:59:59.999Z",
+  "personId": "61589ce687d250001efa7e35",
+  "memberId": "61589ce7f3c74e00202b54cd",
+  "membershipId": "61b1ea5f9c1223001defdde5",
+  "state": "active",
+  "digitalCard": {
+    "id": "61b1ea5f5d2857001fd734ce",
+    "registeredAt": null,
+    "hiddenAt": null
+  },
+  "person": {
+    "familyName": "Lee",
+    "givenName": "Rose",
+    "fullName": "Rose Lee",
+    "gender": "",
+    "birthDate": "",
+    "email": "",
+    "mobile": {
+      "fullNumber": "6591269162",
+      "countryCode": "65",
+      "number": "91269162"
+    }
+  },
+  "createdAt": "2021-12-10T09:05:13.554Z",
+  "modifiedAt": null,
+  "deletedAt": null
+}

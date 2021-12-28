@@ -6,7 +6,8 @@ import AddSales from "./components/AddSales";
 import AppMenu from "./components/AppMenu";
 import IssueCard from "./components/IssueCard";
 import LoginForm from "./components/LoginForm";
-import { getSettings } from "./helpers/activation";
+import { deleteSettings, getSettings } from "./helpers/activation";
+import "./mirage";
 import { VIEWS } from "./types";
 
 function useQuery() {
@@ -16,17 +17,23 @@ function useQuery() {
 }
 
 function App(props) {
+  // server.shutdown();
   const navigate = useNavigate();
-
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
   const [module, setModule] = useState<any>(null);
   const [_token, setToken] = useState<any>(null);
   const r = useQuery();
 
   useEffect(() => {
-    // deleteSettings();
+    deleteSettings();
+    // client.get("/validate").then((response) => {
+    //   console.log(" validate response ", response);
+    //   setSettings(response);
+    // });
+
     if (getSettings()) {
-      navigate("/?login");
+      // TODO: validate/parse settings
+      navigate("/?init");
     }
   }, []);
 
@@ -41,6 +48,12 @@ function App(props) {
 
     if (r.has("login")) {
       setViewState(VIEWS.LOGIN);
+    }
+
+    if (r.has("callback")) {
+      // TODO: validate call url
+      // setViewState(VIEWS.LOGIN);
+      navigate("/?login");
     }
   }, [r]);
 
