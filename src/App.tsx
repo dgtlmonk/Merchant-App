@@ -1,16 +1,14 @@
 import "@/styles/App.css";
 import { CircularProgress } from "@material-ui/core";
-import { withTheme } from "@rjsf/core";
-import { Theme } from "@rjsf/material-ui";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import AddSales from "./components/AddSales";
 import AppMenu from "./components/AppMenu";
 import IssueCard from "./components/IssueCard";
 import LoginForm from "./components/LoginForm";
+import { deleteSettings, getSettings } from "./helpers/activation";
+import "./mirage";
 import { VIEWS } from "./types";
-
-const Form = withTheme(Theme);
 
 function useQuery() {
   const { search } = useLocation();
@@ -18,13 +16,26 @@ function useQuery() {
   return useMemo(() => new URLSearchParams(search), [search]);
 }
 
-function App() {
+function App(props) {
+  // server.shutdown();
+  const navigate = useNavigate();
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
   const [module, setModule] = useState<any>(null);
   const [_token, setToken] = useState<any>(null);
   const r = useQuery();
 
-  const formDataRef = useRef<any>();
+  useEffect(() => {
+    deleteSettings();
+    // client.get("/validate").then((response) => {
+    //   console.log(" validate response ", response);
+    //   setSettings(response);
+    // });
+
+    if (getSettings()) {
+      // TODO: validate/parse settings
+      navigate("/?init");
+    }
+  }, []);
 
   useEffect(() => {
     if (r.getAll("module")) {
@@ -33,6 +44,16 @@ function App() {
 
     if (r.getAll("token")) {
       setToken(r.getAll("token")[0]);
+    }
+
+    if (r.has("login")) {
+      setViewState(VIEWS.LOGIN);
+    }
+
+    if (r.has("callback")) {
+      // TODO: validate call url
+      // setViewState(VIEWS.LOGIN);
+      navigate("/?login");
     }
   }, [r]);
 
@@ -52,7 +73,7 @@ function App() {
       return;
     }
 
-    setViewState(VIEWS.LOGIN);
+    // setViewState(VIEWS.LOGIN);
   }, [module]);
 
   const handleBackToMenu = () => {
@@ -62,10 +83,6 @@ function App() {
   const handleMenuChange = (menu: VIEWS) => {
     setViewState(menu);
   };
-
-  function handleFormChange(e) {
-    formDataRef.current = e.formData;
-  }
 
   return (
     <div className="flex flex-col items-center h-full w-full">
