@@ -1,10 +1,7 @@
 // import { client } from "@/helpers/api-client";
 import { CircularProgress, TextField } from "@material-ui/core";
-import { withTheme } from "@rjsf/core";
-import { Theme } from "@rjsf/material-ui";
 import { useRef, useState } from "react";
 import { client } from "../helpers/api-client";
-const Form = withTheme(Theme);
 
 const ep = "https://bbab-2404-3c00-482e-99c0-c06c-bf4d-6f69-fb47.ngrok.io";
 const host = `${ep}/api/users/login`;

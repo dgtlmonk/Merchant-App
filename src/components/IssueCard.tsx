@@ -43,7 +43,7 @@ function Index({ onDone }: Props) {
     search = "search",
   }
 
-  const isTabletOrMobile = useMediaQuery({ query: "(max-width: 1224px)" });
+  // const isTabletOrMobile = useMediaQuery({ query: "(max-width: 1224px)" });
   const isPortrait = useMediaQuery({ query: "(orientation: portrait)" });
 
   const host = import.meta.env.VITE_API_HOST;
