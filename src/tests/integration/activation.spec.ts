@@ -1,13 +1,13 @@
 // sample.spec.ts created with Cypress
 
 import "cypress-localstorage-commands";
-import { createServer } from "miragejs";
 import { getSettings, setSettings } from "../../helpers/activation";
 
 describe("Activation", () => {
   let server;
 
   before(() => {
+    cy.clearLocalStorageSnapshot();
     cy.saveLocalStorage();
   });
 
@@ -17,34 +17,62 @@ describe("Activation", () => {
   });
 
   beforeEach(() => {
-    server = createServer({});
+    // server = createServer({});
   });
 
   afterEach(() => {
-    server.shutdown();
+    // server.shutdown();
   });
 
-  it("should display access denied notice, given no settings is detected and activate url is not present", () => {
+  it.only("should display access denied notice, given no settings is detected and activate url is not present", () => {
     cy.visit("http://localhost:3000");
 
     expect(cy.contains(/denied/i)).to.exist;
   });
 
-  it.only("should display settings conflict warning, given existing config is detected", () => {
-    // setSettings({
-    //   installationId: "61cba27f6bbf03002050a2ba",
-    //   location: {
-    //     id: "5d1b019745828f10b6c5eed1",
-    //     name: "ION Orchard",
-    //   },
-    // });
+  it.only("should display access denied notice, given activate callback url fails", () => {
+    cy.visit("http://localhost:3000/activate?callaback=idontexist");
+
+    expect(cy.contains(/denied/i)).to.exist;
+  });
+
+  it("should display settings conflict warning, given existing config is detected", () => {
+    setSettings({
+      installationId: "61cba27f6bbf03002050a2ba",
+      location: {
+        id: "5d1b019745828f10b6c5eed1",
+        name: "ION Orchard",
+      },
+    });
 
     // TODO: pass callback url with different location
-    cy.visit("http://localhost:3000/activate?callback=someurl");
-    // const settings = getSettings();
+    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
     // const location = settings.location;
 
     expect(cy.contains(/currently setup/i)).to.exist;
+  });
+
+  it.only("should write in new settings, given no local settings is detected", () => {
+    cy.intercept("POST", "https://someurl.io", {
+      statusCode: 200,
+      body: {
+        location: {
+          id: "5d1b019745828f10b6c5eed1",
+          name: "Perkd Dev Store",
+        },
+      },
+
+      // fixture: "activate.json",
+    }).as("activate");
+
+    // TODO: pass callback url with different location
+    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+
+    // const location = settings.location;
+    cy.wait("@activate");
+
+    expect(cy.contains(/login/i)).to.exist;
+    expect(cy.contains(/dev store/i)).to.exist;
   });
 
   it.skip("should override local settings, given user accept change settings source", () => {

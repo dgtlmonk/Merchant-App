@@ -6,41 +6,49 @@ import AddSales from "./components/AddSales";
 import AppMenu from "./components/AppMenu";
 import IssueCard from "./components/IssueCard";
 import LoginForm from "./components/LoginForm";
-import "./mirage";
-import { VIEWS } from "./types";
+import { getSettings, setSettings } from "./helpers/activation";
+import { client } from "./helpers/api-client";
+// import "./mirage";
+import { activateParams, VIEWS } from "./types";
 
 function App(props) {
   // server.shutdown();
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
+
+  const [localSettings, setLocalSettings] = useState(null);
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
   const [module, _setModule] = useState<any>(null);
   const [isReactivating, setIsReactivating] = useState<boolean>(false);
 
   useEffect(() => {
-    // client.get("/validate").then((response) => {
-    //   console.log(" validate response ", response);
-    //   setSettings(response);
-    // });
-    // if (getSettings()) {
-    //   // TODO: validate/parse settings
-    //   navigate("/?init");
-    // }
-  }, []);
+    const callbackUrl = new URLSearchParams(search).get("callback");
 
-  useEffect(() => {
-    // console.log(
-    //   " pathname search ",
-    //   pathname,
-    //   new URLSearchParams(search).get("callback")
-    // );
+    if (pathname === "/activate" && callbackUrl) {
+      // TODO: validate callback url
+      if (!getSettings()) {
+        console.log("must write to local config");
+        client
+          .post(`${callbackUrl}`, {
+            body: JSON.stringify(activateParams),
+          })
+          .then((res) => {
+            console.log("response ", res);
+            if (!res.error) {
+              setSettings(res);
+              console.log("get settings ", getSettings());
+              setLocalSettings(res);
+              setViewState(VIEWS.LOGIN);
+            }
+          })
+          .catch(() => {
+            setViewState(VIEWS.DENIED);
+          });
+      } else {
+        console.log(" trying to activate?");
+        setIsReactivating(true);
+      }
 
-    if (
-      pathname === "/activate" &&
-      new URLSearchParams(search).get("callback")
-    ) {
-      console.log(" trying to activate?");
-      setIsReactivating(true);
       return;
     }
 
@@ -88,28 +96,34 @@ function App(props) {
         {
           [VIEWS.IDLE]: (
             <div className="flex flex-col justify-center items-center h-full">
-              <span className={`${isReactivating ? "hidden" : "flex"}`}>
-                <CircularProgress size="2rem" />
-              </span>
-              <div>This app is currently setup for</div>
-              <div>[store name] store</div>
-              <div>You are attempting to change it</div>
-              <div className="flex flex-row w-full mt-8">
-                <button
-                  className={`mr-4 p-2 px-8 border rounded-md  bg-blue-400 text-white`}
-                >
-                  Change
-                </button>
-                <button
-                  className={`p-2 px-8 border rounded-md  bg-blue-400 text-white`}
-                >
-                  Cancel
-                </button>
-              </div>
+              {isReactivating ? (
+                <div>
+                  <div>This app is currently setup for</div>
+                  <div>[store name] store</div>
+                  <div>You are attempting to change it</div>
+                  <div className="flex flex-row w-full mt-8">
+                    <button
+                      className={`mr-4 p-2 px-8 border rounded-md  bg-blue-400 text-white`}
+                    >
+                      Change
+                    </button>
+                    <button
+                      className={`p-2 px-8 border rounded-md  bg-blue-400 text-white`}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <span>
+                  <CircularProgress size="2rem" />
+                </span>
+              )}
             </div>
           ),
           [VIEWS.LOGIN]: (
             <LoginForm
+              settings={localSettings}
               onSuccess={() => {
                 setViewState(VIEWS.MENU);
               }}

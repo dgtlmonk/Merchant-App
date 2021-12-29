@@ -41,3 +41,11 @@ export const schema = {
     },
   },
 };
+
+export const activateParams = {
+  app: {
+    id: "me.merchant",
+    version: "4.0.0",
+    env: "prod",
+  },
+};
