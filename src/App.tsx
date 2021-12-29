@@ -1,7 +1,7 @@
 import "@/styles/App.css";
 import { CircularProgress } from "@material-ui/core";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import AddSales from "./components/AddSales";
 import AppMenu from "./components/AppMenu";
 import IssueCard from "./components/IssueCard";
@@ -12,9 +12,8 @@ import { client } from "./helpers/api-client";
 import { activateParams, VIEWS } from "./types";
 
 function App(props) {
-  // server.shutdown();
   const { pathname, search } = useLocation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [localSettings, setLocalSettings] = useState<any>(null);
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
