@@ -2,18 +2,21 @@
 
 import "cypress-localstorage-commands";
 import { createServer } from "miragejs";
-import {
-  getSettings,
-  setSettings,
-  settingsKey,
-} from "../../helpers/activation";
+import { getSettings, setSettings } from "../../helpers/activation";
 
 describe("Activation", () => {
   let server;
 
+  before(() => {
+    cy.saveLocalStorage();
+  });
+
+  after(() => {
+    cy.clearLocalStorageSnapshot();
+    cy.restoreLocalStorage();
+  });
+
   beforeEach(() => {
-    cy.clearLocalStorage(settingsKey);
-    // deleteSettings();
     server = createServer({});
   });
 
@@ -21,12 +24,41 @@ describe("Activation", () => {
     server.shutdown();
   });
 
-  it("should redirect to login page, given callback is present in query params", () => {
-    cy.visit("http://localhost:3000/?callback=/activateUrl");
+  it("should display access denied notice, given no settings is detected and activate url is not present", () => {
+    cy.visit("http://localhost:3000");
+
+    expect(cy.contains(/denied/i)).to.exist;
+  });
+
+  it.only("should display settings conflict warning, given existing config is detected", () => {
+    // setSettings({
+    //   installationId: "61cba27f6bbf03002050a2ba",
+    //   location: {
+    //     id: "5d1b019745828f10b6c5eed1",
+    //     name: "ION Orchard",
+    //   },
+    // });
+
+    // TODO: pass callback url with different location
+    cy.visit("http://localhost:3000/activate?callback=someurl");
+    // const settings = getSettings();
+    // const location = settings.location;
+
+    expect(cy.contains(/currently setup/i)).to.exist;
+  });
+
+  it.skip("should override local settings, given user accept change settings source", () => {
+    expect(true).to.be.true;
+  });
+
+  it.skip("should update local settings, given activate params is present", () => {
+    cy.visit(
+      "http://localhost:3000/activate?callback=https://some-call-back.io"
+    );
     cy.url().should("include", "login");
   });
 
-  it.only("should parse settings, given localstorage settings  is detected", () => {
+  it.skip("should parse settings, given localstorage settings  is detected", () => {
     // server.get("/validate", {
     //   i: "too exist",
     // });

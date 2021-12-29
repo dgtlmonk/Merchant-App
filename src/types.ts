@@ -7,6 +7,8 @@ export enum VIEWS {
   HISTORY = "history",
   SALES = "sales",
   SETTINGS = "settings",
+  DENIED = "access denied",
+  CONFIRN_NEW_SETTINGS = "settings change",
 }
 
 export const uiSchema = {

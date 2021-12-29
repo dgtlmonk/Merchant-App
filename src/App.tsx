@@ -1,61 +1,59 @@
 import "@/styles/App.css";
 import { CircularProgress } from "@material-ui/core";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AddSales from "./components/AddSales";
 import AppMenu from "./components/AppMenu";
 import IssueCard from "./components/IssueCard";
 import LoginForm from "./components/LoginForm";
-import { deleteSettings, getSettings } from "./helpers/activation";
 import "./mirage";
 import { VIEWS } from "./types";
 
-function useQuery() {
-  const { search } = useLocation();
-
-  return useMemo(() => new URLSearchParams(search), [search]);
-}
-
 function App(props) {
   // server.shutdown();
+  const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
-  const [module, setModule] = useState<any>(null);
-  const [_token, setToken] = useState<any>(null);
-  const r = useQuery();
+  const [module, _setModule] = useState<any>(null);
+  const [isReactivating, setIsReactivating] = useState<boolean>(false);
 
   useEffect(() => {
-    deleteSettings();
     // client.get("/validate").then((response) => {
     //   console.log(" validate response ", response);
     //   setSettings(response);
     // });
-
-    if (getSettings()) {
-      // TODO: validate/parse settings
-      navigate("/?init");
-    }
+    // if (getSettings()) {
+    //   // TODO: validate/parse settings
+    //   navigate("/?init");
+    // }
   }, []);
 
   useEffect(() => {
-    if (r.getAll("module")) {
-      setModule(r.getAll("module")[0]);
+    // console.log(
+    //   " pathname search ",
+    //   pathname,
+    //   new URLSearchParams(search).get("callback")
+    // );
+
+    if (
+      pathname === "/activate" &&
+      new URLSearchParams(search).get("callback")
+    ) {
+      console.log(" trying to activate?");
+      setIsReactivating(true);
+      return;
     }
 
-    if (r.getAll("token")) {
-      setToken(r.getAll("token")[0]);
-    }
+    // if (r.getAll("module")) {
+    //   setModule(r.getAll("module")[0]);
+    // }
 
-    if (r.has("login")) {
-      setViewState(VIEWS.LOGIN);
-    }
+    // if (r.has("login")) {
+    //   setViewState(VIEWS.LOGIN);
+    // }
 
-    if (r.has("callback")) {
-      // TODO: validate call url
-      // setViewState(VIEWS.LOGIN);
-      navigate("/?login");
-    }
-  }, [r]);
+    setViewState(VIEWS.DENIED);
+  }, [pathname, search]);
 
   useEffect(() => {
     if (module === "0") {
@@ -89,8 +87,25 @@ function App(props) {
       {
         {
           [VIEWS.IDLE]: (
-            <div className="flex justify-center items-center h-full">
-              <CircularProgress size="2rem" />
+            <div className="flex flex-col justify-center items-center h-full">
+              <span className={`${isReactivating ? "hidden" : "flex"}`}>
+                <CircularProgress size="2rem" />
+              </span>
+              <div>This app is currently setup for</div>
+              <div>[store name] store</div>
+              <div>You are attempting to change it</div>
+              <div className="flex flex-row w-full mt-8">
+                <button
+                  className={`mr-4 p-2 px-8 border rounded-md  bg-blue-400 text-white`}
+                >
+                  Change
+                </button>
+                <button
+                  className={`p-2 px-8 border rounded-md  bg-blue-400 text-white`}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           ),
           [VIEWS.LOGIN]: (
@@ -103,6 +118,14 @@ function App(props) {
           [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
           [VIEWS.ADD_SALES]: <AddSales onDone={handleBackToMenu} />,
           [VIEWS.ISSUE_CARD]: <IssueCard onDone={handleBackToMenu} />,
+          [VIEWS.DENIED]: (
+            <div className="flex flex-col w-full h-full items-center justify-center">
+              <div className="p-12">
+                <h1 className="text-red-600">Access denied.</h1>
+                <span>Contact abcx@perkd.me to activate your account.</span>
+              </div>
+            </div>
+          ),
         }[viewState]
       }
     </div>

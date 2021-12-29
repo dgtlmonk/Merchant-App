@@ -5,7 +5,8 @@ export function deleteSettings() {
 }
 
 export function getSettings() {
-  return localStorage.getItem(settingsKey);
+  // @ts-ignore
+  return JSON.parse(localStorage.getItem(settingsKey)) || null;
 }
 
 export function setSettings(settings: object) {
