@@ -20,11 +20,6 @@ export default ({ onSuccess, settings }: Props) => {
   const emailRef = useRef();
   const passwordRef = useRef();
 
-  // TODO: get settings
-  // useEffect(() => {
-  //   getSettings()
-  // },[])
-
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 

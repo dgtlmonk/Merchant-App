@@ -16,10 +16,11 @@ function App(props) {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
 
-  const [localSettings, setLocalSettings] = useState(null);
+  const [localSettings, setLocalSettings] = useState<any>(null);
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
   const [module, _setModule] = useState<any>(null);
   const [isReactivating, setIsReactivating] = useState<boolean>(false);
+  const [settingsUrl, setSettingsUrl] = useState<string>();
 
   useEffect(() => {
     const callbackUrl = new URLSearchParams(search).get("callback");
@@ -46,21 +47,20 @@ function App(props) {
           });
       } else {
         console.log(" trying to activate?");
+
+        setSettingsUrl(callbackUrl);
+        setLocalSettings(getSettings());
         setIsReactivating(true);
       }
-
       return;
     }
 
-    // if (r.getAll("module")) {
-    //   setModule(r.getAll("module")[0]);
-    // }
-
-    // if (r.has("login")) {
-    //   setViewState(VIEWS.LOGIN);
-    // }
-
-    setViewState(VIEWS.DENIED);
+    if (getSettings()) {
+      setLocalSettings(getSettings());
+      setViewState(VIEWS.LOGIN);
+    } else {
+      setViewState(VIEWS.DENIED);
+    }
   }, [pathname, search]);
 
   useEffect(() => {
@@ -90,6 +90,27 @@ function App(props) {
     setViewState(menu);
   };
 
+  function handleUpdateSettings() {
+    console.log(" updating settings from ", settingsUrl);
+
+    client
+      .post(`${settingsUrl}`, {
+        body: JSON.stringify(activateParams),
+      })
+      .then((res) => {
+        console.log("response ", res);
+        if (!res.error) {
+          setSettings(res);
+          console.log("get settings ", getSettings());
+          setLocalSettings(res);
+          setViewState(VIEWS.LOGIN);
+        }
+      })
+      .catch(() => {
+        setViewState(VIEWS.DENIED);
+      });
+  }
+
   return (
     <div className="flex flex-col items-center h-full w-full">
       {
@@ -99,16 +120,29 @@ function App(props) {
               {isReactivating ? (
                 <div>
                   <div>This app is currently setup for</div>
-                  <div>[store name] store</div>
+                  <div>
+                    <span
+                      className="font-bold mr-2"
+                      style={{ fontSize: "1.2rem" }}
+                    >
+                      {localSettings?.location?.name}
+                    </span>
+                    store
+                  </div>
                   <div>You are attempting to change it</div>
                   <div className="flex flex-row w-full mt-8">
                     <button
-                      className={`mr-4 p-2 px-8 border rounded-md  bg-blue-400 text-white`}
+                      className={`mr-4 p-2 px-8 border rounded-md  text-white`}
+                      style={{ backgroundColor: "red" }}
+                      id="update-settings"
+                      onClick={handleUpdateSettings}
                     >
                       Change
                     </button>
                     <button
                       className={`p-2 px-8 border rounded-md  bg-blue-400 text-white`}
+                      onClick={() => setViewState(VIEWS.LOGIN)}
+                      id="update-cancel"
                     >
                       Cancel
                     </button>
