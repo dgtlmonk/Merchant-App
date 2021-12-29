@@ -39,7 +39,10 @@ function App(props) {
               console.log("get settings ", getSettings());
               setLocalSettings(res);
               setViewState(VIEWS.LOGIN);
+              return;
             }
+
+            setViewState(VIEWS.DENIED);
           })
           .catch(() => {
             setViewState(VIEWS.DENIED);
