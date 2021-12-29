@@ -33,7 +33,6 @@ function App(props) {
             body: JSON.stringify(activateParams),
           })
           .then((res) => {
-            console.log("response ", res);
             if (!res.error) {
               setSettings(res);
               console.log("get settings ", getSettings());
