@@ -11,18 +11,14 @@ const host = `${ep}/api/users/login`;
 
 type Props = {
   onSuccess: () => void;
+  settings?: any;
 };
 
-export default ({ onSuccess }: Props) => {
+export default ({ onSuccess, settings }: Props) => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isLoginFailed, setIsLoginFailed] = useState(false);
   const emailRef = useRef();
   const passwordRef = useRef();
-
-  // TODO: get settings
-  // useEffect(() => {
-  //   getSettings()
-  // },[])
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -55,6 +51,7 @@ export default ({ onSuccess }: Props) => {
 
   return (
     <div className="flex flex-col p-12 items-center justify-center max-w-md h-full">
+      <div>{settings?.location?.name}</div>
       <form className="flex flex-col" onSubmit={handleSubmit}>
         <TextField
           label="email"

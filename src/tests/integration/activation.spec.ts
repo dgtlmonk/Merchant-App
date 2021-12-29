@@ -1,57 +1,122 @@
 // sample.spec.ts created with Cypress
 
 import "cypress-localstorage-commands";
-import { createServer } from "miragejs";
-import {
-  getSettings,
-  setSettings,
-  settingsKey,
-} from "../../helpers/activation";
+import { deleteSettings, setSettings } from "../../helpers/activation";
 
 describe("Activation", () => {
-  let server;
+  before(() => {
+    cy.clearLocalStorageSnapshot();
+    cy.saveLocalStorage();
+  });
+
+  after(() => {
+    cy.clearLocalStorageSnapshot();
+    cy.restoreLocalStorage();
+  });
 
   beforeEach(() => {
-    cy.clearLocalStorage(settingsKey);
-    // deleteSettings();
-    server = createServer({});
+    deleteSettings();
   });
 
-  afterEach(() => {
-    server.shutdown();
+  it("should display access denied notice, given no settings is detected and activate url is not present", () => {
+    cy.visit("http://localhost:3000");
+    expect(cy.contains(/denied/i)).to.exist;
   });
 
-  it("should redirect to login page, given callback is present in query params", () => {
-    cy.visit("http://localhost:3000/?callback=/activateUrl");
-    cy.url().should("include", "login");
+  it("should display access denied notice, given activate callback url fails", () => {
+    cy.visit("http://localhost:3000/activate?callaback=idontexist");
+
+    expect(cy.contains(/denied/i)).to.exist;
   });
 
-  it.only("should parse settings, given localstorage settings  is detected", () => {
-    // server.get("/validate", {
-    //   i: "too exist",
-    // });
+  it("should store new settings, given no local settings is detected", () => {
+    cy.intercept("POST", "https://someurl.io", {
+      statusCode: 200,
+      body: {
+        location: {
+          id: "5d1b019745828f10b6c5eed1",
+          name: "New Dev Store",
+        },
+      },
 
-    // cy.intercept({
-    //   method: "GET",
-    //   url: "/validate",
-    // }).as("validate");
-    setSettings({ i: "exist" });
+      // fixture: "activate.json",
+    }).as("activate");
 
-    cy.visit("http://localhost:3000/activate");
+    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+    cy.wait("@activate");
 
-    // goes to validate
-    // mock api
-    // check updated settings
-    // should redirect to login
+    expect(cy.contains(/login/i)).to.exist;
+    expect(cy.contains(/new dev/i)).to.exist;
+  });
 
-    // check localstorage
-    // cy.setLocalStorage(settingsKey, JSON.stringify({ name: "joel" }));
+  it("should redirect to login by default, given local settings is detected", () => {
+    setSettings({
+      location: {
+        id: "5d1b019745828f10b6c5eed1",
+        name: "Perkd Dev Store",
+      },
+    });
+    cy.visit("http://localhost:3000");
+    expect(cy.contains(/login/i)).to.exist;
+  });
 
-    const settings = getSettings();
-    expect(settings).to.exist;
+  it("should display settings conflict warning, given existing config is detected", () => {
+    setSettings({
+      installationId: "61cba27f6bbf03002050a2ba",
+      location: {
+        id: "5d1b019745828f10b6c5eed1",
+        name: "Perkd Dev 123",
+      },
+    });
 
-    // expect(settings).to.deep.equal({ i: "exists too" });
-    // expect(settings).to.exist;
+    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+
+    expect(cy.contains(/currently setup/i)).to.exist;
+    expect(cy.contains(/dev 123/i)).to.exist;
+  });
+
+  it("should override local settings, given user accept change settings source", () => {
+    setSettings({
+      installationId: "61cba27f6bbf03002050a2ba",
+      location: {
+        id: "5d1b019745828f10b6c5eed1",
+        name: "Perkd Dev II ",
+      },
+    });
+
+    cy.intercept("POST", "https://someurl.io", {
+      statusCode: 200,
+      body: {
+        location: {
+          id: "5d1b019745828f10b6c5eed1",
+          name: "Awesome Store",
+        },
+      },
+    }).as("activate");
+
+    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+    cy.get("#update-settings").click();
+    cy.wait("@activate");
+
+    expect(cy.contains(/awesome store/i)).to.exist;
+  });
+
+  it("should redirect to login, given user cancel change settings source", () => {
+    setSettings({
+      installationId: "61cba27f6bbf03002050a2ba",
+      location: {
+        id: "5d1b019745828f10b6c5eed1",
+        name: "Perkd Dev II ",
+      },
+    });
+
+    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+
+    expect(cy.contains(/currently setup/i)).to.exist;
+    expect(cy.contains(/dev II/i)).to.exist;
+
+    cy.get("#update-cancel").click();
+    expect(cy.contains(/login/i)).to.exist;
   });
 });
 

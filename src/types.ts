@@ -7,6 +7,8 @@ export enum VIEWS {
   HISTORY = "history",
   SALES = "sales",
   SETTINGS = "settings",
+  DENIED = "access denied",
+  CONFIRN_NEW_SETTINGS = "settings change",
 }
 
 export const uiSchema = {
@@ -37,5 +39,13 @@ export const schema = {
       type: "string",
       title: "mobile",
     },
+  },
+};
+
+export const activateParams = {
+  app: {
+    id: "me.merchant",
+    version: "4.0.0",
+    env: "prod",
   },
 };

@@ -5,7 +5,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test:cypress": "./node_modules/.bin/cypress open"
+    "test:cypress": "./node_modules/.bin/cypress open",
+    "test:cypress:headless": "./node_modules/.bin/cypress run"
   },
   "dependencies": {
     "@material-ui/core": "^4.12.3",
