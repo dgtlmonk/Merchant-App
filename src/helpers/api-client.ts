@@ -1,5 +1,7 @@
 import "whatwg-fetch";
 
+const host = import.meta.env.VITE_API_HOST;
+
 const fetcher = (url: string, options?: RequestInit) =>
   window
     .fetch(url, {
@@ -27,4 +29,7 @@ export const client = {
     fetcher(url, { ...options, method: "DELETE" }),
 };
 
-export { fetcher };
+const qualifySvcUrl = `${host}/membership/qualify`;
+const joinSvcUrl = `${host}/membership/join`;
+
+export { fetcher, qualifySvcUrl, joinSvcUrl };

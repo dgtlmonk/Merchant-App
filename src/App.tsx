@@ -2,14 +2,14 @@ import "@/styles/App.css";
 import { CircularProgress } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import AddSales from "./components/AddSales";
 import AppMenu from "./components/AppMenu";
-import IssueCard from "./components/IssueCard";
-import LoginForm from "./components/LoginForm";
 import { getSettings, setSettings } from "./helpers/activation";
 import { client } from "./helpers/api-client";
 // import "./mirage";
 import { activateParams, VIEWS } from "./types";
+import AddSales from "./views/add-sales";
+import IssueCard from "./views/issue-card";
+import LoginForm from "./views/login";
 
 function App(props) {
   const { pathname, search } = useLocation();

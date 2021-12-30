@@ -2,7 +2,6 @@ import { CircularProgress, TextField } from "@material-ui/core";
 import { ArrowBack, Loop } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
-import { format } from "date-fns";
 import { Fragment, useEffect, useRef, useState } from "react";
 import Barcode from "react-barcode";
 import { MdPersonSearch } from "react-icons/md";
@@ -10,14 +9,16 @@ import { FormProps } from "react-jsonschema-form";
 import { useMediaQuery } from "react-responsive";
 // import PhoneInput from "react-phone-input-2";
 // import "react-phone-input-2/lib/material.css";
-import { client } from "../helpers/api-client";
-import { schema, uiSchema } from "../types";
+import { client, qualifySvcUrl } from "../../helpers/api-client";
+import { schema, uiSchema } from "../../types";
+import CardConfirm from "./components/CardConfirm";
 
 enum MATCH_STATUS {
   found = "found",
   not_found = "not found",
   searching = "searching",
   idle = "idle",
+  not_qualified = "not_qualified",
 }
 
 type Props = {
@@ -26,11 +27,6 @@ type Props = {
 };
 
 const Form = withTheme(Theme);
-
-function getFormattedDate(date: string) {
-  if (!date || date === "undefined") return;
-  return format(new Date(date), "d MMM yyyy");
-}
 
 function Index({ onDone, programs }: Props) {
   enum VIEW {
@@ -47,15 +43,13 @@ function Index({ onDone, programs }: Props) {
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
   const [membershipCards, setMembershipCards] = useState([]);
-  // const [programs, setPrograms] = useState<any[] | null>(null);
   const [selectedMembership, setSelectedMembership] = useState<any>(null);
-  const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
   const [matchStatus, setMatchStatus] = useState<MATCH_STATUS>(
     MATCH_STATUS.idle
   );
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
-  const [cardDetail, setCardDetail] = useState(null);
+  const [cardDetail, setCardDetail] = useState<any>(null);
   const [data, setData] = useState<any>({});
   const [matchData, setMatchData] = useState<any>({});
 
@@ -134,9 +128,9 @@ function Index({ onDone, programs }: Props) {
       // setDisplayName(`${matchData?.person?.fullName}`);
       setData({
         ...data,
-        name: {
-          ...matchData.person,
-        },
+        // name: {
+        //   ...matchData.person,
+        // },
       });
       formDataRef.current = {
         ...data,
@@ -157,6 +151,58 @@ function Index({ onDone, programs }: Props) {
     { formData }: FormProps<any>,
     e: React.FormEvent<HTMLFormElement>
   ) => {
+    console.log("qualify url ", qualifySvcUrl);
+    console.log("x-api-key ", import.meta.env.VITE_API_KEY);
+    console.log("tenant-code", import.meta.env.VITE_TENANT_CODE);
+
+    const params = {
+      profile: {
+        ...formData,
+      },
+      device: {},
+      tierLevel: selectedMembership.level,
+      programId: programs[0].programId,
+      location: {},
+      staff: {},
+    };
+
+    client
+      .post("https://merchant.perkd.io/test/membership/qualify", {
+        body: JSON.stringify(params),
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          "tenant-code": `${import.meta.env.VITE_TENANT_CODE}`,
+          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
+        },
+      })
+      .then((res) => {
+        console.log(" qualify response ", res);
+
+        if (res?.qualify && res?.qualify === "no") {
+          console.log("not qualified");
+
+          const [card] = res.person?.activeMemberships;
+
+          setCardDetail({
+            ...card,
+            person: {
+              fullName: res.person.fullName,
+              phones: res.person.phones,
+            },
+          });
+
+          setMatchStatus(MATCH_STATUS.not_qualified);
+          setViewState(VIEW.fullfilled);
+        }
+
+        if (res?.qualify && res?.qualify === "yes") {
+          console.log("qualified");
+          setViewState(VIEW.fullfilled);
+        }
+      });
+
+    return;
     // formDataRef
     setData({ ...formData });
     setViewState(VIEW.confirm);
@@ -585,79 +631,11 @@ function Index({ onDone, programs }: Props) {
                 </div>
               ),
               [VIEW.fullfilled]: (
-                <div className="flex flex-col mt-8">
-                  <div className="flex flex-col  justify-center w-full  items-center">
-                    <div className="flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md">
-                      <div className="px-2">
-                        {/* @ts-ignore */}
-                        <Barcode value={`${cardDetail?.cardNumber}`} />
-                      </div>
-                      <div className="flex w-full border-t py-1 justify-between">
-                        <div className="pl-2">
-                          <div
-                            className=" text-gray-400"
-                            style={{ fontSize: ".7rem" }}
-                          >
-                            join
-                            <span
-                              className="pl-1 font-medium text-gray-700 tracking-tighter"
-                              style={{ fontSize: ".8rem" }}
-                            >
-                              {/* @ts-ignore */}
-                              {getFormattedDate(`${cardDetail?.startTime}`)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="pr-2">
-                          <div
-                            className="pl-2 text-gray-400"
-                            style={{ fontSize: ".7rem" }}
-                          >
-                            expire
-                            <span
-                              className="pl-1 font-medium text-gray-700 tracking-tighter"
-                              style={{ fontSize: ".8rem" }}
-                            >
-                              {/* @ts-ignore */}
-                              {getFormattedDate(`${cardDetail?.endTime}`)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex w-full px-4 py-2 border  rounded-md bg-orange-400 text-white text-sm mt-4">
-                    Remember to scan the barcode on the card
-                  </div>
-                  <div className="text-5xl mt-6 flex w-full justify-center">
-                    {/* @ts-ignore */}
-                    {`${cardDetail?.person?.fullName}`}
-                  </div>
-                  <div className="flex flex-col w-full  text-gray-600 mt-4">
-                    <div className="flex w-full  text-gray-400 p-2 border-b border-gray-400 text-md items-center justify-between">
-                      Mobile
-                      <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
-                        +{/* @ts-ignore */}
-                        {`${cardDetail?.person?.mobile?.countryCode} ${cardDetail?.person?.mobile?.number}`}
-                      </span>
-                    </div>
-                    <div className="flex w-full p-2  text-md text-gray-400 items-center justify-between">
-                      Expire
-                      <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
-                        {/* @ts-ignore */}
-                        {getFormattedDate(`${cardDetail?.endTime}`)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    className="p-2 mt-4 border rounded-md w-full bg-blue-400 text-white font-medium"
-                    onClick={handleDone}
-                  >
-                    Done
-                  </button>
-                </div>
+                <CardConfirm
+                  isNotQualified={matchStatus === MATCH_STATUS.not_qualified}
+                  cardDetail={cardDetail}
+                  onDone={handleDone}
+                />
               ),
             }[viewState]
           }
