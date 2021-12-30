@@ -17,12 +17,12 @@ function App(props) {
 
   const [localSettings, setLocalSettings] = useState<any>(null);
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
-  const [module, _setModule] = useState<any>(null);
   const [isReactivating, setIsReactivating] = useState<boolean>(false);
   const [settingsUrl, setSettingsUrl] = useState<string>();
 
   useEffect(() => {
     const callbackUrl = new URLSearchParams(search).get("callback");
+    const mod = new URLSearchParams(search).get("module");
 
     if (pathname === "/activate" && callbackUrl) {
       if (!getSettings()) {
@@ -52,33 +52,42 @@ function App(props) {
       return;
     }
 
-    if (getSettings()) {
+    const isActivated = getSettings();
+
+    if (isActivated) {
       setLocalSettings(getSettings());
+      console.log("hey!");
+
+      if (mod && mod === "1") {
+        console.log("issue card module?");
+
+        setViewState(VIEWS.ISSUE_CARD);
+        return;
+      }
+
       setViewState(VIEWS.LOGIN);
     } else {
-      // no settings
       setViewState(VIEWS.DENIED);
     }
   }, [pathname, search]);
 
-  useEffect(() => {
-    if (module === "0") {
-      setViewState(VIEWS.MENU);
-      return;
-    }
+  // useEffect(() => {
+  //   if (module === "0") {
+  //     setViewState(VIEWS.MENU);
+  //     return;
+  //   }
 
-    if (module === "1") {
-      setViewState(VIEWS.ISSUE_CARD);
-      return;
-    }
+  //   if (module === "1") {
+  //     setViewState(VIEWS.ISSUE_CARD);
+  //     return;
+  //   }
 
-    if (module === "2") {
-      setViewState(VIEWS.ADD_SALES);
-      return;
-    }
+  //   if (module === "2") {
+  //     setViewState(VIEWS.ADD_SALES);
+  //     return;
+  //   }
 
-    // setViewState(VIEWS.LOGIN);
-  }, [module]);
+  // }, [module]);
 
   const handleBackToMenu = () => {
     setViewState(VIEWS.MENU);
@@ -94,7 +103,6 @@ function App(props) {
         body: JSON.stringify(activateParams),
       })
       .then((res) => {
-        console.log("response ", res);
         if (!res.error) {
           setSettings(res);
           console.log("get settings ", getSettings());
@@ -165,7 +173,12 @@ function App(props) {
           ),
           [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
           [VIEWS.ADD_SALES]: <AddSales onDone={handleBackToMenu} />,
-          [VIEWS.ISSUE_CARD]: <IssueCard onDone={handleBackToMenu} />,
+          [VIEWS.ISSUE_CARD]: (
+            <IssueCard
+              onDone={handleBackToMenu}
+              programs={localSettings?.programs}
+            />
+          ),
           [VIEWS.DENIED]: (
             <div className="flex flex-col w-full h-full items-center justify-center">
               <div className="p-12">

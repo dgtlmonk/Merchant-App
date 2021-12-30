@@ -22,6 +22,7 @@ enum MATCH_STATUS {
 
 type Props = {
   onDone: () => void;
+  programs?: any;
 };
 
 const Form = withTheme(Theme);
@@ -34,7 +35,7 @@ function getFormattedDate(date: string) {
   return format(new Date(date), "d MMM yyyy");
 }
 
-function Index({ onDone }: Props) {
+function Index({ onDone, programs }: Props) {
   enum VIEW {
     fillup = "fillup",
     card_select = "card_select",
@@ -49,7 +50,7 @@ function Index({ onDone }: Props) {
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
   const [membershipCards, setMembershipCards] = useState([]);
-  const [programs, setPrograms] = useState<any[] | null>(null);
+  // const [programs, setPrograms] = useState<any[] | null>(null);
   const [selectedMembership, setSelectedMembership] = useState<any>(null);
   const [isLoadingCards, setIsLoadingCards] = useState<boolean>(true);
   const [matchStatus, setMatchStatus] = useState<MATCH_STATUS>(
@@ -106,32 +107,43 @@ function Index({ onDone }: Props) {
   }, [prevViewRef.current]);
 
   useEffect(() => {
-    client
-      .get(`${host}/programs`, {
-        headers: {
-          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-        },
-      })
-      .then((res: any[]) => {
-        if (res.length) {
-          const [p] = res;
-          let cardList = [];
-          const tierList: [] = p?.tierList;
+    // client
+    //   .get(`${host}/programs`, {
+    //     headers: {
+    //       "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+    //     },
+    //   })
+    //   .then((res: any[]) => {
+    //     if (res.length) {
+    //       const [p] = res;
+    //       let cardList = [];
+    //       const tierList: [] = p?.tierList;
+    //       if (!tierList.length) {
+    //         console.warn("No Cards available!");
+    //       } else {
+    //         // @ts-ignore
+    //         cardList = tierList.filter((tier) => tier?.enableIssuance === true);
+    //         setMembershipCards(cardList);
+    //       }
+    //       setPrograms(res);
+    //     }
+    //   })
+    //   .finally(() => setIsLoadingCards(false));
 
-          if (!tierList.length) {
-            console.warn("No Cards available!");
-          } else {
-            // @ts-ignore
-            cardList = tierList.filter((tier) => tier?.enableIssuance === true);
+    if (programs.length) {
+      const [p] = programs;
+      let cardList = [];
+      const tiers: [] = p?.tiers;
 
-            setMembershipCards(cardList);
-          }
-
-          setPrograms(res);
-        }
-      })
-      .finally(() => setIsLoadingCards(false));
-  }, []);
+      if (!tiers.length) {
+        console.warn("No Cards available!");
+      } else {
+        // @ts-ignore
+        cardList = tiers.filter((tier) => tier?.card?.canIssue === true);
+        setMembershipCards(cardList);
+      }
+    }
+  }, [programs]);
 
   let payload = {
     membershipId: "5d12e1a1e4a5c53fdd6fe352",
@@ -244,19 +256,21 @@ function Index({ onDone }: Props) {
 
   function renderCardList() {
     // TODO: react memo ?
+
     return membershipCards.map((membership: any, i: number) => {
       return (
         <div
           className={`rounded-md flex w-full ${i > 0 ? "mt-8" : ""}`}
+          data-test="shop-card"
           style={{ minHeight: "130px" }}
-          key={membership?.digitalCard?.masterId}
+          key={i}
           role="button"
           onClick={() => {
             setSelectedMembership(membership);
             setViewState(VIEW.fillup);
           }}
         >
-          <img src={membership.digitalCard.image.front} />
+          <img src={membership.card.image.original} />
         </div>
       );
     });
@@ -369,32 +383,28 @@ function Index({ onDone }: Props) {
         <div className="overflow-y-scroll flex justify-center ">
           {
             {
-              [VIEW.card_select]: isLoadingCards ? (
-                <div className="flex h-full items-center">
-                  <CircularProgress size="2rem" />
-                </div>
-              ) : (
-                <div className="flex flex-col mt-4">
-                  <div className="flex flex-row w-full p-8">
+              [VIEW.card_select]: (
+                <div className="flex flex-col w-3/5  items-center">
+                  <div className="flex flex-row p-8">
                     <button
                       className="h-16 justify-around flex border items-center
-                    p-2 rounded-md w-full text-gray-700"
+                    p-2 rounded-md px-8 text-gray-700"
                       onClick={() => {
                         setViewState(VIEW.search);
                         setMatchStatus(MATCH_STATUS.idle);
                       }}
                     >
-                      {" "}
-                      Existing Member
+                      <span className="mr-4" data-test="person-search">
+                        Existing Member
+                      </span>
                       <MdPersonSearch className="opacity-70 text-gray-800 w-6 h-6" />
                     </button>
                   </div>
-                  <div className="flex  justify-center px-8">
+                  <div className="flex flex-col  justify-center px-8">
                     {renderCardList()}
                   </div>
                 </div>
               ),
-
               [VIEW.search]: (
                 <div className={`flex flex-col  h-full  w-full`}>
                   <div
@@ -439,11 +449,7 @@ function Index({ onDone }: Props) {
                     <div className="w-4/6 flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4 ">
                       <div className="flex px-2 w-full h-full justify-center">
                         {/* @ts-ignore */}
-                        <Barcode
-                          value={`${matchData?.cardNumber || "..."}`}
-                          width="4"
-                          height={`${isPortrait ? "150" : "200"}`}
-                        />
+                        <Barcode value={`${matchData?.cardNumber || "..."}`} />
                       </div>
                     </div>
 

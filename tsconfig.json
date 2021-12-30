@@ -20,8 +20,7 @@
     "baseUrl": "./src",
     "paths": {
       "*": ["src/*", "node_modules/*"]
-    },
-    "types": ["cypress", "@testing-library/cypress"]
+    }
   },
   "include": ["./src"]
 }
