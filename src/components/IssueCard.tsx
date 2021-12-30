@@ -27,9 +27,6 @@ type Props = {
 
 const Form = withTheme(Theme);
 
-// console.log("import.meta.env.VITE_API_KEY ", import.meta.env.VITE_API_KEY);
-// console.log("import.meta.env.VITE_API_HOST ", import.meta.env.VITE_API_HOST);
-
 function getFormattedDate(date: string) {
   if (!date || date === "undefined") return;
   return format(new Date(date), "d MMM yyyy");
@@ -84,8 +81,6 @@ function Index({ onDone, programs }: Props) {
       return;
     }
 
-    // setViewState(prevViewRef.current);
-
     if (viewState === VIEW.confirm) {
       setViewState(VIEW.fillup);
       return;
@@ -107,29 +102,6 @@ function Index({ onDone, programs }: Props) {
   }, [prevViewRef.current]);
 
   useEffect(() => {
-    // client
-    //   .get(`${host}/programs`, {
-    //     headers: {
-    //       "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-    //     },
-    //   })
-    //   .then((res: any[]) => {
-    //     if (res.length) {
-    //       const [p] = res;
-    //       let cardList = [];
-    //       const tierList: [] = p?.tierList;
-    //       if (!tierList.length) {
-    //         console.warn("No Cards available!");
-    //       } else {
-    //         // @ts-ignore
-    //         cardList = tierList.filter((tier) => tier?.enableIssuance === true);
-    //         setMembershipCards(cardList);
-    //       }
-    //       setPrograms(res);
-    //     }
-    //   })
-    //   .finally(() => setIsLoadingCards(false));
-
     if (programs.length) {
       const [p] = programs;
       let cardList = [];
@@ -145,6 +117,7 @@ function Index({ onDone, programs }: Props) {
     }
   }, [programs]);
 
+  // TODO: validate
   let payload = {
     membershipId: "5d12e1a1e4a5c53fdd6fe352",
     placeId: "5d1b019745828f10b6c5eed1",
@@ -184,26 +157,6 @@ function Index({ onDone, programs }: Props) {
     { formData }: FormProps<any>,
     e: React.FormEvent<HTMLFormElement>
   ) => {
-    console.log(" form data ", formData);
-
-    // if (!formDataRef?.current?.mobile) {
-    //   if (data?.mobile) {
-    //     formDataRef.current = {
-    //       ...formDataRef.current.value,
-    //       mobile: data.mobile,
-    //     };
-    //   }
-    //   else {
-    //     e.target["mobile"].focus();
-    //     return;
-    //   }
-    // }
-
-    // // const params = Object.assign(Object.create(null, {}), {
-    // //   ...payload,
-    //   // @ts-ignore
-    // });
-
     // formDataRef
     setData({ ...formData });
     setViewState(VIEW.confirm);
@@ -230,8 +183,6 @@ function Index({ onDone, programs }: Props) {
       (program) => program.programId === programId
     );
 
-    console.log("membership found ", membership);
-
     // @ts-ignore
     if (membership.length && membership[0]?.tierList) {
       // @ts-ignore
@@ -256,6 +207,10 @@ function Index({ onDone, programs }: Props) {
 
   function renderCardList() {
     // TODO: react memo ?
+
+    if (!membershipCards || !membershipCards.length) {
+      return <div className={`rounded-md flex w-full`}>No Card Available</div>;
+    }
 
     return membershipCards.map((membership: any, i: number) => {
       return (
@@ -376,7 +331,10 @@ function Index({ onDone, programs }: Props) {
             >
               <ArrowBack className="opacity-50" />
             </button>
-            <div className="p-4">Issue Card:[CARD NAME]</div>
+            <div className="p-4">
+              Issue Card
+              {`${selectedMembership ? ` : ${selectedMembership?.name}` : ""}`}
+            </div>
           </div>
         </div>
 
@@ -530,9 +488,7 @@ function Index({ onDone, programs }: Props) {
                   <div className="flex flex-col mt-8">
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
                       <div className="w-4/6">
-                        <img
-                          src={selectedMembership?.digitalCard?.image.front}
-                        />
+                        <img src={selectedMembership?.card?.image.original} />
                       </div>
 
                       <div className="w-5/6 flex px-12 justify-center">

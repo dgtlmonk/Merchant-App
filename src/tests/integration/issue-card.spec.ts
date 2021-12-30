@@ -66,27 +66,40 @@ describe("Issue Card", () => {
 
   beforeEach(() => {
     setSettings(mockSettings);
-    cy.viewport("ipad-mini");
+    cy.viewport("ipad-2");
   });
 
   it.skip("should display display login, given unauthenticated", () => {
-    // TODO
+    // TODO: implement
     cy.visit("http://localhost:3000/?mod=1");
     expect(cy.contains(/login/i)).to.exist;
   });
 
   it("should display all cards, given `canIssue` field is set to true", () => {
     cy.visit("http://localhost:3000/?module=1");
+    cy.get('[data-test="shop-card"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+    });
+  });
+
+  it.skip("should enable user to search for existing member", () => {
+    cy.visit("http://localhost:3000/?module=1");
     // @ts-ignore
     expect(cy.getBySel("person-search")).to.exist;
+  });
 
-    // @ts-ignore
-    expect(cy.getBySel("shop-card")).to.exist;
+  it.only("should only submit completed form", () => {
+    cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]').then((el) => {
       const c = el.length;
 
       expect(c).to.equals(2);
+      el[1].click();
+
+      expect(cy.contains(/black/i)).to.exist;
     });
   });
 });
