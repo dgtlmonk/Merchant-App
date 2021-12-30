@@ -9,7 +9,7 @@ body {
   /* background-color: #f8f8ff; */
   background-color: #fff;
   overflow: hidden;
-  font-family: melbourne;
+  font-family: "melbourne";
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -17,12 +17,12 @@ body {
 
 @font-face {
   font-family: "melbourne";
-  src: url("fonts/Melbourne.otf");
+  src: local("Melbourne-Regular"), url("fonts/Melbourne.otf");
 }
 
 @font-face {
   font-family: "picon";
-  src: url("fonts/picon.ttf?ybt6q0") format("truetype");
+  src: local("Picon"), url("fonts/Picon.ttf?ybt6q0") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
