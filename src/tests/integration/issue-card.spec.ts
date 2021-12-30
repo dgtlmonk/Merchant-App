@@ -90,7 +90,7 @@ describe("Issue Card", () => {
     expect(cy.getBySel("person-search")).to.exist;
   });
 
-  it.only("should only submit completed form", () => {
+  it("should show correct card, given user card selection", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]').then((el) => {
@@ -101,6 +101,37 @@ describe("Issue Card", () => {
 
       expect(cy.contains(/black/i)).to.exist;
     });
+  });
+
+  it.only("should only submit completed form", () => {
+    cy.visit("http://localhost:3000/?module=1");
+
+    cy.get('[data-test="shop-card"]')
+      .then((el) => {
+        const c = el.length;
+
+        expect(c).to.equals(2);
+        el[0].click();
+
+        expect(cy.contains(/classic/i)).to.exist;
+        // issue-next-btn
+      })
+      .then(() => {
+        let nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+        nextBtn.click();
+        cy.get('[data-test="title-display-as"]').should("not.exist");
+
+        // NOTICE: this may break if form schema source is different
+        cy.get("#root_givenName").type("Joel");
+        cy.get("#root_familyName").type("Pablo");
+        cy.get("#root_mobile").type("+639194550938");
+
+        nextBtn = cy.get('[data-test="issue-next-btn"]');
+        nextBtn.click();
+
+        cy.get('[data-test="title-display-as"]').should("exist");
+      });
   });
 });
 

@@ -488,7 +488,7 @@ function Index({ onDone, programs }: Props) {
                   <div className="flex flex-col mt-8">
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
                       <div className="w-4/6">
-                        <img src={selectedMembership?.card?.image.original} />
+                        <img src={selectedMembership?.card?.image?.original} />
                       </div>
 
                       <div className="w-5/6 flex px-12 justify-center">
@@ -501,27 +501,9 @@ function Index({ onDone, programs }: Props) {
                           onSubmit={handleSubmit}
                           formData={data}
                         >
-                          {/* <div className="flex w-full justify-center items-center mb-4">
-                            <PhoneInput
-                              country={"ph"}
-                              enableSearch
-                              specialLabel="mobile"
-                              inputStyle={{ width: "auto" }}
-                              inputProps={{
-                                name: "mobile",
-                              }}
-                              value={formDataRef?.current?.mobile}
-                              onChange={(phone) => {
-                                formDataRef.current = {
-                                  ...formDataRef.current.value,
-                                  mobile: phone,
-                                };
-                              }}
-                            />
-                          </div>
- */}
                           <button
                             type="submit"
+                            data-test="issue-next-btn"
                             className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-4"
                           >
                             Next
@@ -535,11 +517,12 @@ function Index({ onDone, programs }: Props) {
               [VIEW.confirm]: (
                 <div className="flex flex-col w-full max-w-md items-center mt-8">
                   <div className="w-2/3">
-                    <img src={selectedMembership?.digitalCard?.image.front} />
+                    <img src={selectedMembership?.card?.image?.original} />
                   </div>
 
                   <div className="mt-6">
                     <span
+                      data-test="title-display-as"
                       className={`font-normal text-xs text-slate-500 ${
                         prevViewRef.current === VIEW.search
                           ? "hidden"
