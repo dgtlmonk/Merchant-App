@@ -25,9 +25,7 @@ function App(props) {
     const callbackUrl = new URLSearchParams(search).get("callback");
 
     if (pathname === "/activate" && callbackUrl) {
-      // TODO: validate callback url
       if (!getSettings()) {
-        console.log("must write to local config");
         client
           .post(`${callbackUrl}`, {
             body: JSON.stringify(activateParams),
@@ -47,8 +45,6 @@ function App(props) {
             setViewState(VIEWS.DENIED);
           });
       } else {
-        console.log(" trying to activate?");
-
         setSettingsUrl(callbackUrl);
         setLocalSettings(getSettings());
         setIsReactivating(true);
@@ -60,6 +56,7 @@ function App(props) {
       setLocalSettings(getSettings());
       setViewState(VIEWS.LOGIN);
     } else {
+      // no settings
       setViewState(VIEWS.DENIED);
     }
   }, [pathname, search]);
@@ -92,8 +89,6 @@ function App(props) {
   };
 
   function handleUpdateSettings() {
-    console.log(" updating settings from ", settingsUrl);
-
     client
       .post(`${settingsUrl}`, {
         body: JSON.stringify(activateParams),
@@ -105,7 +100,11 @@ function App(props) {
           console.log("get settings ", getSettings());
           setLocalSettings(res);
           setViewState(VIEWS.LOGIN);
+
+          return;
         }
+
+        setViewState(VIEWS.DENIED);
       })
       .catch(() => {
         setViewState(VIEWS.DENIED);
