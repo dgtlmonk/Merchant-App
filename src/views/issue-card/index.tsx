@@ -151,10 +151,6 @@ function Index({ onDone, programs }: Props) {
     { formData }: FormProps<any>,
     e: React.FormEvent<HTMLFormElement>
   ) => {
-    console.log("qualify url ", qualifySvcUrl);
-    console.log("x-api-key ", import.meta.env.VITE_API_KEY);
-    console.log("tenant-code", import.meta.env.VITE_TENANT_CODE);
-
     const params = {
       profile: {
         ...formData,
@@ -167,7 +163,7 @@ function Index({ onDone, programs }: Props) {
     };
 
     client
-      .post("https://merchant.perkd.io/test/membership/qualify", {
+      .post(`${qualifySvcUrl}`, {
         body: JSON.stringify(params),
         headers: {
           "content-type": "application/json",
@@ -180,10 +176,9 @@ function Index({ onDone, programs }: Props) {
         console.log(" qualify response ", res);
 
         if (res?.qualify && res?.qualify === "no") {
-          console.log("not qualified");
-
           const [card] = res.person?.activeMemberships;
 
+          // TODO: refactor mapping
           setCardDetail({
             ...card,
             person: {
