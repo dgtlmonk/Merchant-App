@@ -21,10 +21,14 @@ function App(props) {
   const [settingsUrl, setSettingsUrl] = useState<string>();
 
   useEffect(() => {
-    const callbackUrl = new URLSearchParams(search).get("callback");
+    const cb = new URLSearchParams(search).get("callback");
     const mod = new URLSearchParams(search).get("module");
+    const activateUrl = new URLSearchParams(search).get("a");
 
-    if (pathname === "/activate" && callbackUrl) {
+    const isActivating = (pathname === "/activate" && cb) || activateUrl;
+    const callbackUrl = cb || activateUrl;
+
+    if (isActivating) {
       if (!getSettings()) {
         client
           .post(`${callbackUrl}`, {
@@ -45,6 +49,7 @@ function App(props) {
             setViewState(VIEWS.DENIED);
           });
       } else {
+        // @ts-ignore
         setSettingsUrl(callbackUrl);
         setLocalSettings(getSettings());
         setIsReactivating(true);
@@ -56,7 +61,6 @@ function App(props) {
 
     if (isActivated) {
       setLocalSettings(getSettings());
-      console.log("hey!");
 
       if (mod && mod === "1") {
         console.log("issue card module?");

@@ -90,12 +90,14 @@ const Index = ({ isNotQualified, cardDetail, onDone }: Props) => {
         </div>
       </div>
 
-      <button
-        className="p-2 mt-4 border rounded-md w-full bg-blue-400 text-white font-medium"
-        onClick={onDone}
-      >
-        Done
-      </button>
+      {!isNotQualified ? (
+        <button
+          className="p-2 mt-4 border rounded-md w-full bg-blue-400 text-white font-medium"
+          onClick={onDone}
+        >
+          Done
+        </button>
+      ) : null}
     </div>
   );
 };
