@@ -60,7 +60,7 @@ describe("Activation", () => {
     expect(cy.contains(/login/i)).to.exist;
   });
 
-  it.only("should display settings conflict warning, given existing config is detected", () => {
+  it("should display settings conflict warning, given existing config is detected", () => {
     setSettings({
       installationId: "61cba27f6bbf03002050a2ba",
       location: {
@@ -94,7 +94,7 @@ describe("Activation", () => {
       },
     }).as("activate");
 
-    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+    cy.visit("http://localhost:3000/?a=https://someurl.io");
     cy.get("#update-settings").click();
     cy.wait("@activate");
 

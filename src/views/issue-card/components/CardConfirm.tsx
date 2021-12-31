@@ -14,11 +14,11 @@ type Props = {
 
 const Index = ({ isNotQualified, cardDetail, onDone }: Props) => {
   return (
-    <div className="flex flex-col ">
-      <div className="flex flex-col  justify-center w-full  items-center">
+    <div className="flex flex-col w-full">
+      <div className="flex flex-col  justify-center  items-center">
         <div
           data-test="notice-already-issued"
-          className={`flex p-4 flex-col justify-center items-center ${
+          className={`flex w-full p-4 flex-col justify-center items-center ${
             isNotQualified ? "visible" : "hidden"
           }`}
           style={{ backgroundColor: "#ffea8a" }}
@@ -61,43 +61,47 @@ const Index = ({ isNotQualified, cardDetail, onDone }: Props) => {
         </div>
       </div>
 
-      {!isNotQualified ? (
-        <div
-          className={`flex w-full px-4 py-2 border  rounded-md bg-orange-400 text-white text-sm mt-4 `}
-        >
-          Remember to scan the barcode on the card
-        </div>
-      ) : null}
+      <div className="flex flex-col px-12 w-full items-center justify-center">
+        <div className="flex flex-col justify-center w-full items-center">
+          {!isNotQualified ? (
+            <div
+              className={`flex font-bold  px-4 py-2 border  justify-center  rounded-md bg-orange-400 text-white text-sm mt-4 `}
+            >
+              Remember to scan the barcode on the card
+            </div>
+          ) : null}
 
-      <div className="text-5xl mt-6 flex w-full justify-center">
-        {/* @ts-ignore */}
-        {`${cardDetail?.person?.fullName}`}
-      </div>
-      <div className="flex flex-col w-full  text-gray-600 mt-4">
-        <div className="flex w-full  text-gray-400 p-2 border-b border-gray-400 text-md items-center justify-between">
-          Mobile
-          <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
-            +{/* @ts-ignore */}
-            {`${cardDetail?.person?.phones[0]?.countryCode} ${cardDetail?.person?.phones[0]?.number}`}
-          </span>
-        </div>
-        <div className="flex w-full p-2  text-md text-gray-400 items-center justify-between">
-          Expire
-          <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
+          <div className="text-5xl mt-6 flex w-full justify-center">
             {/* @ts-ignore */}
-            {getFormattedDate(`${cardDetail?.endTime}`)}
-          </span>
+            {`${cardDetail?.person?.fullName}`}
+          </div>
+          <div className="flex flex-col w-4/6 text-gray-600 mt-4 ">
+            <div className="flex w-full  text-gray-400 p-2 border-b border-gray-400 text-md items-center justify-between">
+              Mobile
+              <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
+                +{/* @ts-ignore */}
+                {`${cardDetail?.person?.phones[0]?.countryCode} ${cardDetail?.person?.phones[0]?.number}`}
+              </span>
+            </div>
+            <div className="flex w-full p-2  text-md text-gray-400 items-center justify-between">
+              Expire
+              <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
+                {/* @ts-ignore */}
+                {getFormattedDate(`${cardDetail?.endTime}`)}
+              </span>
+            </div>
+          </div>
+
+          {!isNotQualified ? (
+            <button
+              className="p-2 mt-4 border rounded-md w-full bg-blue-400 text-white font-medium"
+              onClick={onDone}
+            >
+              Done
+            </button>
+          ) : null}
         </div>
       </div>
-
-      {!isNotQualified ? (
-        <button
-          className="p-2 mt-4 border rounded-md w-full bg-blue-400 text-white font-medium"
-          onClick={onDone}
-        >
-          Done
-        </button>
-      ) : null}
     </div>
   );
 };
