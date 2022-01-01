@@ -3,6 +3,8 @@
 import "cypress-localstorage-commands";
 import { setSettings } from "../../helpers/activation";
 
+const apiServer = Cypress.env("api_server");
+
 const mockSettings = {
   installationId: "61cba27f6bbf03002050a2ba",
   location: {
@@ -117,7 +119,7 @@ describe("Issue Card", () => {
         // issue-next-btn
       })
       .then(() => {
-        cy.intercept("https://merchant.perkd.io/test/membership/qualify", {
+        cy.intercept(`${apiServer}/membership/qualify`, {
           qualify: "no",
           person: {
             activeMemberships: [
@@ -151,7 +153,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it.only("should display 'Card already issued', given customer is not qualified.", () => {
+  it.skip("should display 'Card already issued', given customer is not qualified.", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')
@@ -165,7 +167,7 @@ describe("Issue Card", () => {
         // issue-next-btn
       })
       .then(() => {
-        cy.intercept("https://merchant.perkd.io/test/membership/qualify", {
+        cy.intercept(`${apiServer}/membership/qualify`, {
           qualify: "no",
           person: {
             id: "61b1877790dcdc001d5a5253",
@@ -222,6 +224,66 @@ describe("Issue Card", () => {
         cy.wait("@qualify");
         cy.contains(/remember to scan/i).should("not.exist");
         expect(cy.get('[data-test="notice-already-issued"]')).to.exist;
+      });
+  });
+
+  it.only("should issue a card, given customer is qualified.", () => {
+    cy.visit("http://localhost:3000/?module=1");
+
+    cy.get('[data-test="shop-card"]')
+      .then((el) => {
+        const c = el.length;
+
+        expect(c).to.equals(2);
+        el[0].click();
+
+        expect(cy.contains(/classic/i)).to.exist;
+        // issue-next-btn
+      })
+      .then(() => {
+        cy.intercept(`${apiServer}/membership/qualify`, {
+          qualify: "yes",
+        }).as("qualify");
+
+        cy.intercept(`${apiServer}/membership/join`, {
+          personId: "61cfe36f1dabe90020b37e84",
+          programId: "5d12e1a1e4a5c53fdd6fe352",
+          tierLevel: 1,
+          membershipId: "61cfe370bb1ec1001efb555c",
+          cardNumber: "S0651022525",
+          startTime: "2022-01-01T05:15:28.006Z",
+          endTime: "2022-12-31T15:59:59.999Z",
+        }).as("join");
+
+        // nextBtn.click();
+        // cy.get('[data-test="title-display-as"]').should("exist");
+
+        // NOTICE: this may break if form schema source is different
+        cy.get("#root_givenName").type("Joel");
+        cy.get("#root_familyName").type("Pablo");
+        cy.get("#root_mobile").type("+639194550938");
+
+        let nextBtn = cy.get('[data-test="issue-next-btn"]');
+        nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+        nextBtn.click();
+
+        cy.wait("@qualify");
+        const confirmBtn = cy.get('[data-test="issue-confirm-btn"]');
+
+        confirmBtn.should("exist");
+        confirmBtn.click();
+
+        cy.wait("@join");
+        // .should(
+        //   "include",
+        //   JSON.stringify({
+        //     familyName: "Pablo",
+        //   })
+        // );
+
+        // cy.contains(/remember to scan/i).should("exist");
+        // expect(cy.get('[data-test="notice-already-issued"]')).not.to.exist;
       });
   });
 });

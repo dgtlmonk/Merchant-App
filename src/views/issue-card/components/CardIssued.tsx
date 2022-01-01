@@ -8,11 +8,13 @@ function getFormattedDate(date: string) {
 
 type Props = {
   isNotQualified: boolean;
-  cardDetail: any;
+  person: any;
   onDone?: () => void;
 };
 
-const Index = ({ isNotQualified, cardDetail, onDone }: Props) => {
+const Index = ({ isNotQualified, person, onDone }: Props) => {
+  const [card] = person?.activeMemberships;
+
   return (
     <div className="flex flex-col w-full">
       <div className="flex flex-col  justify-center  items-center">
@@ -29,7 +31,7 @@ const Index = ({ isNotQualified, cardDetail, onDone }: Props) => {
           <div className="px-2">
             {/* TODO: display card number based on selected membership tier */}
             {/* @ts-ignore */}
-            <Barcode value={`${cardDetail?.cardNumber}`} />
+            <Barcode value={`${card?.cardNumber}`} />
           </div>
           <div className="flex w-full border-t py-1 justify-between">
             <div className="pl-2">
@@ -40,7 +42,7 @@ const Index = ({ isNotQualified, cardDetail, onDone }: Props) => {
                   style={{ fontSize: ".8rem" }}
                 >
                   {/* @ts-ignore */}
-                  {getFormattedDate(`${cardDetail?.startTime}`)}
+                  {getFormattedDate(`${card?.startTime}`)}
                 </span>
               </div>
             </div>
@@ -53,7 +55,7 @@ const Index = ({ isNotQualified, cardDetail, onDone }: Props) => {
                 >
                   {" "}
                   {/* @ts-ignore */}
-                  {getFormattedDate(`${cardDetail?.endTime}`)}
+                  {getFormattedDate(`${card?.endTime}`)}
                 </span>
               </div>
             </div>
@@ -70,36 +72,34 @@ const Index = ({ isNotQualified, cardDetail, onDone }: Props) => {
               Remember to scan the barcode on the card
             </div>
           ) : null}
-
           <div className="text-5xl mt-6 flex w-full justify-center">
             {/* @ts-ignore */}
-            {`${cardDetail?.person?.fullName}`}
+            {`${person.fullName}`}
           </div>
           <div className="flex flex-col w-4/6 text-gray-600 mt-4 ">
             <div className="flex w-full  text-gray-400 p-2 border-b border-gray-400 text-md items-center justify-between">
               Mobile
               <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
                 +{/* @ts-ignore */}
-                {`${cardDetail?.person?.phones[0]?.countryCode} ${cardDetail?.person?.phones[0]?.number}`}
+                {`${person?.phones[0]?.countryCode} ${person?.phones[0]?.number}`}
               </span>
             </div>
             <div className="flex w-full p-2  text-md text-gray-400 items-center justify-between">
               Expire
               <span className="flex pl-2 text-xl text-gray-700 tracking-tight">
                 {/* @ts-ignore */}
-                {getFormattedDate(`${cardDetail?.endTime}`)}
+                {getFormattedDate(`${card?.endTime}`)}
               </span>
             </div>
+            {!isNotQualified ? (
+              <button
+                className="p-2 mt-8 border rounded-md w-full bg-blue-400 text-white font-medium"
+                onClick={onDone}
+              >
+                Done
+              </button>
+            ) : null}
           </div>
-
-          {!isNotQualified ? (
-            <button
-              className="p-2 mt-4 border rounded-md w-full bg-blue-400 text-white font-medium"
-              onClick={onDone}
-            >
-              Done
-            </button>
-          ) : null}
         </div>
       </div>
     </div>

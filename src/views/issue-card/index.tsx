@@ -11,7 +11,7 @@ import { useMediaQuery } from "react-responsive";
 // import "react-phone-input-2/lib/material.css";
 import { client, qualifySvcUrl } from "../../helpers/api-client";
 import { schema, uiSchema } from "../../types";
-import CardConfirm from "./components/CardConfirm";
+import CardConfirm from "./components/CardIssued";
 
 enum MATCH_STATUS {
   found = "found",
@@ -176,16 +176,18 @@ function Index({ onDone, programs }: Props) {
         console.log(" qualify response ", res);
 
         if (res?.qualify && res?.qualify === "no") {
-          const [card] = res.person?.activeMemberships;
+          // const [card] = res.person?.activeMemberships;
+          const { person } = res;
 
           // TODO: refactor mapping
-          setCardDetail({
-            ...card,
-            person: {
-              fullName: res.person.fullName,
-              phones: res.person.phones,
-            },
-          });
+          // setCardDetail({
+          //   ...card,
+          //   person: {
+          //     fullName: res.person.fullName,
+          //     phones: res.person.phones,
+          //   },
+          // });
+          setMatchData(person);
 
           setMatchStatus(MATCH_STATUS.not_qualified);
           setViewState(VIEW.fullfilled);
@@ -193,7 +195,9 @@ function Index({ onDone, programs }: Props) {
 
         if (res?.qualify && res?.qualify === "yes") {
           console.log("qualified");
-          setViewState(VIEW.fullfilled);
+
+          setData({ ...formData });
+          setViewState(VIEW.confirm);
         }
       });
 
@@ -204,16 +208,26 @@ function Index({ onDone, programs }: Props) {
   };
 
   const handleConfirmSubmit = () => {
+    console.log("selected membership ", selectedMembership);
+    const params = Object.assign(Object.create(null, {}), {
+      placeId: payload.placeId,
+      ...data,
+    });
+
     client
-      .post(`${host}/cards/issue`, {
+      .post(`${host}/membership/join`, {
         headers: {
           "x-api-key": `${import.meta.env.VITE_API_KEY}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(params),
       })
       .then((res) => {
-        setViewState(VIEW.fullfilled);
-        setCardDetail(res);
+        console.log("confirm issue response  ", res);
+
+        // setViewState(VIEW.fullfilled);
+
+        // TODO: setMatchData(res)
+        // setCardDetail(res);
       });
   };
 
@@ -273,6 +287,7 @@ function Index({ onDone, programs }: Props) {
   }
 
   function handleDone() {
+    console.log("done ?");
     formDataRef.current = null;
     setData(null);
     setViewState(VIEW.card_select);
@@ -589,24 +604,7 @@ function Index({ onDone, programs }: Props) {
                   </div>
                   <div>
                     <div className="flex w-full justify-center items-center p-4">
-                      <TextField label="mobile" value={data.mobile} disabled />
-                      {/* TODO: pass country from header or url */}
-                      {/* <PhoneInput
-                        country={"sg"}
-                        enableSearch
-                        specialLabel="mobile"
-                        inputStyle={{ width: "auto" }}
-                        inputProps={{
-                          name: "mobile",
-                        }}
-                        value={formDataRef?.current?.mobile}
-                        onChange={(phone) => {
-                          formDataRef.current = {
-                            ...formDataRef?.current?.value,
-                            mobile: phone,
-                          };
-                        }}
-                      /> */}
+                      <TextField label="mobile" value={data?.mobile} disabled />
                     </div>
                   </div>
                   <div className="flex flex-row w-full items-center justify-center mt-8">
@@ -617,6 +615,7 @@ function Index({ onDone, programs }: Props) {
                       Cancel
                     </button>
                     <button
+                      data-test="issue-confirm-btn"
                       className="p-2 px-4 border rounded-md  bg-blue-400 text-white"
                       onClick={handleConfirmSubmit}
                     >
@@ -628,7 +627,7 @@ function Index({ onDone, programs }: Props) {
               [VIEW.fullfilled]: (
                 <CardConfirm
                   isNotQualified={matchStatus === MATCH_STATUS.not_qualified}
-                  cardDetail={cardDetail}
+                  person={matchData}
                   onDone={handleDone}
                 />
               ),
