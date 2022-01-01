@@ -274,13 +274,15 @@ describe("Issue Card", () => {
         confirmBtn.should("exist");
         confirmBtn.click();
 
-        cy.wait("@join");
-        // .should(
-        //   "include",
-        //   JSON.stringify({
-        //     familyName: "Pablo",
-        //   })
-        // );
+        cy.wait("@join").should((xhr) => {
+          const body = JSON.parse(xhr.request.body);
+
+          expect(body).to.have.property(
+            "programId",
+            mockSettings.programs[0].programId
+          );
+          expect(body).to.have.property("tierLevel");
+        });
 
         // cy.contains(/remember to scan/i).should("exist");
         // expect(cy.get('[data-test="notice-already-issued"]')).not.to.exist;

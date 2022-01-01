@@ -181,6 +181,7 @@ function App(props) {
             <IssueCard
               onDone={handleBackToMenu}
               programs={localSettings?.programs}
+              location={localSettings?.location}
             />
           ),
           [VIEWS.DENIED]: (

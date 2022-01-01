@@ -23,12 +23,13 @@ enum MATCH_STATUS {
 
 type Props = {
   onDone: () => void;
+  location: any;
   programs?: any;
 };
 
 const Form = withTheme(Theme);
 
-function Index({ onDone, programs }: Props) {
+function Index({ onDone, programs, location }: Props) {
   enum VIEW {
     fillup = "fillup",
     card_select = "card_select",
@@ -49,7 +50,6 @@ function Index({ onDone, programs }: Props) {
   );
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
-  const [cardDetail, setCardDetail] = useState<any>(null);
   const [data, setData] = useState<any>({});
   const [matchData, setMatchData] = useState<any>({});
 
@@ -59,6 +59,7 @@ function Index({ onDone, programs }: Props) {
   const birthDateRef = useRef<any>();
   const mobileRef = useRef<any>();
   const prevViewRef = useRef<VIEW>();
+  const programRef = useRef<any>(null);
 
   useEffect(() => {
     console.log("is port ", isPortrait);
@@ -98,6 +99,8 @@ function Index({ onDone, programs }: Props) {
   useEffect(() => {
     if (programs.length) {
       const [p] = programs;
+      programRef.current = p;
+
       let cardList = [];
       const tiers: [] = p?.tiers;
 
@@ -210,9 +213,13 @@ function Index({ onDone, programs }: Props) {
   const handleConfirmSubmit = () => {
     console.log("selected membership ", selectedMembership);
     const params = Object.assign(Object.create(null, {}), {
-      placeId: payload.placeId,
-      ...data,
+      programId: programRef?.current?.programId,
+      tierLevel: selectedMembership.level,
+      location,
+      profile: { ...data },
     });
+
+    console.log(" join params ", params);
 
     client
       .post(`${host}/membership/join`, {
