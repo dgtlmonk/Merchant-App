@@ -155,7 +155,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it.only("should display 'Card already issued', given customer is not qualified.", () => {
+  it("should display 'Card already issued', given customer is not qualified.", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')
@@ -229,7 +229,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it("should issue a card, given customer is qualified.", () => {
+  it.only("should issue a card, given customer is qualified.", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')

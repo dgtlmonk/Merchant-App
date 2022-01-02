@@ -46,7 +46,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
   const [membershipCards, setMembershipCards] = useState([]);
-  const [membership, setMembership] = useState<any>();
+  const [membership, setMembership] = useState<any>({});
   const [selectedMembership, setSelectedMembership] = useState<any>(null);
   const [matchStatus, setMatchStatus] = useState<MATCH_STATUS>(
     MATCH_STATUS.idle
@@ -191,35 +191,17 @@ function Index({ onDone, programs, location, installationId }: Props) {
             fullName: person.fullName,
           });
 
-          // TODO: refactor mapping
-          // setCardDetail({
-          //   ...card,
-          //   person: {
-          //     fullName: res.person.fullName,
-          //     phones: res.person.phones,
-          //   },
-          // });
-
-          // {card?.mobile
-          //   ? card.mobile
-          //   : `${card?.phones[0]?.countryCode} ${card?.phones[0]?.number}`}
-
           setMatchStatus(MATCH_STATUS.not_qualified);
           setViewState(VIEW.fullfilled);
         }
 
         if (res?.qualify && res?.qualify === "yes") {
-          console.log("qualified");
+          console.log(" --- qualified");
 
           setData({ ...formData });
           setViewState(VIEW.confirm);
         }
       });
-
-    return;
-    // formDataRef
-    setData({ ...formData });
-    setViewState(VIEW.confirm);
   };
 
   const handleConfirmSubmit = () => {
@@ -234,8 +216,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
       profile: { ...data },
     });
 
-    console.log(" join params ", params);
+    asyncJoin(params);
+  };
 
+  function asyncJoin(params: any) {
     client
       .post(`${host}/membership/join`, {
         headers: {
@@ -244,8 +228,13 @@ function Index({ onDone, programs, location, installationId }: Props) {
         body: JSON.stringify(params),
       })
       .then((res) => {
+        //  TODO: catch errors
         console.log("confirm issue response  ", res);
-        setMatchData({
+
+        setMatchStatus(MATCH_STATUS.qualified);
+        setMembership({
+          mobile: data.mobile,
+          phones: null,
           activeMemberships: [
             {
               cardNumber: res.cardNumber,
@@ -254,17 +243,11 @@ function Index({ onDone, programs, location, installationId }: Props) {
             },
           ],
           fullName: displayName,
-          mobile: params.mobile,
         });
 
-        setMatchStatus(MATCH_STATUS.qualified);
-        console.log(matchData);
-        // setViewState(VIEW.fullfilled);
-
-        // TODO: setMatchData(res)
-        // setCardDetail(res);
+        setViewState(VIEW.fullfilled);
       });
-  };
+  }
 
   function getCurrentMembership(programId: string, tierLevel: number) {
     if (!programs || !programs.length) return null;
@@ -394,10 +377,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
       setViewState(VIEW.confirm);
     }
   };
-
-  useEffect(() => {
-    console.log(" match status ", matchStatus);
-  }, [matchStatus]);
 
   return (
     <Fragment>
