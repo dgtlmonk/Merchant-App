@@ -182,6 +182,7 @@ function App(props) {
               onDone={handleBackToMenu}
               programs={localSettings?.programs}
               location={localSettings?.location}
+              installationId={localSettings?.installation?.id}
             />
           ),
           [VIEWS.DENIED]: (

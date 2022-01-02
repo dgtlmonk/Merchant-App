@@ -6,7 +6,9 @@ import { setSettings } from "../../helpers/activation";
 const apiServer = Cypress.env("api_server");
 
 const mockSettings = {
-  installationId: "61cba27f6bbf03002050a2ba",
+  installation: {
+    id: "61cba27f6bbf03002050a2ba",
+  },
   location: {
     id: "5d1b019745828f10b6c5eed1",
     name: "ION Orchard",
@@ -153,7 +155,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it.skip("should display 'Card already issued', given customer is not qualified.", () => {
+  it.only("should display 'Card already issued', given customer is not qualified.", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')
@@ -227,7 +229,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it.only("should issue a card, given customer is qualified.", () => {
+  it("should issue a card, given customer is qualified.", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')
@@ -267,8 +269,8 @@ describe("Issue Card", () => {
         nextBtn = cy.get('[data-test="issue-next-btn"]');
 
         nextBtn.click();
-
         cy.wait("@qualify");
+
         const confirmBtn = cy.get('[data-test="issue-confirm-btn"]');
 
         confirmBtn.should("exist");
@@ -281,6 +283,9 @@ describe("Issue Card", () => {
             "programId",
             mockSettings.programs[0].programId
           );
+
+          expect(body).to.have.property("installation");
+
           expect(body).to.have.property("tierLevel");
         });
 

@@ -11,7 +11,7 @@ import { useMediaQuery } from "react-responsive";
 // import "react-phone-input-2/lib/material.css";
 import { client, qualifySvcUrl } from "../../helpers/api-client";
 import { schema, uiSchema } from "../../types";
-import CardConfirm from "./components/CardIssued";
+import CardIssued from "./components/CardIssued";
 
 enum MATCH_STATUS {
   found = "found",
@@ -19,17 +19,19 @@ enum MATCH_STATUS {
   searching = "searching",
   idle = "idle",
   not_qualified = "not_qualified",
+  qualified = "qualified",
 }
+
+const Form = withTheme(Theme);
 
 type Props = {
   onDone: () => void;
   location: any;
   programs?: any;
+  installationId: string;
 };
 
-const Form = withTheme(Theme);
-
-function Index({ onDone, programs, location }: Props) {
+function Index({ onDone, programs, location, installationId }: Props) {
   enum VIEW {
     fillup = "fillup",
     card_select = "card_select",
@@ -44,6 +46,7 @@ function Index({ onDone, programs, location }: Props) {
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
   const [membershipCards, setMembershipCards] = useState([]);
+  const [membership, setMembership] = useState<any>();
   const [selectedMembership, setSelectedMembership] = useState<any>(null);
   const [matchStatus, setMatchStatus] = useState<MATCH_STATUS>(
     MATCH_STATUS.idle
@@ -158,7 +161,6 @@ function Index({ onDone, programs, location }: Props) {
       profile: {
         ...formData,
       },
-      device: {},
       tierLevel: selectedMembership.level,
       programId: programs[0].programId,
       location: {},
@@ -182,6 +184,13 @@ function Index({ onDone, programs, location }: Props) {
           // const [card] = res.person?.activeMemberships;
           const { person } = res;
 
+          setMembership({
+            mobile: null,
+            phones: person.phones,
+            activeMemberships: person.activeMemberships,
+            fullName: person.fullName,
+          });
+
           // TODO: refactor mapping
           // setCardDetail({
           //   ...card,
@@ -190,7 +199,10 @@ function Index({ onDone, programs, location }: Props) {
           //     phones: res.person.phones,
           //   },
           // });
-          setMatchData(person);
+
+          // {card?.mobile
+          //   ? card.mobile
+          //   : `${card?.phones[0]?.countryCode} ${card?.phones[0]?.number}`}
 
           setMatchStatus(MATCH_STATUS.not_qualified);
           setViewState(VIEW.fullfilled);
@@ -215,6 +227,9 @@ function Index({ onDone, programs, location }: Props) {
     const params = Object.assign(Object.create(null, {}), {
       programId: programRef?.current?.programId,
       tierLevel: selectedMembership.level,
+      installation: {
+        id: installationId,
+      },
       location,
       profile: { ...data },
     });
@@ -230,7 +245,20 @@ function Index({ onDone, programs, location }: Props) {
       })
       .then((res) => {
         console.log("confirm issue response  ", res);
+        setMatchData({
+          activeMemberships: [
+            {
+              cardNumber: res.cardNumber,
+              endTime: res.endTime,
+              startTime: res.startTime,
+            },
+          ],
+          fullName: displayName,
+          mobile: params.mobile,
+        });
 
+        setMatchStatus(MATCH_STATUS.qualified);
+        console.log(matchData);
         // setViewState(VIEW.fullfilled);
 
         // TODO: setMatchData(res)
@@ -632,9 +660,9 @@ function Index({ onDone, programs, location }: Props) {
                 </div>
               ),
               [VIEW.fullfilled]: (
-                <CardConfirm
+                <CardIssued
                   isNotQualified={matchStatus === MATCH_STATUS.not_qualified}
-                  person={matchData}
+                  membership={membership}
                   onDone={handleDone}
                 />
               ),
