@@ -2,14 +2,14 @@ import "@/styles/App.css";
 import { CircularProgress } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import AddSales from "./components/AddSales";
 import AppMenu from "./components/AppMenu";
-import IssueCard from "./components/IssueCard";
-import LoginForm from "./components/LoginForm";
 import { getSettings, setSettings } from "./helpers/activation";
 import { client } from "./helpers/api-client";
 // import "./mirage";
 import { activateParams, VIEWS } from "./types";
+import AddSales from "./views/add-sales";
+import IssueCard from "./views/issue-card";
+import LoginForm from "./views/login";
 
 function App(props) {
   const { pathname, search } = useLocation();
@@ -17,14 +17,18 @@ function App(props) {
 
   const [localSettings, setLocalSettings] = useState<any>(null);
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
-  const [module, _setModule] = useState<any>(null);
   const [isReactivating, setIsReactivating] = useState<boolean>(false);
   const [settingsUrl, setSettingsUrl] = useState<string>();
 
   useEffect(() => {
-    const callbackUrl = new URLSearchParams(search).get("callback");
+    const cb = new URLSearchParams(search).get("callback");
+    const mod = new URLSearchParams(search).get("module");
+    const activateUrl = new URLSearchParams(search).get("a");
 
-    if (pathname === "/activate" && callbackUrl) {
+    const isActivating = (pathname === "/activate" && cb) || activateUrl;
+    const callbackUrl = cb || activateUrl;
+
+    if (isActivating) {
       if (!getSettings()) {
         client
           .post(`${callbackUrl}`, {
@@ -45,6 +49,7 @@ function App(props) {
             setViewState(VIEWS.DENIED);
           });
       } else {
+        // @ts-ignore
         setSettingsUrl(callbackUrl);
         setLocalSettings(getSettings());
         setIsReactivating(true);
@@ -52,33 +57,41 @@ function App(props) {
       return;
     }
 
-    if (getSettings()) {
+    const isActivated = getSettings();
+
+    if (isActivated) {
       setLocalSettings(getSettings());
+
+      if (mod && mod === "1") {
+        console.log("issue card module?");
+
+        setViewState(VIEWS.ISSUE_CARD);
+        return;
+      }
+
       setViewState(VIEWS.LOGIN);
     } else {
-      // no settings
       setViewState(VIEWS.DENIED);
     }
   }, [pathname, search]);
 
-  useEffect(() => {
-    if (module === "0") {
-      setViewState(VIEWS.MENU);
-      return;
-    }
+  // useEffect(() => {
+  //   if (module === "0") {
+  //     setViewState(VIEWS.MENU);
+  //     return;
+  //   }
 
-    if (module === "1") {
-      setViewState(VIEWS.ISSUE_CARD);
-      return;
-    }
+  //   if (module === "1") {
+  //     setViewState(VIEWS.ISSUE_CARD);
+  //     return;
+  //   }
 
-    if (module === "2") {
-      setViewState(VIEWS.ADD_SALES);
-      return;
-    }
+  //   if (module === "2") {
+  //     setViewState(VIEWS.ADD_SALES);
+  //     return;
+  //   }
 
-    // setViewState(VIEWS.LOGIN);
-  }, [module]);
+  // }, [module]);
 
   const handleBackToMenu = () => {
     setViewState(VIEWS.MENU);
@@ -94,7 +107,6 @@ function App(props) {
         body: JSON.stringify(activateParams),
       })
       .then((res) => {
-        console.log("response ", res);
         if (!res.error) {
           setSettings(res);
           console.log("get settings ", getSettings());
@@ -165,7 +177,14 @@ function App(props) {
           ),
           [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
           [VIEWS.ADD_SALES]: <AddSales onDone={handleBackToMenu} />,
-          [VIEWS.ISSUE_CARD]: <IssueCard onDone={handleBackToMenu} />,
+          [VIEWS.ISSUE_CARD]: (
+            <IssueCard
+              onDone={handleBackToMenu}
+              programs={localSettings?.programs}
+              location={localSettings?.location}
+              installationId={localSettings?.installation?.id}
+            />
+          ),
           [VIEWS.DENIED]: (
             <div className="flex flex-col w-full h-full items-center justify-center">
               <div className="p-12">

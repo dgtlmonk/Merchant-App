@@ -2,7 +2,7 @@ import { CircularProgress, InputAdornment, TextField } from "@material-ui/core";
 import { ArrowBack, Close } from "@material-ui/icons";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import { client } from "../helpers/api-client";
+import { client } from "../../helpers/api-client";
 
 // TODO: finalize dynamic params
 const defaultParams = {

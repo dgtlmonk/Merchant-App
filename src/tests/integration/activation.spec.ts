@@ -52,7 +52,7 @@ describe("Activation", () => {
   it("should redirect to login by default, given local settings is detected", () => {
     setSettings({
       location: {
-        id: "5d1b019745828f10b6c5eed1",
+        id: "5d1tb019745828f10b6c5eed1",
         name: "Perkd Dev Store",
       },
     });
@@ -69,7 +69,7 @@ describe("Activation", () => {
       },
     });
 
-    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+    cy.visit("http://localhost:3000/?a=https://someurl.io");
 
     expect(cy.contains(/currently setup/i)).to.exist;
     expect(cy.contains(/dev 123/i)).to.exist;
@@ -94,7 +94,7 @@ describe("Activation", () => {
       },
     }).as("activate");
 
-    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+    cy.visit("http://localhost:3000/?a=https://someurl.io");
     cy.get("#update-settings").click();
     cy.wait("@activate");
 
