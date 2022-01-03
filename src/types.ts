@@ -49,3 +49,9 @@ export const activateParams = {
     env: "prod",
   },
 };
+
+export enum QUALIFY_TYPES {
+  NO = "no",
+  YES = "yes",
+  CONFIRM = "confirm_person",
+}

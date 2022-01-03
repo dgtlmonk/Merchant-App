@@ -2,6 +2,7 @@
 
 import "cypress-localstorage-commands";
 import { setSettings } from "../../helpers/activation";
+import { QUALIFY_TYPES } from "../../types";
 
 const apiServer = Cypress.env("api_server");
 
@@ -107,7 +108,7 @@ describe("Issue Card", () => {
     });
   });
 
-  it.only("should only submit completed form", () => {
+  it("should only submit completed form", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')
@@ -122,7 +123,7 @@ describe("Issue Card", () => {
       })
       .then(() => {
         cy.intercept(`${apiServer}/membership/qualify`, {
-          qualify: "no",
+          qualify: QUALIFY_TYPES.NO,
           person: {
             activeMemberships: [
               {
@@ -170,7 +171,7 @@ describe("Issue Card", () => {
       })
       .then(() => {
         cy.intercept(`${apiServer}/membership/qualify`, {
-          qualify: "no",
+          qualify: QUALIFY_TYPES.NO,
           person: {
             id: "61b1877790dcdc001d5a5253",
             familyName: "Lee",
@@ -243,7 +244,7 @@ describe("Issue Card", () => {
       })
       .then(() => {
         cy.intercept(`${apiServer}/membership/qualify`, {
-          qualify: "yes",
+          qualify: QUALIFY_TYPES.YES,
         }).as("qualify");
 
         cy.intercept(`${apiServer}/membership/join`, {
@@ -281,7 +282,6 @@ describe("Issue Card", () => {
           );
 
           expect(body).to.have.property("installation");
-
           expect(body).to.have.property("tierLevel");
         });
 
@@ -289,8 +289,127 @@ describe("Issue Card", () => {
       });
   });
 
-  it("should prompt confirmation, given existing member is found", () => {
+  it.only("should prompt confirmation, given existing member is found", () => {
     cy.visit("http://localhost:3000/?module=1");
+
+    cy.intercept(`${apiServer}/membership/qualify`, {
+      qualify: QUALIFY_TYPES.CONFIRM,
+      persons: [
+        {
+          id: "61b1877790dcdc001d5a5253",
+          familyName: "Lee",
+          givenName: "Rose",
+          fullName: "Rose Lee",
+          name: {
+            order: "givenfamily",
+            language: null,
+            salutation: null,
+            display: "Rose Lee",
+          },
+          gender: "f",
+          birthDate: {
+            id: "463bddaa852b4d2adb1587f6",
+            name: "birth",
+            date: "1999-09-30T00:00:00.000Z",
+            year: 1999,
+            month: 9,
+            day: 30,
+          },
+          phones: [
+            {
+              id: "7eba0b6210566146ef7e8d02",
+              fullNumber: "6591269162",
+              type: "mobile",
+              countryCode: "65",
+              areaCode: "",
+              number: "91269162",
+              regionCode: "SG",
+              lineType: "mobile",
+              optIn: true,
+              valid: true,
+            },
+          ],
+          emails: [
+            {
+              id: "0919c3af023082f2d7df5cc7",
+              address: "bwygogo2@gmail.com",
+              type: "home",
+              optIn: true,
+              valid: true,
+            },
+          ],
+          activeMemberships: [
+            {
+              membershipId: "61b1cfa19c1223001defdddf",
+              programId: "5d12e1a1e4a5c53fdd6fe352",
+              tierLevel: 1,
+              startTime: "2021-12-09T09:42:56.504Z",
+              endTime: "2022-12-08T15:59:59.000Z",
+              cardNumber: "S0650012050",
+              registeredAt: "2021-12-29T12:39:28.759Z",
+            },
+          ],
+        },
+        // {
+        //   id: "61c81aad63b27700205d8587",
+        //   familyName: "Bao",
+        //   givenName: "Jennifer",
+        //   fullName: "Bao Jennifer",
+        //   name: {
+        //     order: "familygiven",
+        //     salutation: null,
+        //     display: "Bao Wen Yan",
+        //   },
+        //   gender: null,
+        //   phones: [
+        //     {
+        //       id: "dafa82b252496d859e0039f8",
+        //       fullNumber: "6591269162",
+        //       type: "mobile",
+        //       countryCode: "65",
+        //       areaCode: "",
+        //       number: "91269162",
+        //       regionCode: "SG",
+        //       lineType: "mobile",
+        //       optIn: null,
+        //       valid: true,
+        //     },
+        //   ],
+        //   emails: [],
+        //   activeMemberships: [
+        //     {
+        //       membershipId: "61c81aae1ffcad001f6b3c9e",
+        //       programId: "5d12e1a1e4a5c53fdd6fe352",
+        //       tierLevel: 1,
+        //       startTime: "2021-12-26T07:32:59.800Z",
+        //       endTime: "2022-12-25T15:59:59.000Z",
+        //       cardNumber: "S0650012446",
+        //       registeredAt: null,
+        //     },
+        //   ],
+        // },
+      ],
+    }).as("qualify");
+
+    cy.get('[data-test="shop-card"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[0].click();
+
+      expect(cy.contains(/classic/i)).to.exist;
+    });
+
+    // NOTICE: this may break if form schema source is different
+    cy.get("#root_givenName").type("Joel");
+    cy.get("#root_familyName").type("Pablo");
+    cy.get("#root_mobile").type("639194550938");
+
+    let nextBtn = cy.get('[data-test="issue-next-btn"]');
+    nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+    nextBtn.click();
+    cy.wait("@qualify");
   });
 });
 
