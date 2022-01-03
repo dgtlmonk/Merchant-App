@@ -73,7 +73,7 @@ describe("Issue Card", () => {
     cy.viewport("ipad-2");
   });
 
-  it.skip("should display display login, given unauthenticated", () => {
+  it("should display display login, given unauthenticated", () => {
     // TODO: implement
     cy.visit("http://localhost:3000/?mod=1");
     expect(cy.contains(/login/i)).to.exist;
@@ -88,7 +88,7 @@ describe("Issue Card", () => {
     });
   });
 
-  it.skip("should enable user to search for existing member", () => {
+  it("should enable user to search for existing member", () => {
     cy.visit("http://localhost:3000/?module=1");
     // @ts-ignore
     expect(cy.getBySel("person-search")).to.exist;
@@ -101,13 +101,13 @@ describe("Issue Card", () => {
       const c = el.length;
 
       expect(c).to.equals(2);
-      el[1].click();
+      // el[1].click();
 
-      expect(cy.contains(/black/i)).to.exist;
+      // expect(cy.contains(/black/i)).to.exist;
     });
   });
 
-  it("should only submit completed form", () => {
+  it.only("should only submit completed form", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')
@@ -229,7 +229,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it.only("should issue a card, given customer is qualified.", () => {
+  it("should issue a card, given customer is qualified.", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')
@@ -240,7 +240,6 @@ describe("Issue Card", () => {
         el[0].click();
 
         expect(cy.contains(/classic/i)).to.exist;
-        // issue-next-btn
       })
       .then(() => {
         cy.intercept(`${apiServer}/membership/qualify`, {
@@ -256,9 +255,6 @@ describe("Issue Card", () => {
           startTime: "2022-01-01T05:15:28.006Z",
           endTime: "2022-12-31T15:59:59.999Z",
         }).as("join");
-
-        // nextBtn.click();
-        // cy.get('[data-test="title-display-as"]').should("exist");
 
         // NOTICE: this may break if form schema source is different
         cy.get("#root_givenName").type("Joel");
@@ -289,9 +285,12 @@ describe("Issue Card", () => {
           expect(body).to.have.property("tierLevel");
         });
 
-        // cy.contains(/remember to scan/i).should("exist");
-        // expect(cy.get('[data-test="notice-already-issued"]')).not.to.exist;
+        expect(cy.get('[data-test="reminder-notice"]')).to.exist;
       });
+  });
+
+  it("should prompt confirmation, given existing member is found", () => {
+    cy.visit("http://localhost:3000/?module=1");
   });
 });
 

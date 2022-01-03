@@ -98,6 +98,7 @@ const Index = ({ isNotQualified, membership, onDone }: Props) => {
         <div className="flex flex-col justify-center w-full items-center">
           {!isNotQualified ? (
             <div
+              data-test="reminder-notice"
               className={`flex font-bold  px-4 py-2 border  justify-center  rounded-md bg-orange-400 text-white text-sm mt-4 `}
             >
               Remember to scan the barcode on the card

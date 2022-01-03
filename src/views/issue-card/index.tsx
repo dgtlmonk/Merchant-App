@@ -181,17 +181,17 @@ function Index({ onDone, programs, location, installationId }: Props) {
         console.log(" qualify response ", res);
 
         if (res?.qualify && res?.qualify === "no") {
-          // const [card] = res.person?.activeMemberships;
           const { person } = res;
 
+          setMatchStatus(MATCH_STATUS.not_qualified);
+
           setMembership({
-            mobile: null,
-            phones: person.phones,
+            mobile: formData.mobile,
+            phones: null,
             activeMemberships: person.activeMemberships,
-            fullName: person.fullName,
+            fullName: `${formData.givenName} ${formData.familyName} `,
           });
 
-          setMatchStatus(MATCH_STATUS.not_qualified);
           setViewState(VIEW.fullfilled);
         }
 
