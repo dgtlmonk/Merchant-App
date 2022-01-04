@@ -27,11 +27,12 @@ const Index = ({ isNotQualified, membership, onDone }: Props) => {
   const [card, setCardDetail] = useState<any>(null);
 
   useEffect(() => {
-    console.log(" memberhsip ", membership);
     // @ts-ignore
     if (membership?.activeMemberships.length === 1) {
       // @ts-ignore
-      setCardDetail(membership?.activeMemberships[0]);
+      setCardDetail(
+        membership?.activeMemberships[membership.activeMemberships.length - 1]
+      );
       setCardView(CARD_VIEW.single);
     } else {
       setCardView(CARD_VIEW.list);
@@ -52,11 +53,11 @@ const Index = ({ isNotQualified, membership, onDone }: Props) => {
         </div>
 
         {cardView === CARD_VIEW.single ? (
-          <div className="flex mt-4 flex-col  border justify-center align-center  bg-white shadow-md rounded-md">
-            <div className="px-2">
+          <div className="flex mt-4 flex-col  border justify-center items-center  bg-white shadow-md rounded-md p-2">
+            <div className="flex  items-center mb-2" style={{ width: "350px" }}>
               {/* TODO: display card number based on selected membership tier */}
               {/* @ts-ignore */}
-              <Barcode value={`${card?.cardNumber}`} />
+              <Barcode value={`${card?.cardNumber}`} width={3} height={130} />
             </div>
             <div className="flex w-full border-t py-1 justify-between">
               <div className="pl-2">
@@ -126,14 +127,12 @@ const Index = ({ isNotQualified, membership, onDone }: Props) => {
               </span>
             </div>
 
-            {!isNotQualified ? (
-              <button
-                className="p-2 mt-8 border rounded-md w-full bg-blue-400 text-white font-medium"
-                onClick={onDone}
-              >
-                Done
-              </button>
-            ) : null}
+            <button
+              className="p-2 mt-8 border rounded-md w-full bg-blue-400 text-white font-medium"
+              onClick={onDone}
+            >
+              Done
+            </button>
           </div>
         </div>
       </div>

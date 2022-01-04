@@ -1,5 +1,5 @@
 import { CircularProgress, TextField } from "@material-ui/core";
-import { ArrowBack, Loop } from "@material-ui/icons";
+import { ArrowBack } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -10,7 +10,8 @@ import { useMediaQuery } from "react-responsive";
 // import PhoneInput from "react-phone-input-2";
 // import "react-phone-input-2/lib/material.css";
 import { client, qualifySvcUrl } from "../../helpers/api-client";
-import { schema, uiSchema } from "../../types";
+import { QUALIFY_TYPES, schema, uiSchema } from "../../types";
+import CardConfirm from "./components/CardConfirm";
 import CardIssued from "./components/CardIssued";
 
 enum MATCH_STATUS {
@@ -20,8 +21,9 @@ enum MATCH_STATUS {
   idle = "idle",
   not_qualified = "not_qualified",
   qualified = "qualified",
+  confirm = "confirm",
 }
-
+confirm;
 const Form = withTheme(Theme);
 
 type Props = {
@@ -45,7 +47,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
 
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
-  const [membershipCards, setMembershipCards] = useState([]);
+  const [memberTiers, setMemberTiers] = useState([]);
   const [membership, setMembership] = useState<any>({});
   const [selectedMembership, setSelectedMembership] = useState<any>(null);
   const [matchStatus, setMatchStatus] = useState<MATCH_STATUS>(
@@ -104,15 +106,15 @@ function Index({ onDone, programs, location, installationId }: Props) {
       const [p] = programs;
       programRef.current = p;
 
-      let cardList = [];
+      let tierList = [];
       const tiers: [] = p?.tiers;
 
       if (!tiers.length) {
         console.warn("No Cards available!");
       } else {
         // @ts-ignore
-        cardList = tiers.filter((tier) => tier?.card?.canIssue === true);
-        setMembershipCards(cardList);
+        tierList = tiers.filter((tier) => tier?.card?.canIssue === true);
+        setMemberTiers(tierList);
       }
     }
   }, [programs]);
@@ -131,12 +133,8 @@ function Index({ onDone, programs, location, installationId }: Props) {
 
   useEffect(() => {
     if (matchData) {
-      // setDisplayName(`${matchData?.person?.fullName}`);
       setData({
         ...data,
-        // name: {
-        //   ...matchData.person,
-        // },
       });
       formDataRef.current = {
         ...data,
@@ -164,7 +162,12 @@ function Index({ onDone, programs, location, installationId }: Props) {
       tierLevel: selectedMembership.level,
       programId: programs[0].programId,
       location: {},
+      // TODO: get from login
       staff: {},
+      // TODO: where to get?
+      installation: {
+        id: `${installationId}`,
+      },
     };
 
     client
@@ -178,34 +181,45 @@ function Index({ onDone, programs, location, installationId }: Props) {
         },
       })
       .then((res) => {
-        console.log(" qualify response ", res);
+        if (res?.qualify) {
+          if (res?.qualify === QUALIFY_TYPES.NO) {
+            const { person } = res;
 
-        if (res?.qualify && res?.qualify === "no") {
-          const { person } = res;
+            setMembership({
+              mobile: formData.mobile,
+              phones: null,
+              activeMemberships: person.activeMemberships,
+              fullName: `${formData.givenName} ${formData.familyName} `,
+            });
 
-          setMatchStatus(MATCH_STATUS.not_qualified);
+            setMatchStatus(MATCH_STATUS.not_qualified);
+            setViewState(VIEW.fullfilled);
+            return;
+          }
 
-          setMembership({
-            mobile: formData.mobile,
-            phones: null,
-            activeMemberships: person.activeMemberships,
-            fullName: `${formData.givenName} ${formData.familyName} `,
-          });
+          if (res?.qualify === QUALIFY_TYPES.YES) {
+            setData({ ...formData });
+            setViewState(VIEW.confirm);
+            return;
+          }
 
-          setViewState(VIEW.fullfilled);
+          if (res?.qualify === QUALIFY_TYPES.CONFIRM) {
+            setData({ ...formData });
+            setMatchStatus(MATCH_STATUS.confirm);
+            setMatchData(res?.persons);
+            setViewState(VIEW.confirm);
+            return;
+          }
         }
-
-        if (res?.qualify && res?.qualify === "yes") {
-          console.log(" --- qualified");
-
-          setData({ ...formData });
-          setViewState(VIEW.confirm);
-        }
+      })
+      .catch(() => {
+        console.warn(" Qualify check failed to call api");
       });
   };
 
   const handleConfirmSubmit = () => {
     console.log("selected membership ", selectedMembership);
+
     const params = Object.assign(Object.create(null, {}), {
       programId: programRef?.current?.programId,
       tierLevel: selectedMembership.level,
@@ -214,6 +228,11 @@ function Index({ onDone, programs, location, installationId }: Props) {
       },
       location,
       profile: { ...data },
+
+      // TODO:  get this value after staff login
+      staff: {
+        id: "dev123",
+      },
     });
 
     asyncJoin(params);
@@ -223,7 +242,9 @@ function Index({ onDone, programs, location, installationId }: Props) {
     client
       .post(`${host}/membership/join`, {
         headers: {
+          "content-type": "application/json",
           "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
         },
         body: JSON.stringify(params),
       })
@@ -249,25 +270,22 @@ function Index({ onDone, programs, location, installationId }: Props) {
       });
   }
 
-  function getCurrentMembership(programId: string, tierLevel: number) {
+  function getMembershipDetails(programId: string, tierLevel: number) {
     if (!programs || !programs.length) return null;
 
-    const membership = programs.filter(
+    const currentProgram = programs.filter(
       (program) => program.programId === programId
-    );
+    )[0];
 
     // @ts-ignore
-    if (membership.length && membership[0]?.tierList) {
+    if (currentProgram && currentProgram?.tiers) {
       // @ts-ignore
-      const { tierList } = membership[0];
-      console.log(" tier list ", tierList);
+      const { tiers } = currentProgram;
 
-      if (tierList && tierList.length) {
-        const currentMembership = tierList.filter(
+      if (tiers && tiers.length) {
+        const currentMembership = tiers.filter(
           (tier) => tier.level == tierLevel
         )[0];
-
-        console.log(" current membership ?? ", currentMembership);
 
         return currentMembership;
       }
@@ -279,13 +297,13 @@ function Index({ onDone, programs, location, installationId }: Props) {
   }
 
   function renderCardList() {
-    // TODO: react memo ?
-
-    if (!membershipCards || !membershipCards.length) {
-      return <div className={`rounded-md flex w-full`}>No Card Available</div>;
+    if (!memberTiers || !memberTiers.length) {
+      return (
+        <div className={`rounded-md flex w-full`}>No Member Card Available</div>
+      );
     }
 
-    return membershipCards.map((membership: any, i: number) => {
+    return memberTiers.map((membership: any, i: number) => {
       return (
         <div
           className={`rounded-md flex w-full ${i > 0 ? "mt-8" : ""}`}
@@ -331,7 +349,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
         if (res.length) {
           const [program] = res;
 
-          const personMembership = getCurrentMembership(
+          const personMembership = getMembershipDetails(
             program.programId,
             program.tierLevel
           );
@@ -347,8 +365,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
   }
 
   const handleConfirmMatch = (confirm: boolean) => (e) => {
-    console.log("confirm ", confirm);
-
     prevViewRef.current = VIEW.search;
 
     const params = Object.assign(Object.create(null, {}), {
@@ -358,8 +374,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
 
     // revoke
     if (!confirm) {
-      // revoke
-
       client
         .post(`${host}/cards/revoke`, {
           headers: {
@@ -471,13 +485,22 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       </span>
                     </div>
 
-                    <div className="w-4/6 mt-4">
+                    <div className="w-96 mt-4">
                       <img src={selectedMembership?.digitalCard?.image.front} />
                     </div>
                     <div className="w-4/6 flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4 ">
-                      <div className="flex px-2 w-full h-full justify-center">
+                      {/* <div className="flex px-2 w-full h-full justify-center"> */}
+
+                      <div
+                        className="flex  items-center mb-4"
+                        style={{ width: "350px" }}
+                      >
                         {/* @ts-ignore */}
-                        <Barcode value={`${matchData?.cardNumber || "..."}`} />
+                        <Barcode
+                          value={`${matchData?.cardNumber || "..."}`}
+                          width={3}
+                          height={130}
+                        />
                       </div>
                     </div>
 
@@ -557,7 +580,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                 <Fragment>
                   <div className="flex flex-col mt-8">
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
-                      <div className="w-4/6">
+                      <div className="w-96">
                         <img src={selectedMembership?.card?.image?.original} />
                       </div>
 
@@ -585,58 +608,27 @@ function Index({ onDone, programs, location, installationId }: Props) {
                 </Fragment>
               ),
               [VIEW.confirm]: (
-                <div className="flex flex-col w-full max-w-md items-center mt-8">
-                  <div className="w-2/3">
-                    <img src={selectedMembership?.card?.image?.original} />
-                  </div>
-
-                  <div className="mt-6">
-                    <span
-                      data-test="title-display-as"
-                      className={`font-normal text-xs text-slate-500 ${
-                        prevViewRef.current === VIEW.search
-                          ? "hidden"
-                          : "visible"
-                      }`}
-                    >
-                      display as
-                    </span>
-
-                    <div className="flex flex-row items-center -mt-4">
-                      <div className="-mt-1 text-2xl ">{displayName}</div>
-                      <button
-                        className={`h-16 w-16 ${
-                          prevViewRef.current === VIEW.search
-                            ? "hidden"
-                            : "visible"
-                        }`}
-                        onClick={() => setToggleDisplayName(!toggleDisplayName)}
-                      >
-                        <Loop className="opacity-80 text-blue-500" />
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex w-full justify-center items-center p-4">
-                      <TextField label="mobile" value={data?.mobile} disabled />
-                    </div>
-                  </div>
-                  <div className="flex flex-row w-full items-center justify-center mt-8">
-                    <button
-                      className="p-2 px-4 border rounded-md  bg-slate-400 text-white mr-4"
-                      onClick={handleDone}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      data-test="issue-confirm-btn"
-                      className="p-2 px-4 border rounded-md  bg-blue-400 text-white"
-                      onClick={handleConfirmSubmit}
-                    >
-                      Confirm
-                    </button>
-                  </div>
-                </div>
+                <CardConfirm
+                  getMembershipDetails={getMembershipDetails}
+                  matches={matchData}
+                  displayName={displayName}
+                  onDone={handleDone}
+                  onToggleDisplayName={() =>
+                    setToggleDisplayName(!toggleDisplayName)
+                  }
+                  cardImg={selectedMembership?.card?.image?.original}
+                  mobile={data?.mobile}
+                  onConfirm={handleConfirmSubmit}
+                  onMatch={(data) => {
+                    setMatchStatus(MATCH_STATUS.not_qualified);
+                    setMembership(data);
+                    setViewState(VIEW.fullfilled);
+                  }}
+                  onJoin={handleConfirmSubmit}
+                  isToggleDisplayNameDisabled={
+                    prevViewRef.current === VIEW.search
+                  }
+                />
               ),
               [VIEW.fullfilled]: (
                 <CardIssued

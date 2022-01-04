@@ -2,6 +2,7 @@
 
 import "cypress-localstorage-commands";
 import { setSettings } from "../../helpers/activation";
+import { QUALIFY_TYPES } from "../../types";
 
 const apiServer = Cypress.env("api_server");
 
@@ -73,7 +74,7 @@ describe("Issue Card", () => {
     cy.viewport("ipad-2");
   });
 
-  it("should display display login, given unauthenticated", () => {
+  it("should display login, given unauthenticated", () => {
     // TODO: implement
     cy.visit("http://localhost:3000/?mod=1");
     expect(cy.contains(/login/i)).to.exist;
@@ -107,7 +108,7 @@ describe("Issue Card", () => {
     });
   });
 
-  it.only("should only submit completed form", () => {
+  it("should only submit completed form", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')
@@ -122,7 +123,7 @@ describe("Issue Card", () => {
       })
       .then(() => {
         cy.intercept(`${apiServer}/membership/qualify`, {
-          qualify: "no",
+          qualify: QUALIFY_TYPES.NO,
           person: {
             activeMemberships: [
               {
@@ -170,44 +171,7 @@ describe("Issue Card", () => {
       })
       .then(() => {
         cy.intercept(`${apiServer}/membership/qualify`, {
-          qualify: "no",
-          person: {
-            id: "61b1877790dcdc001d5a5253",
-            familyName: "Lee",
-            givenName: "Rose",
-            fullName: "Rose Lee",
-            name: {
-              order: "givenfamily",
-              language: null,
-              salutation: null,
-              display: "Rose Lee",
-            },
-            phones: [
-              {
-                id: "7eba0b6210566146ef7e8d02",
-                fullNumber: "6591269162",
-                type: "mobile",
-                countryCode: "65",
-                areaCode: "",
-                number: "91269162",
-                regionCode: "SG",
-                lineType: "mobile",
-                optIn: true,
-                valid: true,
-              },
-            ],
-            activeMemberships: [
-              {
-                membershipId: "61b1cfa19c1223001defdddf",
-                programId: "5d12e1a1e4a5c53fdd6fe352",
-                tierLevel: 1,
-                startTime: "2021-12-09T09:42:56.504Z",
-                endTime: "2022-12-08T15:59:59.000Z",
-                cardNumber: "S0650012050",
-                registeredAt: "2021-12-29T12:39:28.759Z",
-              },
-            ],
-          },
+          fixture: "qualify-confirm-no",
         }).as("qualify");
 
         let nextBtn = cy.get('[data-test="issue-next-btn"]');
@@ -243,7 +207,7 @@ describe("Issue Card", () => {
       })
       .then(() => {
         cy.intercept(`${apiServer}/membership/qualify`, {
-          qualify: "yes",
+          qualify: QUALIFY_TYPES.YES,
         }).as("qualify");
 
         cy.intercept(`${apiServer}/membership/join`, {
@@ -251,7 +215,7 @@ describe("Issue Card", () => {
           programId: "5d12e1a1e4a5c53fdd6fe352",
           tierLevel: 1,
           membershipId: "61cfe370bb1ec1001efb555c",
-          cardNumber: "S0651022525",
+          cardNumber: "S065102255",
           startTime: "2022-01-01T05:15:28.006Z",
           endTime: "2022-12-31T15:59:59.999Z",
         }).as("join");
@@ -272,25 +236,234 @@ describe("Issue Card", () => {
         confirmBtn.should("exist");
         confirmBtn.click();
 
-        cy.wait("@join").should((xhr) => {
-          const body = JSON.parse(xhr.request.body);
-
-          expect(body).to.have.property(
-            "programId",
-            mockSettings.programs[0].programId
-          );
-
-          expect(body).to.have.property("installation");
-
-          expect(body).to.have.property("tierLevel");
-        });
-
+        cy.wait("@join");
         expect(cy.get('[data-test="reminder-notice"]')).to.exist;
+
+        expect(cy.contains(/S065102255/i)).to.exist;
       });
   });
 
   it("should prompt confirmation, given existing member is found", () => {
     cy.visit("http://localhost:3000/?module=1");
+
+    cy.intercept(`${apiServer}/membership/qualify`, {
+      fixture: "qualify-confirm-single",
+    }).as("qualify");
+
+    cy.intercept(`${apiServer}/membership/join`, {
+      personId: "61cdac161dabe90020b37a69",
+      programId: "5d12e1a1e4a5c53fdd6fe352",
+      tierLevel: 1,
+      membershipId: "61cdac16bb1ec1001efb5556",
+      cardNumber: "S0651022524",
+      startTime: "2021-12-30T12:54:46.164Z",
+      endTime: "2022-12-29T15:59:59.999Z",
+    }).as("join");
+
+    cy.get('[data-test="shop-card"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[0].click();
+
+      expect(cy.contains(/classic/i)).to.exist;
+    });
+
+    // NOTICE: this may break if form schema source is different
+    cy.get("#root_givenName").type("Joel");
+    cy.get("#root_familyName").type("Pablo");
+    cy.get("#root_mobile").type("639194550938");
+
+    const nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+    nextBtn.click();
+    cy.wait("@qualify");
+    expect(cy.contains(/same person/i)).to.exist;
+
+    const confirmBtn = cy.get('[data-test="confirm-person-btn"]');
+    confirmBtn.click();
+    expect(cy.contains(/card already/i)).to.exist;
+  });
+
+  it("should continue to join, given search member was found but not the same person", () => {
+    cy.visit("http://localhost:3000/?module=1");
+
+    cy.intercept(`${apiServer}/membership/qualify`, {
+      fixture: "qualify-confirm-single",
+    }).as("qualify");
+
+    cy.intercept(`${apiServer}/membership/join`, {
+      personId: "61cdac161dabe90020b37a69",
+      programId: "5d12e1a1e4a5c53fdd6fe352",
+      tierLevel: 1,
+      membershipId: "61cdac16bb1ec1001efb5556",
+      cardNumber: "S0651022524",
+      startTime: "2021-12-30T12:54:46.164Z",
+      endTime: "2022-12-29T15:59:59.999Z",
+    }).as("join");
+
+    cy.get('[data-test="shop-card"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[0].click();
+
+      expect(cy.contains(/classic/i)).to.exist;
+    });
+
+    // NOTICE: this may break if form schema source is different
+    cy.get("#root_givenName").type("Joel");
+    cy.get("#root_familyName").type("Pablo");
+    cy.get("#root_mobile").type("639194550938");
+
+    let nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+    nextBtn.click();
+    cy.wait("@qualify");
+    expect(cy.contains(/same person/i)).to.exist;
+
+    let noBtn = cy.get('[data-test="confirm-false-btn"]');
+    noBtn.click();
+    cy.wait("@join");
+
+    expect(cy.contains(/S0651022524/i)).to.exist;
+  });
+
+  it("should list user membership, given multiple matched membership result", () => {
+    cy.visit("http://localhost:3000/?module=1");
+
+    cy.intercept(`${apiServer}/membership/qualify`, {
+      fixture: "qualify-confirm-multiple",
+    }).as("qualify");
+
+    cy.intercept(`${apiServer}/membership/join`, {
+      personId: "61cdac161dabe90020b37a69",
+      programId: "5d12e1a1e4a5c53fdd6fe352",
+      tierLevel: 1,
+      membershipId: "61cdac16bb1ec1001efb5556",
+      cardNumber: "S0651022524",
+      startTime: "2021-12-30T12:54:46.164Z",
+      endTime: "2022-12-29T15:59:59.999Z",
+    }).as("join");
+
+    cy.get('[data-test="shop-card"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[0].click();
+
+      expect(cy.contains(/classic/i)).to.exist;
+    });
+
+    // NOTICE: this may break if form schema source is different
+    cy.get("#root_givenName").type("Joel");
+    cy.get("#root_familyName").type("Pablo");
+    cy.get("#root_mobile").type("639194550938");
+
+    let nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+    nextBtn.click();
+    cy.wait("@qualify");
+
+    cy.get('[data-test="match-person"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+    });
+  });
+
+  it("should join a member, given 'No Match' is selected from search result result", () => {
+    cy.visit("http://localhost:3000/?module=1");
+
+    cy.intercept(`${apiServer}/membership/qualify`, {
+      fixture: "qualify-confirm-multiple",
+    }).as("qualify");
+
+    cy.intercept(`${apiServer}/membership/join`, {
+      personId: "61cdac161dabe90020b37a69",
+      programId: "5d12e1a1e4a5c53fdd6fe352",
+      tierLevel: 1,
+      membershipId: "61cdac16bb1ec1001efb5556",
+      cardNumber: "S0651022524",
+      startTime: "2021-12-30T12:54:46.164Z",
+      endTime: "2022-12-29T15:59:59.999Z",
+    }).as("join");
+
+    cy.get('[data-test="shop-card"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[0].click();
+
+      expect(cy.contains(/classic/i)).to.exist;
+    });
+
+    // NOTICE: this may break if form schema source is different
+    cy.get("#root_givenName").type("Joel");
+    cy.get("#root_familyName").type("Pablo");
+    cy.get("#root_mobile").type("639194550938");
+
+    let nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+    nextBtn.click();
+    cy.wait("@qualify");
+
+    cy.get('[data-test="match-person"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+    });
+
+    let noMatchBtn = cy.get('[data-test="no-match-btn"]');
+    expect(noMatchBtn).to.exist;
+    noMatchBtn.click();
+
+    cy.wait("@join");
+    expect(cy.contains(/S0651022524/i)).to.exist;
+  });
+
+  it("should show membership detail, give a search result item was selected", () => {
+    cy.visit("http://localhost:3000/?module=1");
+
+    cy.intercept(`${apiServer}/membership/qualify`, {
+      fixture: "qualify-confirm-multiple",
+    }).as("qualify");
+
+    cy.intercept(`${apiServer}/membership/join`, {
+      personId: "61cdac161dabe90020b37a69",
+      programId: "5d12e1a1e4a5c53fdd6fe352",
+      tierLevel: 1,
+      membershipId: "61cdac16bb1ec1001efb5556",
+      cardNumber: "S0651022524",
+      startTime: "2021-12-30T12:54:46.164Z",
+      endTime: "2022-12-29T15:59:59.999Z",
+    }).as("join");
+
+    cy.get('[data-test="shop-card"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[0].click();
+
+      expect(cy.contains(/classic/i)).to.exist;
+    });
+
+    cy.get("#root_givenName").type("Joel");
+    cy.get("#root_familyName").type("Pablo");
+    cy.get("#root_mobile").type("639194550938");
+
+    let nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+    nextBtn.click();
+    cy.wait("@qualify");
+
+    cy.get('[data-test="match-person"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[1].click();
+      expect(cy.contains(/bao jennifer/i)).to.exist;
+    });
   });
 });
 
