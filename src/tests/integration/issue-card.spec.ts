@@ -74,7 +74,7 @@ describe("Issue Card", () => {
     cy.viewport("ipad-2");
   });
 
-  it.skip("should display login, given unauthenticated", () => {
+  it("should display login, given unauthenticated", () => {
     // TODO: implement
     cy.visit("http://localhost:3000/?mod=1");
     expect(cy.contains(/login/i)).to.exist;
@@ -422,7 +422,7 @@ describe("Issue Card", () => {
     expect(cy.contains(/S0651022524/i)).to.exist;
   });
 
-  it.only("should show membership detail, give a search result item was selected", () => {
+  it("should show membership detail, give a search result item was selected", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.intercept(`${apiServer}/membership/qualify`, {

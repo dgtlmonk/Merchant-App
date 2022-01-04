@@ -211,7 +211,7 @@ const Index = ({
         ) : (
           <Fragment>
             <div className="mt-8">
-              <img src={cardImg} width="350" />
+              <img src={cardImg} className="w-96" />
             </div>
 
             <div className="mt-6">
