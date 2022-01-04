@@ -9,6 +9,7 @@ type Props = {
   onToggleDisplayName: () => void;
   onDone: () => void;
   onJoin: () => void;
+  onMatch: (data: any) => void;
   onConfirm: () => void;
   isToggleDisplayNameDisabled: boolean;
   matches?: any[];
@@ -22,6 +23,7 @@ const Index = ({
   onToggleDisplayName,
   onDone,
   onConfirm,
+  onMatch,
   isToggleDisplayNameDisabled,
   matches,
   getMembershipDetails,
@@ -29,10 +31,10 @@ const Index = ({
 }: Props) => {
   const [previewDetails, setPreviewDetails] = useState<any>(null);
   const [isListView, setIsListView] = useState(false);
-
-  useEffect(() => {
-    console.log("match preview details ", previewDetails);
-  }, [previewDetails]);
+  const [currentMatch, setCurrentMatch] = useState<any>(null);
+  // useEffect(() => {
+  //   console.log("match preview details ", previewDetails);
+  // }, [previewDetails]);
 
   useEffect(() => {
     if (matches && matches?.length) {
@@ -47,7 +49,9 @@ const Index = ({
 
     if (matches && matches.length > 1) {
       setIsListView(true);
-      console.log(" matches ", matches);
+    } else {
+      // @ts-ignore
+      setCurrentMatch(matches[0]);
     }
   }, [matches]);
 
@@ -62,7 +66,10 @@ const Index = ({
 
   const MatchItem = ({ person }: MatchItemProps) => {
     return (
-      <div className="flex flex-row w-full justify-between p-8 border-b">
+      <div
+        className="flex flex-row w-full justify-between p-8 border-b"
+        data-test="match-person"
+      >
         <div className="flex flex-col w-full">
           <h1 className="text-2xl font-bold">{person?.fullName}</h1>
           <div className="flex flex-row items-center">
@@ -134,7 +141,15 @@ const Index = ({
                 <div className="flex flex-col items-center">
                   <h2>Is this the same person?</h2>
                   <div className="flex flex-row w-full p-2 justify-around ">
-                    <button className="px-4 py-2 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium">
+                    <button
+                      data-test="confirm-person-btn"
+                      className="px-4 py-2 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                      onClick={() => {
+                        if (matches.length == 1) {
+                          onMatch(currentMatch);
+                        }
+                      }}
+                    >
                       Yes
                     </button>
 
@@ -149,37 +164,31 @@ const Index = ({
                 </div>
               </Fragment>
             ) : (
-              <div className="flex flex-row w-full justify-between">
-                <div className="flex">select a matching memeber</div>
-                <div>No Match</div>
+              <div className="flex flex-row w-full justify-between items-center">
+                <div className="flex flex-col">
+                  <div className="flex font-semibold text-xl">
+                    Select a matching member
+                  </div>
+                  <span className="text-gray-600">
+                    or 'No Match' if none matches
+                  </span>
+                </div>
+                <div>
+                  <button
+                    data-test="no-match-btn"
+                    className="px-4 py-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                    onClick={onConfirm}
+                  >
+                    No Match
+                  </button>
+                </div>
               </div>
             )}
           </div>
         ) : null}
 
         {isListView ? (
-          <div className="flex flex-col w-full justify-center mt-8">
-            {/* <div className="flex flex-row w-full justify-between p-8 border-b">
-              <div className="flex flex-col w-full">
-                <h1 className="text-2xl font-bold">Rose Lee</h1>
-                <div className="flex flex-row items-center">
-                  <PhoneOutlined className="opacity-50 mr-2 text-blue-400" />{" "}
-                  6591269162
-                </div>
-                <div className="flex flex-row items-center">
-                  <EmailOutlined className="opacity-50 mr-2 text-blue-400" />
-                  bwygogo2@gmail.com
-                </div>
-              </div>
-              <div className="relative rounded-lg overflow-hidden w-48">
-                <div className="rounded-sm">
-                  <img
-                    className="object-fill"
-                    src="https://s3-ap-southeast-1.amazonaws.com/s3staging.waveo.com/card/dbc322d3-07bf-4200-87ce-6a6ef557517a-front.jpg"
-                  />
-                </div>
-              </div>
-            </div> */}
+          <div className="flex flex-col w-full justify-center">
             {matches &&
               matches?.map((match) => (
                 <MatchItem

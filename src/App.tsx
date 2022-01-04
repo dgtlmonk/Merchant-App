@@ -63,8 +63,6 @@ function App(props) {
       setLocalSettings(getSettings());
 
       if (mod && mod === "1") {
-        console.log("issue card module?");
-
         setViewState(VIEWS.ISSUE_CARD);
         return;
       }
@@ -74,24 +72,6 @@ function App(props) {
       setViewState(VIEWS.DENIED);
     }
   }, [pathname, search]);
-
-  // useEffect(() => {
-  //   if (module === "0") {
-  //     setViewState(VIEWS.MENU);
-  //     return;
-  //   }
-
-  //   if (module === "1") {
-  //     setViewState(VIEWS.ISSUE_CARD);
-  //     return;
-  //   }
-
-  //   if (module === "2") {
-  //     setViewState(VIEWS.ADD_SALES);
-  //     return;
-  //   }
-
-  // }, [module]);
 
   const handleBackToMenu = () => {
     setViewState(VIEWS.MENU);
@@ -109,7 +89,6 @@ function App(props) {
       .then((res) => {
         if (!res.error) {
           setSettings(res);
-          console.log("get settings ", getSettings());
           setLocalSettings(res);
           setViewState(VIEWS.LOGIN);
 

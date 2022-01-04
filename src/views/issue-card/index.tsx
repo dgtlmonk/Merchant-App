@@ -170,8 +170,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
       },
     };
 
-    console.log(" qualify params ", params);
-
     client
       .post(`${qualifySvcUrl}`, {
         body: JSON.stringify(params),
@@ -241,7 +239,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
   };
 
   function asyncJoin(params: any) {
-    console.log(" joining ", params);
     client
       .post(`${host}/membership/join`, {
         headers: {
@@ -622,6 +619,13 @@ function Index({ onDone, programs, location, installationId }: Props) {
                   cardImg={selectedMembership?.card?.image?.original}
                   mobile={data?.mobile}
                   onConfirm={handleConfirmSubmit}
+                  onMatch={() => {
+                    console.log("on match");
+                    setMatchStatus(MATCH_STATUS.not_qualified);
+                    console.log(" membership ", membership);
+                    setMembership(matchData[0]);
+                    setViewState(VIEW.fullfilled);
+                  }}
                   onJoin={handleConfirmSubmit}
                   isToggleDisplayNameDisabled={
                     prevViewRef.current === VIEW.search

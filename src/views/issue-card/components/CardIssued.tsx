@@ -27,7 +27,6 @@ const Index = ({ isNotQualified, membership, onDone }: Props) => {
   const [card, setCardDetail] = useState<any>(null);
 
   useEffect(() => {
-    console.log(" memberhsip ", membership);
     // @ts-ignore
     if (membership?.activeMemberships.length === 1) {
       // @ts-ignore
