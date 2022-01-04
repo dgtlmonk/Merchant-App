@@ -619,11 +619,9 @@ function Index({ onDone, programs, location, installationId }: Props) {
                   cardImg={selectedMembership?.card?.image?.original}
                   mobile={data?.mobile}
                   onConfirm={handleConfirmSubmit}
-                  onMatch={() => {
-                    console.log("on match");
+                  onMatch={(data) => {
                     setMatchStatus(MATCH_STATUS.not_qualified);
-                    console.log(" membership ", membership);
-                    setMembership(matchData[0]);
+                    setMembership(data);
                     setViewState(VIEW.fullfilled);
                   }}
                   onJoin={handleConfirmSubmit}

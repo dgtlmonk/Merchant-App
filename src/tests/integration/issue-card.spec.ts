@@ -74,7 +74,7 @@ describe("Issue Card", () => {
     cy.viewport("ipad-2");
   });
 
-  it("should display display login, given unauthenticated", () => {
+  it.skip("should display login, given unauthenticated", () => {
     // TODO: implement
     cy.visit("http://localhost:3000/?mod=1");
     expect(cy.contains(/login/i)).to.exist;
@@ -156,7 +156,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it.skip("should display 'Card already issued', given customer is not qualified.", () => {
+  it("should display 'Card already issued', given customer is not qualified.", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')
@@ -243,7 +243,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it.only("should prompt confirmation, given existing member is found", () => {
+  it("should prompt confirmation, given existing member is found", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.intercept(`${apiServer}/membership/qualify`, {
@@ -288,7 +288,9 @@ describe("Issue Card", () => {
   it("should continue to join, given search member was found but not the same person", () => {
     cy.visit("http://localhost:3000/?module=1");
 
-    cy.intercept(`${apiServer}/membership/qualify`).as("qualify");
+    cy.intercept(`${apiServer}/membership/qualify`, {
+      fixture: "qualify-confirm-single",
+    }).as("qualify");
 
     cy.intercept(`${apiServer}/membership/join`, {
       personId: "61cdac161dabe90020b37a69",
@@ -327,7 +329,50 @@ describe("Issue Card", () => {
     expect(cy.contains(/S0651022524/i)).to.exist;
   });
 
-  it("should list memberships, given matched member has multiple membership", () => {
+  it("should list user membership, given multiple matched membership result", () => {
+    cy.visit("http://localhost:3000/?module=1");
+
+    cy.intercept(`${apiServer}/membership/qualify`, {
+      fixture: "qualify-confirm-multiple",
+    }).as("qualify");
+
+    cy.intercept(`${apiServer}/membership/join`, {
+      personId: "61cdac161dabe90020b37a69",
+      programId: "5d12e1a1e4a5c53fdd6fe352",
+      tierLevel: 1,
+      membershipId: "61cdac16bb1ec1001efb5556",
+      cardNumber: "S0651022524",
+      startTime: "2021-12-30T12:54:46.164Z",
+      endTime: "2022-12-29T15:59:59.999Z",
+    }).as("join");
+
+    cy.get('[data-test="shop-card"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[0].click();
+
+      expect(cy.contains(/classic/i)).to.exist;
+    });
+
+    // NOTICE: this may break if form schema source is different
+    cy.get("#root_givenName").type("Joel");
+    cy.get("#root_familyName").type("Pablo");
+    cy.get("#root_mobile").type("639194550938");
+
+    let nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+    nextBtn.click();
+    cy.wait("@qualify");
+
+    cy.get('[data-test="match-person"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+    });
+  });
+
+  it("should join a member, given 'No Match' is selected from search result result", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.intercept(`${apiServer}/membership/qualify`, {
@@ -369,16 +414,56 @@ describe("Issue Card", () => {
       expect(c).to.equals(2);
     });
 
-    // let noMatchBtn = cy.get('[data-test="no-match-btn"]');
-    // expect(noMatchBtn).to.exist;
+    let noMatchBtn = cy.get('[data-test="no-match-btn"]');
+    expect(noMatchBtn).to.exist;
+    noMatchBtn.click();
 
-    // expect(cy.contains(/same person/i)).to.exist;
+    cy.wait("@join");
+    expect(cy.contains(/S0651022524/i)).to.exist;
+  });
 
-    // let noBtn = cy.get('[data-test="confirm-false-btn"]');
-    // noBtn.click();
-    // cy.wait("@join");
+  it.only("should show membership detail, give a search result item was selected", () => {
+    cy.visit("http://localhost:3000/?module=1");
 
-    // expect(cy.contains(/S0651022524/i)).to.exist;
+    cy.intercept(`${apiServer}/membership/qualify`, {
+      fixture: "qualify-confirm-multiple",
+    }).as("qualify");
+
+    cy.intercept(`${apiServer}/membership/join`, {
+      personId: "61cdac161dabe90020b37a69",
+      programId: "5d12e1a1e4a5c53fdd6fe352",
+      tierLevel: 1,
+      membershipId: "61cdac16bb1ec1001efb5556",
+      cardNumber: "S0651022524",
+      startTime: "2021-12-30T12:54:46.164Z",
+      endTime: "2022-12-29T15:59:59.999Z",
+    }).as("join");
+
+    cy.get('[data-test="shop-card"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[0].click();
+
+      expect(cy.contains(/classic/i)).to.exist;
+    });
+
+    cy.get("#root_givenName").type("Joel");
+    cy.get("#root_familyName").type("Pablo");
+    cy.get("#root_mobile").type("639194550938");
+
+    let nextBtn = cy.get('[data-test="issue-next-btn"]');
+
+    nextBtn.click();
+    cy.wait("@qualify");
+
+    cy.get('[data-test="match-person"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[1].click();
+      expect(cy.contains(/bao jennifer/i)).to.exist;
+    });
   });
 });
 

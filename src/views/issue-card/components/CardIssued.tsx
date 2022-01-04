@@ -127,14 +127,12 @@ const Index = ({ isNotQualified, membership, onDone }: Props) => {
               </span>
             </div>
 
-            {!isNotQualified ? (
-              <button
-                className="p-2 mt-8 border rounded-md w-full bg-blue-400 text-white font-medium"
-                onClick={onDone}
-              >
-                Done
-              </button>
-            ) : null}
+            <button
+              className="p-2 mt-8 border rounded-md w-full bg-blue-400 text-white font-medium"
+              onClick={onDone}
+            >
+              Done
+            </button>
           </div>
         </div>
       </div>

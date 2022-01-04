@@ -56,6 +56,7 @@ const Index = ({
   }, [matches]);
 
   type MatchItemProps = {
+    onSelectDataIndex: () => void;
     person: {
       fullName: string;
       phones: any[];
@@ -64,11 +65,12 @@ const Index = ({
     };
   };
 
-  const MatchItem = ({ person }: MatchItemProps) => {
+  const MatchItem = ({ onSelectDataIndex, person }: MatchItemProps) => {
     return (
       <div
         className="flex flex-row w-full justify-between p-8 border-b"
         data-test="match-person"
+        onClick={onSelectDataIndex}
       >
         <div className="flex flex-col w-full">
           <h1 className="text-2xl font-bold">{person?.fullName}</h1>
@@ -190,8 +192,12 @@ const Index = ({
         {isListView ? (
           <div className="flex flex-col w-full justify-center">
             {matches &&
-              matches?.map((match) => (
+              matches?.map((match, i) => (
                 <MatchItem
+                  onSelectDataIndex={() => {
+                    setCurrentMatch(matches[i]);
+                    onMatch(matches[i]);
+                  }}
                   key={match.id}
                   person={{
                     fullName: match.fullName,
