@@ -162,8 +162,15 @@ function Index({ onDone, programs, location, installationId }: Props) {
       tierLevel: selectedMembership.level,
       programId: programs[0].programId,
       location: {},
+      // TODO: get from login
       staff: {},
+      // TODO: where to get?
+      installation: {
+        id: `${installationId}`,
+      },
     };
+
+    console.log(" qualify params ", params);
 
     client
       .post(`${qualifySvcUrl}`, {
@@ -193,15 +200,12 @@ function Index({ onDone, programs, location, installationId }: Props) {
           }
 
           if (res?.qualify === QUALIFY_TYPES.YES) {
-            console.log(" --- qualified");
-
             setData({ ...formData });
             setViewState(VIEW.confirm);
             return;
           }
 
           if (res?.qualify === QUALIFY_TYPES.CONFIRM) {
-            console.log(" --- qualify confirm ", res);
             setData({ ...formData });
             setMatchStatus(MATCH_STATUS.confirm);
             setMatchData(res?.persons);
@@ -217,6 +221,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
 
   const handleConfirmSubmit = () => {
     console.log("selected membership ", selectedMembership);
+
     const params = Object.assign(Object.create(null, {}), {
       programId: programRef?.current?.programId,
       tierLevel: selectedMembership.level,
@@ -225,16 +230,24 @@ function Index({ onDone, programs, location, installationId }: Props) {
       },
       location,
       profile: { ...data },
+
+      // TODO:  get this value after staff login
+      staff: {
+        id: "dev123",
+      },
     });
 
     asyncJoin(params);
   };
 
   function asyncJoin(params: any) {
+    console.log(" joining ", params);
     client
       .post(`${host}/membership/join`, {
         headers: {
+          "content-type": "application/json",
           "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
         },
         body: JSON.stringify(params),
       })
@@ -260,25 +273,22 @@ function Index({ onDone, programs, location, installationId }: Props) {
       });
   }
 
-  function getCurrentMembership(programId: string, tierLevel: number) {
+  function getMembershipDetails(programId: string, tierLevel: number) {
     if (!programs || !programs.length) return null;
 
-    const membership = programs.filter(
+    const currentProgram = programs.filter(
       (program) => program.programId === programId
-    );
+    )[0];
 
     // @ts-ignore
-    if (membership.length && membership[0]?.tierList) {
+    if (currentProgram && currentProgram?.tiers) {
       // @ts-ignore
-      const { tierList } = membership[0];
-      console.log(" tier list ", tierList);
+      const { tiers } = currentProgram;
 
-      if (tierList && tierList.length) {
-        const currentMembership = tierList.filter(
+      if (tiers && tiers.length) {
+        const currentMembership = tiers.filter(
           (tier) => tier.level == tierLevel
         )[0];
-
-        console.log(" current membership ?? ", currentMembership);
 
         return currentMembership;
       }
@@ -291,7 +301,9 @@ function Index({ onDone, programs, location, installationId }: Props) {
 
   function renderCardList() {
     if (!memberTiers || !memberTiers.length) {
-      return <div className={`rounded-md flex w-full`}>No Card Available</div>;
+      return (
+        <div className={`rounded-md flex w-full`}>No Member Card Available</div>
+      );
     }
 
     return memberTiers.map((membership: any, i: number) => {
@@ -340,7 +352,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
         if (res.length) {
           const [program] = res;
 
-          const personMembership = getCurrentMembership(
+          const personMembership = getMembershipDetails(
             program.programId,
             program.tierLevel
           );
@@ -480,9 +492,18 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       <img src={selectedMembership?.digitalCard?.image.front} />
                     </div>
                     <div className="w-4/6 flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4 ">
-                      <div className="flex px-2 w-full h-full justify-center">
+                      {/* <div className="flex px-2 w-full h-full justify-center"> */}
+
+                      <div
+                        className="flex  items-center mb-4"
+                        style={{ width: "350px" }}
+                      >
                         {/* @ts-ignore */}
-                        <Barcode value={`${matchData?.cardNumber || "..."}`} />
+                        <Barcode
+                          value={`${matchData?.cardNumber || "..."}`}
+                          width={3}
+                          height={130}
+                        />
                       </div>
                     </div>
 
@@ -591,6 +612,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
               ),
               [VIEW.confirm]: (
                 <CardConfirm
+                  getMembershipDetails={getMembershipDetails}
                   matches={matchData}
                   displayName={displayName}
                   onDone={handleDone}
@@ -598,8 +620,9 @@ function Index({ onDone, programs, location, installationId }: Props) {
                     setToggleDisplayName(!toggleDisplayName)
                   }
                   cardImg={selectedMembership?.card?.image?.original}
-                  mobile={data.mobile}
+                  mobile={data?.mobile}
                   onConfirm={handleConfirmSubmit}
+                  onJoin={handleConfirmSubmit}
                   isToggleDisplayNameDisabled={
                     prevViewRef.current === VIEW.search
                   }

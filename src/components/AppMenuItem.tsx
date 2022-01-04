@@ -13,7 +13,6 @@ export default ({ label, onSelect, iconCls }: Props) => {
       onClick={onSelect}
     >
       <span>{label}</span>
-
       <span className={`${iconCls} icon-menu`}></span>
     </div>
   );
