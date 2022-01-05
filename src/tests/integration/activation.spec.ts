@@ -1,5 +1,3 @@
-// sample.spec.ts created with Cypress
-
 import "cypress-localstorage-commands";
 import { deleteSettings, setSettings } from "../../helpers/activation";
 

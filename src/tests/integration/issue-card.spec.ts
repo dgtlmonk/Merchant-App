@@ -1,5 +1,3 @@
-// sample.spec.ts created with Cypress
-
 import "cypress-localstorage-commands";
 import { setSettings } from "../../helpers/activation";
 import { QUALIFY_TYPES } from "../../types";
