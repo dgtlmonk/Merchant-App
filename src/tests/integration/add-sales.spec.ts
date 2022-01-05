@@ -164,6 +164,48 @@ describe("Add Sales", () => {
 
     expect(cy.contains(/success/i)).to.exist;
   });
+
+  it.skip("should list matching members, given search result is more than one", () => {
+    cy.intercept("GET", `${apiServer}/person/search?cardNumber=123451`, {
+      fixture: "card-number-search-result",
+    }).as("search");
+
+    cy.intercept(`${apiServer}/orders`, {
+      orderId: "61cd8f58bee8a7e5d787bbce",
+      receipt: "1234588",
+      currency: "SGD",
+      amount: 800,
+      status: "paid",
+      personId: "61b1877790dcdc001d5a5253",
+      membershipId: "61b1cfa19c1223001defdddf",
+      createdAt: "2021-12-30T10:52:08.189Z",
+    }).as("orders");
+
+    cy.visit("http://localhost:3000/?module=2");
+
+    const searchBtn = cy.get('[data-test="search-icon-btn"]');
+    const cardNumberInput = cy.get('[data-test="card-number"]');
+
+    expect(cardNumberInput).to.exist;
+    expect(searchBtn).to.exist;
+
+    cardNumberInput.type("123451");
+    cy.get('[data-test="no-match-notice"]').should("not.exist");
+    cy.get('[data-test="search-icon-btn"]').click();
+
+    cy.wait("@search");
+    cy.get('[data-test="no-match-notice"]').should("not.exist");
+    expect(cy.contains(/teng austen/i)).to.exist;
+
+    cy.get('[data-test="sales-receipt"]').type("abc");
+    cy.get('[data-test="sales-qtty"]').type("10");
+    cy.get('[data-test="sales-amount"]').type("100");
+
+    cy.get('[data-test="sales-confirm-btn"]').click();
+    cy.wait("@orders");
+
+    expect(cy.contains(/success/i)).to.exist;
+  });
 });
 
 export {};

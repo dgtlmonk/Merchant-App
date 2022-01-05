@@ -55,10 +55,8 @@ function Index({
         },
       })
       .then((res: any) => {
-        console.log("res ", res);
-
-        if (res?.id) {
-          setPerson(res);
+        if (res && res.length === 1) {
+          setPerson(res[0]);
           setIsPersonFound(true);
           setIsSearchingSuccess(true);
           // @ts-ignore
