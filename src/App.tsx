@@ -158,7 +158,12 @@ function App(props) {
             />
           ),
           [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
-          [VIEWS.ADD_SALES]: <AddSales onDone={handleBackToMenu} />,
+          [VIEWS.ADD_SALES]: (
+            <AddSales
+              programs={localSettings?.programs}
+              onDone={handleBackToMenu}
+            />
+          ),
           [VIEWS.ISSUE_CARD]: (
             <IssueCard
               onDone={handleBackToMenu}

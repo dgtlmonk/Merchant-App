@@ -78,9 +78,31 @@ describe("Add Sales", () => {
     expect(cy.contains(/login/i)).to.exist;
   });
 
-  it.only("should show no match notice, give no result is return from search", () => {
+  it("should show no match notice, given no result is returned from search", () => {
+    cy.intercept("GET", `${apiServer}/person/search?cardNumber=123451`, {}).as(
+      "search"
+    );
+
+    cy.visit("http://localhost:3000/?module=2");
+
+    const searchBtn = cy.get('[data-test="search-icon-btn"]');
+    const cardNumberInput = cy.get('[data-test="card-number"]');
+
+    expect(cardNumberInput).to.exist;
+    expect(searchBtn).to.exist;
+
+    cardNumberInput.type("123451");
+    cy.get('[data-test="no-match-notice"]').should("not.exist");
+
+    cy.get('[data-test="search-icon-btn"]').click();
+    cy.wait("@search");
+
+    cy.get('[data-test="no-match-notice"]').should("exist");
+  });
+
+  it("should show match, given a result is returned from search", () => {
     cy.intercept("GET", `${apiServer}/person/search?cardNumber=123451`, {
-      // fixture: "activate.json",
+      fixture: "card-number-search-result",
     }).as("search");
 
     cy.visit("http://localhost:3000/?module=2");
@@ -92,10 +114,38 @@ describe("Add Sales", () => {
     expect(searchBtn).to.exist;
 
     cardNumberInput.type("123451");
+    cy.get('[data-test="no-match-notice"]').should("not.exist");
     cy.get('[data-test="search-icon-btn"]').click();
-    cy.wait("@search");
 
-    expect(cy.contains(/no matching member/i)).to.exist;
+    cy.wait("@search");
+    cy.get('[data-test="no-match-notice"]').should("not.exist");
+    expect(cy.contains(/teng austen/i)).to.exist;
+  });
+
+  it.only("should proceed to order, given a result is returned from search and form is completed", () => {
+    cy.intercept("GET", `${apiServer}/person/search?cardNumber=123451`, {
+      fixture: "card-number-search-result",
+    }).as("search");
+
+    cy.visit("http://localhost:3000/?module=2");
+
+    const searchBtn = cy.get('[data-test="search-icon-btn"]');
+    const cardNumberInput = cy.get('[data-test="card-number"]');
+
+    expect(cardNumberInput).to.exist;
+    expect(searchBtn).to.exist;
+
+    cardNumberInput.type("123451");
+    cy.get('[data-test="no-match-notice"]').should("not.exist");
+    cy.get('[data-test="search-icon-btn"]').click();
+
+    cy.wait("@search");
+    cy.get('[data-test="no-match-notice"]').should("not.exist");
+    expect(cy.contains(/teng austen/i)).to.exist;
+
+    cy.get('[data-test="sales-receipt"]').type("abc");
+    cy.get('[data-test="sales-qtty"]').type("10");
+    cy.get('[data-test="sales-amount"]').type("100");
   });
 });
 
