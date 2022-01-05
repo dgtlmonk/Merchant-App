@@ -5,7 +5,6 @@ import { useLocation } from "react-router-dom";
 import AppMenu from "./components/AppMenu";
 import { getSettings, setSettings } from "./helpers/activation";
 import { client } from "./helpers/api-client";
-// import "./mirage";
 import { activateParams, VIEWS } from "./types";
 import AddSales from "./views/add-sales";
 import IssueCard from "./views/issue-card";
@@ -13,7 +12,6 @@ import LoginForm from "./views/login";
 
 function App(props) {
   const { pathname, search } = useLocation();
-  // const navigate = useNavigate();
 
   const [localSettings, setLocalSettings] = useState<any>(null);
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
@@ -64,6 +62,11 @@ function App(props) {
 
       if (mod && mod === "1") {
         setViewState(VIEWS.ISSUE_CARD);
+        return;
+      }
+
+      if (mod && mod === "2") {
+        setViewState(VIEWS.ADD_SALES);
         return;
       }
 

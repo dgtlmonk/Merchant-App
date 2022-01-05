@@ -10,7 +10,6 @@ const defaultParams = {
   // "receipt": "ION20211209001",
   // "quantity": 1,
   // "amount": 140.9,
-
   programId: "5d12e1a1e4a5c53fdd6fe352",
   tierLevel: 2,
   personId: "61b0d31490dcdc001d5a51ff",
@@ -53,24 +52,29 @@ function Index({ onDone }: Props) {
     setIsSearching(true);
     setIsSearchingSuccess(false);
     client
-      .post(`${host}/memberships/search`, {
+      .get(`${host}/person/search?cardNumber=${cardNumberRef?.current.value}`, {
         headers: {
           "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          "content-type": "application/json",
+          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
         },
-        body: JSON.stringify({
-          // @ts-ignore
-          searchValue: cardNumberRef?.current.value,
-        }),
       })
       .then((res: any) => {
-        const [detail] = res;
+        console.log("search result ", res);
 
-        const { fullName } = detail.person;
-        setPerson(fullName);
-        setIsSearchingSuccess(true);
+        if (res?.data) {
+          const [detail] = res;
 
-        // @ts-ignore
-        receiptRef?.current?.focus();
+          const { fullName } = detail.person;
+          setPerson(fullName);
+          setIsSearchingSuccess(true);
+
+          // @ts-ignore
+          receiptRef?.current?.focus();
+        }
+      })
+      .catch(() => {
+        console.log("not found");
       })
       .finally(() => setIsSearching(false));
   };
@@ -114,6 +118,7 @@ function Index({ onDone }: Props) {
     }
 
     setIsSubmitting(true);
+    // TODO: refactor
     client
       .post(`${host}/orders/create`, {
         headers: {
@@ -176,7 +181,7 @@ function Index({ onDone }: Props) {
 
     <div className="flex flex-col w-full h-full items-center">
       <div
-        className="module__header sticky top-0 w-full z-20 mb-2"
+        className="module__header sticky top-0 w-full z-20 "
         style={{ backgroundColor: "#f8f8ff" }}
       >
         <div className="flex flex-row justify-center items-center relative w-full h-16">
@@ -184,6 +189,33 @@ function Index({ onDone }: Props) {
             <ArrowBack className="opacity-50" />
           </button>
           <div className="p-4">Sales</div>
+        </div>
+      </div>
+
+      <div className="flex flex-col w-full">
+        <div className="flex flex-col  justify-center  items-center">
+          <div
+            data-test="notice-confirm"
+            className="flex w-full p-4 flex-row justify-between items-center"
+            style={{ backgroundColor: "#ffea8a" }}
+          >
+            <div className="flex flex-col">
+              <div className="flex font-semibold text-xl">
+                No matching member.
+              </div>
+              <span className="text-gray-600">
+                Seach again or issue a new card.
+              </span>
+            </div>
+            <div>
+              <button
+                data-test="no-match-btn"
+                className="px-4 py-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+              >
+                No Match
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -217,16 +249,24 @@ function Index({ onDone }: Props) {
                 }
               }}
               defaultValue=""
+              inputProps={{
+                ["data-test"]: "card-number",
+                style: { fontSize: "2rem" },
+              }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="start">
-                    <span className="p-4 px-2" onClick={handleSearchMemberCard}>
+                    <div
+                      className="flex justify-center items-center  w-12 h-12  relative -mt-4"
+                      data-test="search-icon-btn"
+                      onClick={handleSearchMemberCard}
+                    >
                       {isSearching ? (
                         <CircularProgress size="1rem" />
                       ) : (
                         <FaSearch className="opacity-40" />
                       )}
-                    </span>
+                    </div>
                   </InputAdornment>
                 ),
               }}
