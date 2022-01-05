@@ -33,9 +33,10 @@ function App(props) {
             body: JSON.stringify(activateParams),
           })
           .then((res) => {
+            console.log("activate response ", res);
+
             if (!res.error) {
               setSettings(res);
-              console.log("get settings ", getSettings());
               setLocalSettings(res);
               setViewState(VIEWS.LOGIN);
               return;
@@ -160,7 +161,10 @@ function App(props) {
           [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
           [VIEWS.ADD_SALES]: (
             <AddSales
+              currency={localSettings?.business?.currency}
+              installationId={localSettings?.installation?.id}
               programs={localSettings?.programs}
+              location={localSettings?.location}
               onDone={handleBackToMenu}
             />
           ),

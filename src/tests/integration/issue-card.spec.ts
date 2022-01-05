@@ -14,6 +14,7 @@ const mockSettings = {
   },
   business: {
     tenantCode: "samsonitesg",
+    currency: "SGD",
     style: {
       light: {},
       dark: {},

@@ -4,27 +4,21 @@ import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { client } from "../../helpers/api-client";
 
-// TODO: finalize dynamic params
-const defaultParams = {
-  // "cardNumber": "S0650012049",
-  // "receipt": "ION20211209001",
-  // "quantity": 1,
-  // "amount": 140.9,
-  programId: "5d12e1a1e4a5c53fdd6fe352",
-  tierLevel: 2,
-  personId: "61b0d31490dcdc001d5a51ff",
-  memberId: "61b0d3149c1223001defddc9",
-  membershipId: "61b0e0c29c1223001defddd8",
-  purchasedAt: "2021-12-09T03:31:39.753Z",
-  placeId: "5d1b019745828f10b6c5eed1",
-};
-
 type Props = {
-  onDone?: () => void;
+  onDone: () => void;
+  location: any;
+  currency: string;
+  installationId: string;
   programs?: any;
 };
 
-function Index({ onDone, programs }: Props) {
+function Index({
+  onDone,
+  currency,
+  programs,
+  installationId,
+  location,
+}: Props) {
   const host = import.meta.env.VITE_API_HOST;
   const cardNumberRef = useRef<any>();
   const qttyRef = useRef<any>();
@@ -35,7 +29,7 @@ function Index({ onDone, programs }: Props) {
   const [isPersonFound, setIsPersonFound] = useState(false);
   const [isSearchingSuccess, setIsSearchingSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitSuccess, setIsSubmitSuccess] = useState(false);
+  const [isSalesSubmitSuccess, setIsSalesSubmitSuccess] = useState(false);
   const [person, setPerson] = useState<any>(null);
 
   useEffect(() => {
@@ -82,9 +76,9 @@ function Index({ onDone, programs }: Props) {
   };
 
   const handleConfirm = () => {
-    if (isSubmitSuccess) {
+    if (isSalesSubmitSuccess) {
       // New
-      setIsSubmitSuccess(false);
+      setIsSalesSubmitSuccess(false);
       setIsSubmitting(false);
       setIsSearchingSuccess(false);
 
@@ -123,17 +117,23 @@ function Index({ onDone, programs }: Props) {
     const params = {
       orderSummary: {
         receipt: receiptRef.current.value,
-        quantity: qttyRef.current.value,
-        currency: "SGD",
-        amount: amountRef.current.value,
+        quantity: Number(qttyRef.current.value),
+        // TODO: get actual currency from activation
+        currency: currency || "SGD",
+        amount: Number(amountRef.current.value),
       },
+      membershipId: person?.membership?.membershipId,
+      location,
+      installation: {
+        id: installationId,
+      },
+      // TODO: get from login
+      staff: {},
     };
 
-    console.log(" params ", params);
+    console.log(" order params ", params);
 
-    return;
     setIsSubmitting(true);
-    // TODO: refactor
     client
       .post(`${host}/orders`, {
         headers: {
@@ -141,23 +141,20 @@ function Index({ onDone, programs }: Props) {
           "x-api-key": `${import.meta.env.VITE_API_KEY}`,
           "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
         },
-        body: JSON.stringify({
-          ...defaultParams,
-          cardNumber: cardNumberRef.current?.value,
-          receipt: receiptRef.current?.value,
-          quantity: qttyRef.current?.value,
-          amount: amountRef.current?.value,
-        }),
+        body: JSON.stringify({ ...params }),
       })
       .then((res) => {
-        setIsSubmitSuccess(true);
+        setIsSalesSubmitSuccess(true);
+        setTimeout(() => {
+          onDone();
+        }, 700);
       })
       .finally(() => setIsSubmitting(false));
   };
 
   function handleReset() {
     setIsPersonFound(false);
-    setIsSubmitSuccess(false);
+    setIsSalesSubmitSuccess(false);
     setIsSubmitting(false);
     setIsSearchingSuccess(false);
     resetRefs();
@@ -195,9 +192,6 @@ function Index({ onDone, programs }: Props) {
   }
 
   function getMembershipDetails(programId: string, tierLevel: number) {
-    console.log(" program id tier ", programId, tierLevel);
-
-    console.log("program ", programs);
     if (!programs || !programs.length) return null;
 
     const currentProgram = programs.filter(
@@ -269,7 +263,7 @@ function Index({ onDone, programs }: Props) {
       <div className="flex max-w-md flex-col justify-center z-10 p-8">
         <div
           className={`flex w-full px-4 py-2 border justify-center  rounded-md bg-orange-400 text-white text-sm mb-4 
-        ${isSubmitSuccess ? "visible" : "hidden"}`}
+        ${isSalesSubmitSuccess ? "visible" : "hidden"}`}
         >
           Sales added successfully
         </div>
@@ -334,6 +328,7 @@ function Index({ onDone, programs }: Props) {
               <TextField
                 label="Receipt Number"
                 inputRef={receiptRef}
+                disabled={isSalesSubmitSuccess}
                 inputProps={{ ["data-test"]: "sales-receipt" }}
                 InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
               />
@@ -341,6 +336,7 @@ function Index({ onDone, programs }: Props) {
             <span className="flex mr-2 w-1/5">
               <TextField
                 inputRef={qttyRef}
+                disabled={isSalesSubmitSuccess}
                 inputProps={{ ["data-test"]: "sales-qtty" }}
                 InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
                 label="Quantity"
@@ -349,6 +345,7 @@ function Index({ onDone, programs }: Props) {
             </span>
             <TextField
               inputRef={amountRef}
+              disabled={isSalesSubmitSuccess}
               inputProps={{ ["data-test"]: "sales-amount" }}
               InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
               label="Total Amount"
@@ -367,9 +364,10 @@ function Index({ onDone, programs }: Props) {
             <div className="flex flex-row w-full items-center justify-center mt-8">
               <CircularProgress size="1.5rem" />
             </div>
-          ) : isSearchingSuccess ? (
+          ) : isSearchingSuccess && !isSalesSubmitSuccess ? (
             <div className="flex flex-row w-full items-center justify-center mt-8">
               <button
+                data-test="sales-reset-btn"
                 disabled={isSubmitting}
                 className={`p-2 px-8 border rounded-md  bg-slate-400 text-white mr-4`}
                 onClick={handleReset}
@@ -377,10 +375,11 @@ function Index({ onDone, programs }: Props) {
                 Cancel
               </button>
               <button
+                data-test="sales-confirm-btn"
                 className={`p-2 px-8 border rounded-md  bg-blue-400 text-white`}
                 onClick={handleConfirm}
               >
-                {isSubmitSuccess ? "Add New" : "Confirm"}
+                {isSalesSubmitSuccess ? "New Sales" : "Confirm"}
               </button>
             </div>
           ) : null}

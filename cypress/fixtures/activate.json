@@ -6,6 +6,7 @@
   },
   "business": {
     "tenantCode": "samsonitesg",
+    "currency": "SGD",
     "style": {
       "light": {},
       "dark": {}

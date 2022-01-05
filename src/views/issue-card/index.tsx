@@ -161,7 +161,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
       },
       tierLevel: selectedMembership.level,
       programId: programs[0].programId,
-      location: {},
+      location,
       // TODO: get from login
       staff: {},
       // TODO: where to get?
