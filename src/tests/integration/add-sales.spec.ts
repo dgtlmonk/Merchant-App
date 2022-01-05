@@ -123,7 +123,7 @@ describe("Add Sales", () => {
     expect(cy.contains(/teng austen/i)).to.exist;
   });
 
-  it.only("should proceed to order, given a result is returned from search and form is completed", () => {
+  it("should proceed to order, given a result is returned from search and form is completed", () => {
     cy.intercept("GET", `${apiServer}/person/search?cardNumber=123451`, {
       fixture: "card-number-search-result",
     }).as("search");
@@ -165,9 +165,9 @@ describe("Add Sales", () => {
     expect(cy.contains(/success/i)).to.exist;
   });
 
-  it.skip("should list matching members, given search result is more than one", () => {
+  it.only("should list matching members, given search result is more than one", () => {
     cy.intercept("GET", `${apiServer}/person/search?cardNumber=123451`, {
-      fixture: "card-number-search-result",
+      fixture: "card-number-search-result-multiple",
     }).as("search");
 
     cy.intercept(`${apiServer}/orders`, {
@@ -194,17 +194,18 @@ describe("Add Sales", () => {
     cy.get('[data-test="search-icon-btn"]').click();
 
     cy.wait("@search");
-    cy.get('[data-test="no-match-notice"]').should("not.exist");
-    expect(cy.contains(/teng austen/i)).to.exist;
+    cy.get('[data-test="sales-confirm-btn"]').should("not.exist");
+    cy.get('[data-test="card-number"]').should("not.exist");
+    // expect(cy.contains(/teng austen/i)).to.exist;
 
-    cy.get('[data-test="sales-receipt"]').type("abc");
-    cy.get('[data-test="sales-qtty"]').type("10");
-    cy.get('[data-test="sales-amount"]').type("100");
+    // cy.get('[data-test="sales-receipt"]').type("abc");
+    // cy.get('[data-test="sales-qtty"]').type("10");
+    // cy.get('[data-test="sales-amount"]').type("100");
 
-    cy.get('[data-test="sales-confirm-btn"]').click();
-    cy.wait("@orders");
+    // cy.get('[data-test="sales-confirm-btn"]').click();
+    // cy.wait("@orders");
 
-    expect(cy.contains(/success/i)).to.exist;
+    // expect(cy.contains(/success/i)).to.exist;
   });
 });
 

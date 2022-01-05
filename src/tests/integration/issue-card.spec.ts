@@ -283,7 +283,7 @@ describe("Issue Card", () => {
     expect(cy.contains(/card already/i)).to.exist;
   });
 
-  it.only("should continue to join, given search member was found but not the same person", () => {
+  it("should continue to join, given search member was found but not the same person", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.intercept(`${apiServer}/membership/qualify`, {

@@ -1,5 +1,5 @@
 import { CircularProgress, InputAdornment, TextField } from "@material-ui/core";
-import { ArrowBack } from "@material-ui/icons";
+import { ArrowBack, EmailOutlined, PhoneOutlined } from "@material-ui/icons";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { client } from "../../helpers/api-client";
@@ -26,9 +26,11 @@ function Index({
   const amountRef = useRef<any>();
 
   const [isSearching, setIsSearching] = useState(false);
+  const [isListMatch, setIsListMatch] = useState(false);
   const [isPersonFound, setIsPersonFound] = useState(false);
   const [isSearchingSuccess, setIsSearchingSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [matchedPersons, setMatchedPersons] = useState<any>([]);
   const [isSalesSubmitSuccess, setIsSalesSubmitSuccess] = useState(false);
   const [person, setPerson] = useState<any>(null);
 
@@ -36,6 +38,55 @@ function Index({
     // @ts-ignore
     cardNumberRef?.current?.focus();
   }, []);
+
+  type MatchItemProps = {
+    onSelectDataIndex: () => void;
+    person: {
+      fullName: string;
+      phones: any[];
+      activeMemberships: any[];
+      emails: any[];
+    };
+  };
+
+  const MatchItem = ({ onSelectDataIndex, person }: MatchItemProps) => {
+    return (
+      <div
+        className="flex flex-row w-full justify-between p-8 border-b"
+        data-test="match-person"
+        onClick={onSelectDataIndex}
+      >
+        <div className="flex flex-col w-full">
+          <h1 className="text-2xl font-bold">{person?.fullName}</h1>
+          <div className="flex flex-row items-center">
+            <PhoneOutlined className="opacity-50 mr-2 text-blue-400" />{" "}
+            {person?.phones[0]?.fullNumber}
+          </div>
+          <div className="flex flex-row items-center">
+            <EmailOutlined className="opacity-50 mr-2 text-blue-400" />
+            {(person?.emails && person?.emails[0]?.address) || "no email"}
+          </div>
+        </div>
+        <div className="relative rounded-lg overflow-hidden w-48">
+          <div className="rounded-sm">
+            <img
+              className="object-fill"
+              src={`${
+                getMembershipDetails(
+                  person?.activeMemberships[
+                    person?.activeMemberships?.length - 1
+                  ].programId,
+                  person?.activeMemberships[
+                    person?.activeMemberships?.length - 1
+                  ]?.tierLevel
+                )?.card?.image?.thumbnail
+              }`}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const handleSearchMemberCard = () => {
     // @ts-ignore
@@ -49,18 +100,28 @@ function Index({
     client
       .get(`${host}/person/search?cardNumber=${cardNumberRef?.current.value}`, {
         headers: {
-          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
           "content-type": "application/json",
+          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
           "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
         },
       })
       .then((res: any) => {
-        if (res && res.length === 1) {
-          setPerson(res[0]);
-          setIsPersonFound(true);
-          setIsSearchingSuccess(true);
-          // @ts-ignore
-          receiptRef?.current?.focus();
+        console.log("search res ", res);
+        if (res && res.length) {
+          if (res.length === 1) {
+            setIsListMatch(false);
+            setPerson(res[0]);
+            setIsPersonFound(true);
+            setIsSearchingSuccess(true);
+            // @ts-ignore
+            receiptRef?.current?.focus();
+          } else {
+            // is a list match
+            setMatchedPersons(res);
+            setIsPersonFound(false);
+            setIsListMatch(true);
+            // setIsSearchingSuccess(true);
+          }
         } else {
           setIsPersonFound(false);
           setIsSearchingSuccess(true);
@@ -128,8 +189,6 @@ function Index({
       // TODO: get from login
       staff: {},
     };
-
-    console.log(" order params ", params);
 
     setIsSubmitting(true);
     client
@@ -266,97 +325,119 @@ function Index({
           Sales added successfully
         </div>
 
-        <div className="flex flex-col w-full">
-          {isPersonFound ? (
-            <div className="flex flex-row justify-between items-center">
-              <span className="text-2xl">{person?.fullName}</span>
-              <div className="relative rounded-lg overflow-hidden w-32">
-                <div className="rounded-sm">
-                  <img
-                    className="object-fill"
-                    src={`${
-                      getMembershipDetails(
-                        person?.membership.programId,
-                        person?.membership.tierLevel
-                      )?.card?.image?.thumbnail
-                    }`}
-                  />
+        {isListMatch ? (
+          <div className="flex flex-col w-full justify-center">
+            {matchedPersons &&
+              matchedPersons?.map((match, i) => (
+                <MatchItem
+                  onSelectDataIndex={() => {
+                    setPerson(matchedPersons[i]);
+                    // onMatch(matchedPersons[i]);
+                  }}
+                  key={match.id}
+                  person={{
+                    fullName: match.fullName,
+                    phones: match.phones,
+                    activeMemberships: match.activeMemberships,
+                    emails: match.emails,
+                  }}
+                />
+              ))}
+          </div>
+        ) : (
+          <div className="flex flex-col w-full">
+            {isPersonFound ? (
+              <div className="flex flex-row justify-between items-center">
+                <span className="text-2xl">{person?.fullName}</span>
+                <div className="relative rounded-lg overflow-hidden w-32">
+                  <div className="rounded-sm">
+                    <img
+                      className="object-fill"
+                      src={`${
+                        getMembershipDetails(
+                          person?.membership.programId,
+                          person?.membership.tierLevel
+                        )?.card?.image?.thumbnail
+                      }`}
+                    />
+                  </div>
                 </div>
               </div>
+            ) : (
+              <TextField
+                label="Member Card Number"
+                className="w-full"
+                variant="filled"
+                disabled={isSearching}
+                inputRef={cardNumberRef}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearchMemberCard();
+                    e.preventDefault();
+                  }
+                }}
+                defaultValue=""
+                inputProps={{
+                  ["data-test"]: "card-number",
+                  style: { fontSize: "2rem" },
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">
+                      <div
+                        className="flex justify-center items-center  w-12 h-12  relative -mt-4"
+                        data-test="search-icon-btn"
+                        onClick={handleSearchMemberCard}
+                      >
+                        {isSearching ? (
+                          <CircularProgress size="1rem" />
+                        ) : (
+                          <FaSearch className="opacity-40" />
+                        )}
+                      </div>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            )}
+
+            <div className="flex flex-row mt-8">
+              <span className="flex mr-2 w-3/5 leading-tight">
+                <TextField
+                  label="Receipt Number"
+                  inputRef={receiptRef}
+                  disabled={isSalesSubmitSuccess}
+                  inputProps={{ ["data-test"]: "sales-receipt" }}
+                  InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
+                />
+              </span>
+              <span className="flex mr-2 w-1/5">
+                <TextField
+                  inputRef={qttyRef}
+                  disabled={isSalesSubmitSuccess}
+                  inputProps={{ ["data-test"]: "sales-qtty" }}
+                  InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
+                  label="Quantity"
+                  type="number"
+                />
+              </span>
+              <TextField
+                inputRef={amountRef}
+                disabled={isSalesSubmitSuccess}
+                inputProps={{ ["data-test"]: "sales-amount" }}
+                InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
+                label="Total Amount"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="end">
+                      <span className="mr-2 text-gray-400">$</span>
+                    </InputAdornment>
+                  ),
+                }}
+              />
             </div>
-          ) : (
-            <TextField
-              label="Member Card Number"
-              className="w-full"
-              variant="filled"
-              disabled={isSearching}
-              inputRef={cardNumberRef}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  handleSearchMemberCard();
-                  e.preventDefault();
-                }
-              }}
-              defaultValue=""
-              inputProps={{
-                ["data-test"]: "card-number",
-                style: { fontSize: "2rem" },
-              }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="start">
-                    <div
-                      className="flex justify-center items-center  w-12 h-12  relative -mt-4"
-                      data-test="search-icon-btn"
-                      onClick={handleSearchMemberCard}
-                    >
-                      {isSearching ? (
-                        <CircularProgress size="1rem" />
-                      ) : (
-                        <FaSearch className="opacity-40" />
-                      )}
-                    </div>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          )}
-          <div className="flex flex-row mt-8">
-            <span className="flex mr-2 w-3/5 leading-tight">
-              <TextField
-                label="Receipt Number"
-                inputRef={receiptRef}
-                disabled={isSalesSubmitSuccess}
-                inputProps={{ ["data-test"]: "sales-receipt" }}
-                InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
-              />
-            </span>
-            <span className="flex mr-2 w-1/5">
-              <TextField
-                inputRef={qttyRef}
-                disabled={isSalesSubmitSuccess}
-                inputProps={{ ["data-test"]: "sales-qtty" }}
-                InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
-                label="Quantity"
-                type="number"
-              />
-            </span>
-            <TextField
-              inputRef={amountRef}
-              disabled={isSalesSubmitSuccess}
-              inputProps={{ ["data-test"]: "sales-amount" }}
-              InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
-              label="Total Amount"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="end">
-                    <span className="mr-2 text-gray-400">$</span>
-                  </InputAdornment>
-                ),
-              }}
-            />
           </div>
-        </div>
+        )}
         <div className="flex flex-row w-full items-center justify-center ">
           {isSubmitting ? (
             <div className="flex flex-row w-full items-center justify-center mt-8">

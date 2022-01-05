@@ -218,8 +218,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
   };
 
   const handleConfirmSubmit = () => {
-    console.log("selected membership ", selectedMembership);
-
     const params = Object.assign(Object.create(null, {}), {
       programId: programRef?.current?.programId,
       tierLevel: selectedMembership.level,
@@ -249,9 +247,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
         body: JSON.stringify(params),
       })
       .then((res) => {
-        //  TODO: catch errors
-        console.log("confirm issue response  ", res);
-
         setMatchStatus(MATCH_STATUS.qualified);
         setMembership({
           mobile: data.mobile,
@@ -323,7 +318,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
   }
 
   function handleDone() {
-    console.log("done ?");
     formDataRef.current = null;
     setData(null);
     setViewState(VIEW.card_select);
@@ -610,7 +604,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
               [VIEW.confirm]: (
                 <CardConfirm
                   getMembershipDetails={getMembershipDetails}
-                  matches={matchData}
+                  matchedPersons={matchData}
                   displayName={displayName}
                   onDone={handleDone}
                   onToggleDisplayName={() =>
