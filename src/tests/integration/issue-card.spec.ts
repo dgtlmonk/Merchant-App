@@ -223,8 +223,7 @@ describe("Issue Card", () => {
         cy.get("#root_familyName").type("Pablo");
         cy.get("#root_mobile").type("+639194550938");
 
-        let nextBtn = cy.get('[data-test="issue-next-btn"]');
-        nextBtn = cy.get('[data-test="issue-next-btn"]');
+        const nextBtn = cy.get('[data-test="issue-next-btn"]');
 
         nextBtn.click();
         cy.wait("@qualify");
