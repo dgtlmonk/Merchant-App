@@ -14,7 +14,13 @@ export default defineConfig(({ command, mode }) => {
         },
       },
       publicDir: "public/assets",
-      plugins: [react(), VitePWA({})],
+      plugins: [
+        react(),
+        VitePWA({
+          srcDir: "src",
+          filename: "sw.ts",
+        }),
+      ],
     };
   } else {
     // command === 'build'
@@ -27,7 +33,13 @@ export default defineConfig(({ command, mode }) => {
         },
       },
       publicDir: "public",
-      plugins: [react(), VitePWA({})],
+      plugins: [
+        react(),
+        VitePWA({
+          srcDir: "src",
+          filename: "sw.ts",
+        }),
+      ],
     };
   }
 });
