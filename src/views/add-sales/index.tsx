@@ -389,6 +389,7 @@ function Index({
                     <div className="relative rounded-lg overflow-hidden w-32">
                       <div className="rounded-sm">
                         <img
+                          loading="lazy"
                           className="object-fill"
                           src={`${
                             getMembershipDetails(

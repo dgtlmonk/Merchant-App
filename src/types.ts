@@ -8,6 +8,7 @@ export enum VIEWS {
   SALES = "sales",
   SETTINGS = "settings",
   DENIED = "access denied",
+  CONFIRM_INSTALL = "confirm install",
   CONFIRN_NEW_SETTINGS = "settings change",
 }
 

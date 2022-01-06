@@ -307,7 +307,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
             setViewState(VIEW.fillup);
           }}
         >
-          <img src={membership.card.image.original} />
+          <img loading="lazy" src={membership.card.image.original} />
         </div>
       );
     });
@@ -476,7 +476,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
                     </div>
 
                     <div className="w-96 mt-4">
-                      <img src={selectedMembership?.digitalCard?.image.front} />
+                      <img
+                        loading="lazy"
+                        src={selectedMembership?.digitalCard?.image.front}
+                      />
                     </div>
                     <div className="w-4/6 flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4 ">
                       {/* <div className="flex px-2 w-full h-full justify-center"> */}
@@ -571,7 +574,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
                   <div className="flex flex-col mt-8">
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
                       <div className="w-96">
-                        <img src={selectedMembership?.card?.image?.original} />
+                        <img
+                          loading="lazy"
+                          src={selectedMembership?.card?.image?.original}
+                        />
                       </div>
 
                       <div className="w-5/6 flex px-12 justify-center">
