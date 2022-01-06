@@ -1,5 +1,6 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 const path = require("path");
 
 export default defineConfig(({ command, mode }) => {
@@ -13,7 +14,7 @@ export default defineConfig(({ command, mode }) => {
         },
       },
       publicDir: "public/assets",
-      plugins: [react()],
+      plugins: [react(), VitePWA({})],
     };
   } else {
     // command === 'build'
@@ -26,7 +27,7 @@ export default defineConfig(({ command, mode }) => {
         },
       },
       publicDir: "public",
-      plugins: [react()],
+      plugins: [react(), VitePWA({})],
     };
   }
 });
