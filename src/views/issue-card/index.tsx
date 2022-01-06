@@ -98,10 +98,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
   }
 
   useEffect(() => {
-    console.log(" prev view ", prevViewRef.current);
-  }, [prevViewRef.current]);
-
-  useEffect(() => {
     if (programs.length) {
       const [p] = programs;
       programRef.current = p;

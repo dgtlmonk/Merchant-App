@@ -147,7 +147,7 @@ function Index({
             setIsPersonFound(false);
             setIsListMatch(true);
             setViewState(VIEW.list);
-            // setIsSearchingSuccess(true);
+            setIsSearchingSuccess(true);
           }
         } else {
           setIsPersonFound(false);
@@ -163,7 +163,7 @@ function Index({
 
   const handleConfirm = () => {
     if (isSalesSubmitSuccess) {
-      // New
+      // new sales
       setIsSalesSubmitSuccess(false);
       setIsSubmitting(false);
       setIsSearchingSuccess(false);
@@ -231,7 +231,7 @@ function Index({
         setIsSalesSubmitSuccess(true);
         setTimeout(() => {
           onDone();
-        }, 700);
+        }, 1000);
       })
       .finally(() => setIsSubmitting(false));
   };
@@ -352,7 +352,7 @@ function Index({
         }`}
       >
         <div
-          className={`flex px-4 py-2 border justify-center  rounded-md bg-orange-400 text-white text-sm mb-4 
+          className={`flex px-4 py-2 border justify-center  rounded-md bg-orange-400 text-white text-sm mb-4 font-bold 
         ${isSalesSubmitSuccess ? "visible" : "hidden"}`}
         >
           Sales added successfully
