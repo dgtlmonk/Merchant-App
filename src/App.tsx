@@ -2,6 +2,7 @@ import "@/styles/App.css";
 import { CircularProgress } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import ActivationHero from "./components/ActivationHero";
 import AppMenu from "./components/AppMenu";
 import { getSettings, setSettings } from "./helpers/activation";
 import { client } from "./helpers/api-client";
@@ -28,25 +29,8 @@ function App(props) {
 
     if (isActivating) {
       if (!getSettings()) {
-        client
-          .post(`${callbackUrl}`, {
-            body: JSON.stringify(activateParams),
-          })
-          .then((res) => {
-            console.log("activate response ", res);
-
-            if (!res.error) {
-              setSettings(res);
-              setLocalSettings(res);
-              setViewState(VIEWS.LOGIN);
-              return;
-            }
-
-            setViewState(VIEWS.DENIED);
-          })
-          .catch(() => {
-            setViewState(VIEWS.DENIED);
-          });
+        setViewState(VIEWS.CONFIRM_INSTALL);
+        setSettingsUrl(callbackUrl as string);
       } else {
         // @ts-ignore
         setSettingsUrl(callbackUrl);
@@ -86,6 +70,7 @@ function App(props) {
   };
 
   function handleUpdateSettings() {
+    console.log("handleUpdate settings");
     client
       .post(`${settingsUrl}`, {
         body: JSON.stringify(activateParams),
@@ -95,7 +80,6 @@ function App(props) {
           setSettings(res);
           setLocalSettings(res);
           setViewState(VIEWS.LOGIN);
-
           return;
         }
 
@@ -176,14 +160,10 @@ function App(props) {
               installationId={localSettings?.installation?.id}
             />
           ),
-          [VIEWS.DENIED]: (
-            <div className="flex flex-col w-full h-full items-center justify-center">
-              <div className="p-12">
-                <h1 className="text-red-600">Access denied.</h1>
-                <span>Contact abcx@perkd.me to activate your account.</span>
-              </div>
-            </div>
+          [VIEWS.CONFIRM_INSTALL]: (
+            <ActivationHero onActivate={handleUpdateSettings} />
           ),
+          [VIEWS.DENIED]: <ActivationHero />,
         }[viewState]
       }
     </div>

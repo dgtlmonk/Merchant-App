@@ -83,6 +83,7 @@ const Index = ({
         <div className="relative rounded-lg overflow-hidden w-48">
           <div className="rounded-sm">
             <img
+              loading="lazy"
               className="object-fill"
               src={`${
                 getMembershipDetails(
@@ -131,6 +132,7 @@ const Index = ({
                   </div>
                   <div className="p-2">
                     <img
+                      loading="lazy"
                       src={previewDetails?.card?.image?.thumbnail}
                       width="150"
                     />
@@ -208,7 +210,7 @@ const Index = ({
         ) : (
           <Fragment>
             <div className="mt-8">
-              <img src={cardImg} className="w-96" />
+              <img loading="lazy" src={cardImg} className="w-96" />
             </div>
 
             <div className="mt-6">

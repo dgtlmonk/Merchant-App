@@ -14,17 +14,24 @@ describe("Activation", () => {
 
   beforeEach(() => {
     deleteSettings();
+    cy.viewport("ipad-2");
   });
 
   it("should display access denied notice, given no settings is detected and activate url is not present", () => {
     cy.visit("http://localhost:3000");
-    expect(cy.contains(/denied/i)).to.exist;
+    expect(cy.contains(/no longer valid/i)).to.exist;
   });
 
   it("should display access denied notice, given activate callback url fails", () => {
     cy.visit("http://localhost:3000/activate?callaback=idontexist");
 
-    expect(cy.contains(/denied/i)).to.exist;
+    expect(cy.contains(/no longer/i)).to.exist;
+  });
+
+  it("should prompt confirm use app, given no local settings is detected", () => {
+    cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+
+    expect(cy.contains(/confirm you want to use app/i)).to.exist;
   });
 
   it("should store new settings, given no local settings is detected", () => {
@@ -41,6 +48,11 @@ describe("Activation", () => {
     }).as("activate");
 
     cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
+
+    const activateBtn = cy.get('[data-test="activate-btn"]');
+    expect(activateBtn).to.exist;
+    activateBtn.click();
+
     cy.wait("@activate");
 
     expect(cy.contains(/login/i)).to.exist;
