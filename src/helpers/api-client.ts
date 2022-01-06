@@ -14,7 +14,7 @@ const fetcher = (url: string, options?: RequestInit) =>
     })
     .then((r) => {
       if (r?.headers?.get("content-type")?.match("json")) {
-        return r.json();
+        return r?.json();
       }
     });
 

@@ -12,7 +12,7 @@ type Props = {
   onMatch: (data: any) => void;
   onConfirm: () => void;
   isToggleDisplayNameDisabled: boolean;
-  matches?: any[];
+  matchedPersons?: any[];
   getMembershipDetails(programId: string, tierLevel: number);
 };
 
@@ -25,20 +25,17 @@ const Index = ({
   onConfirm,
   onMatch,
   isToggleDisplayNameDisabled,
-  matches,
+  matchedPersons,
   getMembershipDetails,
   onJoin,
 }: Props) => {
   const [previewDetails, setPreviewDetails] = useState<any>(null);
   const [isListView, setIsListView] = useState(false);
   const [currentMatch, setCurrentMatch] = useState<any>(null);
-  // useEffect(() => {
-  //   console.log("match preview details ", previewDetails);
-  // }, [previewDetails]);
 
   useEffect(() => {
-    if (matches && matches?.length) {
-      const [membership] = matches[0].activeMemberships;
+    if (matchedPersons && matchedPersons?.length) {
+      const [membership] = matchedPersons[0].activeMemberships;
       const matchDetails = getMembershipDetails(
         membership.programId,
         membership.tierLevel
@@ -47,13 +44,13 @@ const Index = ({
       setPreviewDetails(matchDetails);
     }
 
-    if (matches && matches.length > 1) {
+    if (matchedPersons && matchedPersons.length > 1) {
       setIsListView(true);
     } else {
       // @ts-ignore
-      setCurrentMatch(matches[0]);
+      setCurrentMatch(matchedPersons[0]);
     }
-  }, [matches]);
+  }, [matchedPersons]);
 
   type MatchItemProps = {
     onSelectDataIndex: () => void;
@@ -107,13 +104,13 @@ const Index = ({
   return (
     <div className="flex flex-col w-full">
       <div className="flex flex-col  justify-center  items-center">
-        {matches && matches?.length ? (
+        {matchedPersons && matchedPersons?.length ? (
           <div
             data-test="notice-confirm"
             className="flex w-full p-4 flex-col justify-around items-center"
             style={{ backgroundColor: "#ffea8a" }}
           >
-            {matches.length === 1 ? (
+            {matchedPersons.length === 1 ? (
               <Fragment>
                 <div className="flex w-full  flex-row justify-around items-center mb-4">
                   <div className="flex w-full flex-col ">
@@ -122,7 +119,7 @@ const Index = ({
                         Existing member found:
                       </h1>
                       <h1 className="ml-2 text-2xl text-blue-600">
-                        {matches[0]?.fullName}
+                        {matchedPersons[0]?.fullName}
                       </h1>
                     </div>
 
@@ -147,7 +144,7 @@ const Index = ({
                       data-test="confirm-person-btn"
                       className="px-4 py-2 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
                       onClick={() => {
-                        if (matches.length == 1) {
+                        if (matchedPersons.length == 1) {
                           onMatch(currentMatch);
                         }
                       }}
@@ -191,12 +188,12 @@ const Index = ({
 
         {isListView ? (
           <div className="flex flex-col w-full justify-center">
-            {matches &&
-              matches?.map((match, i) => (
+            {matchedPersons &&
+              matchedPersons?.map((match, i) => (
                 <MatchItem
                   onSelectDataIndex={() => {
-                    setCurrentMatch(matches[i]);
-                    onMatch(matches[i]);
+                    setCurrentMatch(matchedPersons[i]);
+                    onMatch(matchedPersons[i]);
                   }}
                   key={match.id}
                   person={{

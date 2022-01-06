@@ -1,0 +1,88 @@
+[
+  {
+    "id": "5d85b908983ed557658bfa1c",
+    "familyName": "Teng",
+    "givenName": "Austen",
+    "fullName": "Teng Austen",
+    "name": {
+      "order": "familygiven",
+      "salutation": null
+    },
+    "gender": "m",
+    "birthDate": {
+      "id": "440523c8c1fc01846f24e2f3",
+      "name": "birth",
+      "date": "1966-03-23T00:00:00.000Z",
+      "year": 1966,
+      "month": 3,
+      "day": 23
+    },
+    "phones": [
+      {
+        "id": "4a2418dcaa7d38fa8e2936fb",
+        "fullNumber": "6591123662",
+        "type": "mobile",
+        "countryCode": "65",
+        "areaCode": "",
+        "number": "91123662",
+        "regionCode": "SG",
+        "lineType": "mobile",
+        "optIn": true,
+        "valid": true
+      }
+    ],
+    "emails": [],
+    "membership": {
+      "membershipId": "5d85b9087b34a20388a2ace2",
+      "programId": "5d12e1a1e4a5c53fdd6fe352",
+      "tierLevel": 1,
+      "startTime": "2019-09-21T05:45:44.230Z",
+      "endTime": "2020-09-19T15:59:59.000Z",
+      "cardNumber": "S0650001239",
+      "registeredAt": "2019-09-21T05:52:32.576Z"
+    }
+  },
+  {
+    "id": "1d85b908983ed557658bfa1c",
+    "familyName": "Joel",
+    "givenName": "Pablo",
+    "fullName": "Joel Pablo",
+    "name": {
+      "order": "familygiven",
+      "salutation": null
+    },
+    "gender": "m",
+    "birthDate": {
+      "id": "440523c8c1fc01846f24e2f3",
+      "name": "birth",
+      "date": "1966-03-23T00:00:00.000Z",
+      "year": 1966,
+      "month": 3,
+      "day": 23
+    },
+    "phones": [
+      {
+        "id": "4a2418dcaa7d38fa8e2936fb",
+        "fullNumber": "6591123662",
+        "type": "mobile",
+        "countryCode": "65",
+        "areaCode": "",
+        "number": "91123662",
+        "regionCode": "SG",
+        "lineType": "mobile",
+        "optIn": true,
+        "valid": true
+      }
+    ],
+    "emails": [],
+    "membership": {
+      "membershipId": "5d85b9087b34a20388a2ace2",
+      "programId": "5d12e1a1e4a5c53fdd6fe352",
+      "tierLevel": 1,
+      "startTime": "2019-09-21T05:45:44.230Z",
+      "endTime": "2020-09-19T15:59:59.000Z",
+      "cardNumber": "S0650001239",
+      "registeredAt": "2019-09-21T05:52:32.576Z"
+    }
+  }
+]

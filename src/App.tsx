@@ -5,7 +5,6 @@ import { useLocation } from "react-router-dom";
 import AppMenu from "./components/AppMenu";
 import { getSettings, setSettings } from "./helpers/activation";
 import { client } from "./helpers/api-client";
-// import "./mirage";
 import { activateParams, VIEWS } from "./types";
 import AddSales from "./views/add-sales";
 import IssueCard from "./views/issue-card";
@@ -13,7 +12,6 @@ import LoginForm from "./views/login";
 
 function App(props) {
   const { pathname, search } = useLocation();
-  // const navigate = useNavigate();
 
   const [localSettings, setLocalSettings] = useState<any>(null);
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
@@ -35,9 +33,10 @@ function App(props) {
             body: JSON.stringify(activateParams),
           })
           .then((res) => {
+            console.log("activate response ", res);
+
             if (!res.error) {
               setSettings(res);
-              console.log("get settings ", getSettings());
               setLocalSettings(res);
               setViewState(VIEWS.LOGIN);
               return;
@@ -64,6 +63,11 @@ function App(props) {
 
       if (mod && mod === "1") {
         setViewState(VIEWS.ISSUE_CARD);
+        return;
+      }
+
+      if (mod && mod === "2") {
+        setViewState(VIEWS.ADD_SALES);
         return;
       }
 
@@ -155,7 +159,15 @@ function App(props) {
             />
           ),
           [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
-          [VIEWS.ADD_SALES]: <AddSales onDone={handleBackToMenu} />,
+          [VIEWS.ADD_SALES]: (
+            <AddSales
+              currency={localSettings?.business?.currency}
+              installationId={localSettings?.installation?.id}
+              programs={localSettings?.programs}
+              location={localSettings?.location}
+              onDone={handleBackToMenu}
+            />
+          ),
           [VIEWS.ISSUE_CARD]: (
             <IssueCard
               onDone={handleBackToMenu}
