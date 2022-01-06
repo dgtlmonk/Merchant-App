@@ -11,7 +11,7 @@ export default ({ onActivate }: Props) => (
   >
     <div className="flex flex-col items-center justify-center bg-white p-12 rounded-xl shadow-md">
       <div className="w-14 -mt-20 mb-4 ">
-        <img src="assets/perkd_logo.png" loading="lazy" alt="Perkd Logo" />
+        <img src="perkd_logo.png" loading="lazy" alt="Perkd Logo" />
       </div>
       <h1 className="font-semibold text-2xl tracking-wide text-gray-600">
         Perkd Merchant&trade; App

@@ -4,42 +4,53 @@ import { VitePWA } from "vite-plugin-pwa";
 const path = require("path");
 
 export default defineConfig(({ command, mode }) => {
-  if (command === "serve") {
-    return {
-      // dev specific config
-
-      resolve: {
-        alias: {
-          "@": path.resolve(__dirname, "./src"),
-        },
+  // if (command === "serve") {
+  return {
+    // dev specific config
+    root: "./",
+    build: {
+      outDir: "dist",
+    },
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
       },
-      publicDir: "public/assets",
-      plugins: [
-        react(),
-        VitePWA({
-          srcDir: "src",
-          filename: "sw.ts",
-        }),
-      ],
-    };
-  } else {
-    // command === 'build'
-    return {
-      // build specific config
-
-      resolve: {
-        alias: {
-          "@": path.resolve(__dirname, "./src"),
+    },
+    publicDir: command === "serve" ? "public/assets" : "public",
+    plugins: [
+      react(),
+      VitePWA({
+        includeAssets: [
+          "favicon.svg",
+          "favicon.ico",
+          "robots.txt",
+          "apple-touch-icon.png",
+        ],
+        manifest: {
+          name: "Perkd Merchant App",
+          short_name: "Perkd Merchant",
+          description: "Perkd Merchant App",
+          theme_color: "#ffffff",
+          icons: [
+            {
+              src: "pwa-192x192.png",
+              sizes: "192x192",
+              type: "image/png",
+            },
+            {
+              src: "pwa-512x512.png",
+              sizes: "512x512",
+              type: "image/png",
+            },
+            {
+              src: "pwa-512x512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "any maskable",
+            },
+          ],
         },
-      },
-      publicDir: "public",
-      plugins: [
-        react(),
-        VitePWA({
-          srcDir: "src",
-          filename: "sw.ts",
-        }),
-      ],
-    };
-  }
+      }),
+    ],
+  };
 });
