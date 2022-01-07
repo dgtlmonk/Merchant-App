@@ -128,7 +128,7 @@ const Index = ({ isNotQualified, membership, onDone }: Props) => {
             </div>
 
             <button
-              className="p-2 mt-8 border rounded-md w-full bg-blue-400 text-white font-medium"
+              className="h-12 p-2 mt-8 border rounded-md w-full bg-blue-400 text-white font-medium"
               onClick={onDone}
             >
               Done

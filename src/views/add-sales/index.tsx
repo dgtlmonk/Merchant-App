@@ -309,7 +309,7 @@ function Index({
                     <div>
                       <button
                         data-test="ok-no-match-btn"
-                        className="px-4 py-2 border rounded-md w-12 bg-blue-400 text-white font-medium"
+                        className="px-4 py-2 border rounded-md w-12 h-12   bg-blue-400 text-white font-medium"
                         onClick={() => setIsSearchingSuccess(false)}
                       >
                         Ok
@@ -468,14 +468,14 @@ function Index({
               <button
                 data-test="sales-reset-btn"
                 disabled={isSubmitting}
-                className={`p-2 px-8 border rounded-md  bg-slate-400 text-white mr-4`}
+                className={`h-12  p-2 px-8 border rounded-md  bg-slate-400 text-white mr-4`}
                 onClick={handleReset}
               >
                 Cancel
               </button>
               <button
                 data-test="sales-confirm-btn"
-                className={`p-2 px-8 border rounded-md  bg-blue-400 text-white`}
+                className={`h-12  p-2 px-8 border rounded-md  bg-blue-400 text-white`}
                 onClick={handleConfirm}
               >
                 {isSalesSubmitSuccess ? "New Sales" : "Confirm"}

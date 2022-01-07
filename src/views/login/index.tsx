@@ -3,8 +3,8 @@ import { CircularProgress, TextField } from "@material-ui/core";
 import { useRef, useState } from "react";
 import { client } from "../../helpers/api-client";
 
-const ep = "https://bbab-2404-3c00-482e-99c0-c06c-bf4d-6f69-fb47.ngrok.io";
-const host = `${ep}/api/users/login`;
+const host = import.meta.env.VITE_API_HOST;
+
 // "http://d4b2-2404-3c00-482e-99c0-5d39-e26c-8a0a-2dbd.ngrok.io/api/users/login";
 
 // const host = "https://61bbe191e943920017784fd9.mockapi.io/login";
@@ -17,14 +17,14 @@ type Props = {
 export default ({ onSuccess, settings }: Props) => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isLoginFailed, setIsLoginFailed] = useState(false);
-  const emailRef = useRef();
+  const usernameRef = useRef();
   const passwordRef = useRef();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     // @ts-ignore
-    const email = emailRef?.current?.value;
+    const username = usernameRef?.current?.value;
 
     // @ts-ignore
     const password = passwordRef?.current?.value;
@@ -33,17 +33,24 @@ export default ({ onSuccess, settings }: Props) => {
     setIsLoginFailed(false);
 
     client
-      .post(host, {
+      .post(`${host}/login?tenant_code=${settings.business?.tenantCode}`, {
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
+        },
         body: JSON.stringify({
-          email,
+          username,
           password,
         }),
       })
+
       .then((res) => {
         if (res.error) {
           setIsLoginFailed(true);
           return;
         }
+
         onSuccess();
       })
       .finally(() => setIsAuthenticating(false));
@@ -51,20 +58,29 @@ export default ({ onSuccess, settings }: Props) => {
 
   return (
     <div className="flex flex-col p-12 items-center justify-center max-w-md h-full">
-      <div>{settings?.location?.name}</div>
+      <div className="mb-8 text-3xl font-semibold">
+        {settings?.location?.name}
+      </div>
       <form className="flex flex-col" onSubmit={handleSubmit}>
         <TextField
-          label="email"
-          inputRef={emailRef}
           required
+          label="username"
+          inputRef={usernameRef}
           disabled={isAuthenticating}
+          inputProps={{
+            ["data-test"]: "login-username",
+          }}
         />
         <span className="flex mt-4">
           <TextField
             label="password"
+            type="password"
             inputRef={passwordRef}
             required
             disabled={isAuthenticating}
+            inputProps={{
+              ["data-test"]: "login-password",
+            }}
           />
         </span>
         {isAuthenticating ? (
@@ -73,15 +89,16 @@ export default ({ onSuccess, settings }: Props) => {
           </div>
         ) : (
           <button
+            data-test="login-btn"
             type="submit"
-            className="p-2 mt-4 rounded-md w-full bg-blue-400 text-white font-medium"
+            className="p-2 mt-4 h-12 rounded-md w-full bg-blue-400 text-white font-medium"
           >
             Login
           </button>
         )}
         {isLoginFailed && (
           <div className="flex justify-center p-2 prose-sm text-red-600">
-            Invalid login
+            Login failed
           </div>
         )}
       </form>

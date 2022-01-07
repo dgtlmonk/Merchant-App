@@ -33,7 +33,7 @@ export default ({ onActivate }: Props) => (
             </button>
             <button
               data-test="activate-btn"
-              className="px-2 py-1  border rounded-md w-full bg-blue-400 text-white font-medium"
+              className="px-2 py-1 h-12  border rounded-md w-full bg-blue-400 text-white font-medium"
               onClick={onActivate}
             >
               Activate

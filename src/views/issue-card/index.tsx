@@ -379,7 +379,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
         >
           <div className="flex flex-row justify-center items-center relative w-full h-16 border">
             <button
-              className={`absolute top-0 left-0 h-16 w-16 ${
+              className={`absolute top-0 left-0 h-16 w-16  ${
                 viewState === VIEW.fullfilled ? "hidden" : "visible"
               }`}
               onClick={handlePreviousView}
@@ -489,14 +489,14 @@ function Index({ onDone, programs, location, installationId }: Props) {
                           <div className="flex flex-row w-full p-2 justify-around ">
                             <button
                               data-test="person-query-same-person-btn"
-                              className="px-2 py-1 h-12 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                              className="h-12  px-2 py-1 h-12 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
                               onClick={handleConfirmMatch(true)}
                             >
                               Yes
                             </button>
 
                             <button
-                              className="px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium"
+                              className="h-12  px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium"
                               onClick={handleConfirmMatch(false)}
                             >
                               No
@@ -532,7 +532,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                         </span>
                         <button
                           data-test="person-query-btn"
-                          className={`p-2 border w-full rounded-md bg-blue-400 text-white font-medium
+                          className={`h-12 p-2 border w-full rounded-md bg-blue-400 text-white font-medium
                       ${
                         matchStatus !== MATCH_STATUS.searching
                           ? "visible"
@@ -573,7 +573,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                           <button
                             type="submit"
                             data-test="issue-next-btn"
-                            className="p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-4"
+                            className="h-12 p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-4"
                           >
                             Next
                           </button>

@@ -111,7 +111,7 @@ function App(props) {
                   <div>You are attempting to change it</div>
                   <div className="flex flex-row w-full mt-8">
                     <button
-                      className={`mr-4 p-2 px-8 border rounded-md  text-white`}
+                      className={`mr-4 h-12 p-2 px-8 border rounded-md  text-white`}
                       style={{ backgroundColor: "red" }}
                       id="update-settings"
                       onClick={handleUpdateSettings}
@@ -119,7 +119,7 @@ function App(props) {
                       Change
                     </button>
                     <button
-                      className={`p-2 px-8 border rounded-md  bg-blue-400 text-white`}
+                      className={`p-2 h-12  px-8 border rounded-md  bg-blue-400 text-white`}
                       onClick={() => setViewState(VIEWS.LOGIN)}
                       id="update-cancel"
                     >
