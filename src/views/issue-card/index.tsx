@@ -3,13 +3,14 @@ import { ArrowBack } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { Fragment, useEffect, useRef, useState } from "react";
-import Barcode from "react-barcode";
+// import Barcode from "react-barcode";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
 import { useMediaQuery } from "react-responsive";
 // import PhoneInput from "react-phone-input-2";
 // import "react-phone-input-2/lib/material.css";
 import { client, qualifySvcUrl } from "../../helpers/api-client";
+import { getMembershipDetails } from "../../helpers/membership";
 import { QUALIFY_TYPES, schema, uiSchema } from "../../types";
 import CardConfirm from "./components/CardConfirm";
 import CardIssued from "./components/CardIssued";
@@ -56,13 +57,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [data, setData] = useState<any>({});
-  const [matchData, setMatchData] = useState<any>({});
+  const [matchedPerson, setMatchedPerson] = useState<any[]>([]);
 
   const formDataRef = useRef<any>();
-  const familyNameRef = useRef<any>();
-  const givenNameRef = useRef<any>();
-  const birthDateRef = useRef<any>();
-  const mobileRef = useRef<any>();
+  const searchQueryRef = useRef<any>();
   const prevViewRef = useRef<VIEW>();
   const programRef = useRef<any>(null);
 
@@ -115,12 +113,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
     }
   }, [programs]);
 
-  // TODO: validate
-  let payload = {
-    membershipId: "5d12e1a1e4a5c53fdd6fe352",
-    placeId: "5d1b019745828f10b6c5eed1",
-  };
-
   useEffect(() => {
     if (data) {
       setDisplayName(`${data?.givenName} ${data?.familyName}`);
@@ -128,16 +120,16 @@ function Index({ onDone, programs, location, installationId }: Props) {
   }, [data]);
 
   useEffect(() => {
-    if (matchData) {
+    if (matchedPerson) {
       setData({
         ...data,
       });
       formDataRef.current = {
         ...data,
-        mobile: matchData?.person?.mobile?.fullNumber,
+        mobile: matchedPerson[0]?.phones[0]?.fullNumber,
       };
     }
-  }, [matchData]);
+  }, [matchedPerson]);
 
   useEffect(() => {
     if (!toggleDisplayName) {
@@ -202,7 +194,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
           if (res?.qualify === QUALIFY_TYPES.CONFIRM) {
             setData({ ...formData });
             setMatchStatus(MATCH_STATUS.confirm);
-            setMatchData(res?.persons);
+            setMatchedPerson(res?.persons);
             setViewState(VIEW.confirm);
             return;
           }
@@ -261,30 +253,8 @@ function Index({ onDone, programs, location, installationId }: Props) {
       });
   }
 
-  function getMembershipDetails(programId: string, tierLevel: number) {
-    if (!programs || !programs.length) return null;
-
-    const currentProgram = programs.filter(
-      (program) => program.programId === programId
-    )[0];
-
-    // @ts-ignore
-    if (currentProgram && currentProgram?.tiers) {
-      // @ts-ignore
-      const { tiers } = currentProgram;
-
-      if (tiers && tiers.length) {
-        const currentMembership = tiers.filter(
-          (tier) => tier.level == tierLevel
-        )[0];
-
-        return currentMembership;
-      }
-
-      return null;
-    }
-
-    return null;
+  function getMembershipDetailsProxy(programId: string, tierLevel: number) {
+    return getMembershipDetails(programId, tierLevel, programs);
   }
 
   function renderCardList() {
@@ -319,35 +289,39 @@ function Index({ onDone, programs, location, installationId }: Props) {
     setViewState(VIEW.card_select);
   }
 
-  function handleMatchPerson() {
-    const payload = {
-      giveName: givenNameRef.current.value,
-      familyName: familyNameRef.current.value,
-      mobile: mobileRef.current.value,
-    };
+  function handleSearchPerson() {
+    if (!searchQueryRef.current.value) {
+      searchQueryRef.current.focus();
+      return;
+    }
 
     setMatchStatus(MATCH_STATUS.searching);
-
     client
-      .post(`${host}/memberships/match`, {
+      .get(`${host}/person/search?q=${searchQueryRef.current.value}`, {
         headers: {
+          "content-type": "application/json",
           "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
         },
-        body: JSON.stringify(payload),
       })
       .then((res: any[]) => {
-        if (res.length) {
+        console.log(" search response ", res);
+
+        // single result
+        // TODO:  handle multiple result
+        if (res.length === 1) {
           const [program] = res;
 
           const personMembership = getMembershipDetails(
             program.programId,
-            program.tierLevel
+            program.tierLevel,
+            programs
           );
 
           personMembership && setSelectedMembership(personMembership);
 
           setMatchStatus(MATCH_STATUS.found);
-          setMatchData(program);
+          setMatchedPerson(res);
         } else {
           setMatchStatus(MATCH_STATUS.not_found);
         }
@@ -357,28 +331,35 @@ function Index({ onDone, programs, location, installationId }: Props) {
   const handleConfirmMatch = (confirm: boolean) => (e) => {
     prevViewRef.current = VIEW.search;
 
-    const params = Object.assign(Object.create(null, {}), {
-      membershipId: matchData?.membershipId,
-      placeId: payload.placeId,
-    });
+    const [person] = matchedPerson;
+
+    setMatchStatus(MATCH_STATUS.idle);
+
+    // const params = Object.assign(Object.create(null, {}), {
+    //   membershipId: person?.membershipId,
+    // });
 
     // revoke
     if (!confirm) {
-      client
-        .post(`${host}/cards/revoke`, {
-          headers: {
-            "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-          },
-          body: JSON.stringify(params),
-        })
-        .then(() => {
-          setMatchStatus(MATCH_STATUS.idle);
-          setViewState(VIEW.confirm);
-        });
-    } else {
-      // issue
+      console.log("not the same member");
       setMatchStatus(MATCH_STATUS.idle);
       setViewState(VIEW.confirm);
+
+      // client
+      //   .post(`${host}/cards/revoke`, {
+      //     headers: {
+      //       "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+      //     },
+      //     body: JSON.stringify(params),
+      //   })
+      //   .then(() => {
+      //     setMatchStatus(MATCH_STATUS.idle);
+      //     setViewState(VIEW.confirm);
+      //   });
+    } else {
+      setMembership(person);
+      setMatchStatus(MATCH_STATUS.not_qualified);
+      setViewState(VIEW.fullfilled);
     }
   };
 
@@ -419,16 +400,18 @@ function Index({ onDone, programs, location, installationId }: Props) {
                 <div className="flex flex-col w-3/5  items-center">
                   <div className="flex flex-row p-8">
                     <button
+                      data-test="person-search"
                       className="h-16 justify-around flex border items-center
                     p-2 rounded-md px-8 text-gray-700"
                       onClick={() => {
                         setViewState(VIEW.search);
                         setMatchStatus(MATCH_STATUS.idle);
+                        setTimeout(() => {
+                          searchQueryRef?.current.focus();
+                        }, 500);
                       }}
                     >
-                      <span className="mr-4" data-test="person-search">
-                        Existing Member
-                      </span>
+                      <span className="mr-4">Existing Member</span>
                       <MdPersonSearch className="opacity-70 text-gray-800 w-6 h-6" />
                     </button>
                   </div>
@@ -438,123 +421,118 @@ function Index({ onDone, programs, location, installationId }: Props) {
                 </div>
               ),
               [VIEW.search]: (
-                <div className={`flex flex-col  h-full  w-full`}>
-                  <div
-                    className={`flex pt-4 flex-col justify-center items-center ${
-                      matchStatus === MATCH_STATUS.not_found
-                        ? "visible"
-                        : "hidden"
-                    }`}
-                  >
-                    <span
-                      className="text-red-600  p-2"
-                      style={{ fontSize: "1.4rem" }}
-                    >
-                      Member not found
-                    </span>
-                  </div>
-
-                  {/* match confirm start */}
-                  <div
-                    className={`flex pt-4 flex-col justify-center items-center ${
-                      matchStatus === MATCH_STATUS.idle ||
-                      matchStatus === MATCH_STATUS.not_found ||
-                      matchStatus === MATCH_STATUS.searching
-                        ? "hidden"
-                        : "visible"
-                    }`}
-                    style={{ backgroundColor: "#ffea8a" }}
-                  >
-                    <h2>Existing member found: </h2>
-                    <div className="flex flex-col  items-center">
-                      <h1 className="text-2xl text-gray-500">
-                        {matchData.person?.fullName}
-                      </h1>
-                      <span className="font-light text-sm text-gray-400">
-                        with the same mobile number
-                      </span>
-                    </div>
-
-                    <div className="w-96 mt-4">
-                      <img
-                        loading="lazy"
-                        src={selectedMembership?.digitalCard?.image.front}
-                      />
-                    </div>
-                    <div className="w-4/6 flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4 ">
-                      {/* <div className="flex px-2 w-full h-full justify-center"> */}
-
-                      <div
-                        className="flex  items-center mb-4"
-                        style={{ width: "350px" }}
-                      >
-                        {/* @ts-ignore */}
-                        <Barcode
-                          value={`${matchData?.cardNumber || "..."}`}
-                          width={3}
-                          height={130}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-4 mb-4 flex flex-col items-center">
-                      <h2>Is this the same person?</h2>
-                      <div className="flex flex-row w-full p-2 justify-around ">
-                        <button
-                          className="px-2 py-1 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
-                          onClick={handleConfirmMatch(true)}
-                        >
-                          Yes
-                        </button>
-
-                        <button
-                          className="px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium"
-                          onClick={handleConfirmMatch(false)}
-                        >
-                          No
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  {/* match confirm ends */}
-
-                  <div className="flex flex-col justify-center  items-center px-4 mt-4">
-                    <TextField
-                      style={{ marginBottom: "1rem" }}
-                      className="w-4/6"
-                      label="family name"
-                      inputRef={familyNameRef}
-                    />
-                    <TextField
-                      style={{ marginBottom: "1rem" }}
-                      className="w-4/6 mb-4"
-                      label="given name"
-                      inputRef={givenNameRef}
-                    />
-                    <TextField
-                      style={{ marginBottom: "1rem" }}
-                      className="w-4/6"
-                      label="birth date"
-                      inputRef={birthDateRef}
-                    />
-                    <TextField
-                      className="w-4/6"
-                      label="mobile"
-                      inputRef={mobileRef}
-                    />
-                  </div>
-                  <div className="flex w-full mt-8 px-8">
-                    <span
-                      className={`w-full flex justify-center ${
-                        matchStatus === MATCH_STATUS.searching
+                <div className={`flex flex-col  h-full w-full`}>
+                  <div className="flex flex-col  justify-center  items-center">
+                    <div
+                      className={`flex pt-4 flex-col justify-center items-center ${
+                        matchStatus === MATCH_STATUS.not_found
                           ? "visible"
                           : "hidden"
                       }`}
                     >
-                      <CircularProgress size="2rem" />
-                    </span>
-                    <button
-                      className={`p-2 border w-full rounded-md bg-blue-400 text-white font-medium
+                      <span
+                        className="text-red-600  p-2"
+                        style={{ fontSize: "1.4rem" }}
+                      >
+                        Member not found
+                      </span>
+                    </div>
+
+                    {/* match confirm start */}
+                    {/* refactor on next iteration */}
+                    {matchedPerson[0] && matchedPerson[0]?.activeMemberships ? (
+                      <div
+                        className={`flex w-full p-4 mb-4 flex-col justify-around items-center ${
+                          matchStatus === MATCH_STATUS.idle ||
+                          matchStatus === MATCH_STATUS.not_found ||
+                          matchStatus === MATCH_STATUS.searching
+                            ? "hidden"
+                            : "visible"
+                        }`}
+                        style={{ backgroundColor: "#ffea8a" }}
+                      >
+                        <div className="flex w-full  flex-row justify-around items-center mb-4">
+                          <div className="flex w-full flex-col ">
+                            <div className="flex flex-row text-2xl">
+                              <h1 className=" text-gray-500">
+                                Existing member found:
+                              </h1>
+                              <h1 className="ml-2  text-blue-600 font-bold">
+                                {matchedPerson[0]?.fullName}
+                              </h1>
+                            </div>
+                          </div>
+                          <div className="p-2">
+                            <img
+                              loading="lazy"
+                              src={`${
+                                getMembershipDetailsProxy(
+                                  matchedPerson[0]?.activeMemberships[
+                                    matchedPerson[0]?.activeMemberships
+                                      ?.length - 1
+                                  ]?.programId,
+                                  matchedPerson[0]?.activeMemberships[
+                                    matchedPerson[0]?.activeMemberships
+                                      ?.length - 1
+                                  ]?.tierLevel
+                                )?.card?.image?.thumbnail
+                              }`}
+                              width="150"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mt-4 flex flex-col items-center">
+                          <h2 style={{ fontSize: "1.5rem" }}>
+                            Is this the same person?
+                          </h2>
+                          <div className="flex flex-row w-full p-2 justify-around ">
+                            <button
+                              data-test="person-query-same-person-btn"
+                              className="px-2 py-1 h-12 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                              onClick={handleConfirmMatch(true)}
+                            >
+                              Yes
+                            </button>
+
+                            <button
+                              className="px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium"
+                              onClick={handleConfirmMatch(false)}
+                            >
+                              No
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* match confirm ends */}
+
+                    <div className="flex flex-col justify-center items-center">
+                      <div className="flex flex-col justify-center  items-center px-4 mt-4 w-full">
+                        <TextField
+                          label="card or mobile number"
+                          InputLabelProps={{ style: { fontSize: 20 } }} // font size of input text
+                          inputProps={{
+                            style: { fontSize: "2rem" },
+                            ["data-test"]: "seach-mobile-input",
+                          }}
+                          inputRef={searchQueryRef}
+                        />
+                      </div>
+                      <div className="flex w-full mt-8 px-8">
+                        <span
+                          className={`w-full flex justify-center ${
+                            matchStatus === MATCH_STATUS.searching
+                              ? "visible"
+                              : "hidden"
+                          }`}
+                        >
+                          <CircularProgress size="2rem" />
+                        </span>
+                        <button
+                          data-test="person-query-btn"
+                          className={`p-2 border w-full rounded-md bg-blue-400 text-white font-medium
                       ${
                         matchStatus !== MATCH_STATUS.searching
                           ? "visible"
@@ -562,10 +540,12 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       }
                       
                       `}
-                      onClick={handleMatchPerson}
-                    >
-                      Search
-                    </button>
+                          onClick={handleSearchPerson}
+                        >
+                          Search
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ),
@@ -605,8 +585,8 @@ function Index({ onDone, programs, location, installationId }: Props) {
               ),
               [VIEW.confirm]: (
                 <CardConfirm
-                  getMembershipDetails={getMembershipDetails}
-                  matchedPersons={matchData}
+                  getMembershipDetails={getMembershipDetailsProxy}
+                  matchedPersons={matchedPerson}
                   displayName={displayName}
                   onDone={handleDone}
                   onToggleDisplayName={() =>

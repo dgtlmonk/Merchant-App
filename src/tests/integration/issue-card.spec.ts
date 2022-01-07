@@ -273,14 +273,14 @@ describe("Issue Card", () => {
     cy.get("#root_mobile").type("639194550938");
 
     const nextBtn = cy.get('[data-test="issue-next-btn"]');
-
     nextBtn.click();
+
     cy.wait("@qualify");
     expect(cy.contains(/same person/i)).to.exist;
 
-    const confirmBtn = cy.get('[data-test="confirm-person-btn"]');
-    confirmBtn.click();
-    expect(cy.contains(/card already/i)).to.exist;
+    // const confirmBtn = cy.get('[data-test="confirm-person-btn"]');
+    // confirmBtn.click();
+    // expect(cy.contains(/card already/i)).to.exist;
   });
 
   it("should continue to join, given search member was found but not the same person", () => {

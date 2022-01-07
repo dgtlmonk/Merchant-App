@@ -1,0 +1,47 @@
+[
+  {
+    "id": "61d42c961dabe90020b37f89",
+    "familyName": "Pablo",
+    "givenName": "Joel",
+    "fullName": "Joel Pablo",
+    "name": {
+      "order": "givenfamily",
+      "salutation": null
+    },
+    "gender": "m",
+    "phones": [
+      {
+        "id": "06c1bd29e510cabb5e5d013c",
+        "fullNumber": "639194550938",
+        "type": "mobile",
+        "countryCode": "63",
+        "areaCode": "",
+        "number": "9194550938",
+        "regionCode": "PH",
+        "lineType": "mobile",
+        "optIn": null,
+        "valid": true
+      }
+    ],
+    "emails": [
+      {
+        "id": "a00b099f",
+        "address": "joel@perkd.me",
+        "type": "work",
+        "optIn": null,
+        "valid": true
+      }
+    ],
+    "activeMemberships": [
+      {
+        "membershipId": "61d42c967a461b0021b3ab38",
+        "programId": "5d12e1a1e4a5c53fdd6fe352",
+        "tierLevel": 1,
+        "startTime": "2022-01-04T11:16:38.300Z",
+        "endTime": "2023-01-03T15:59:59.999Z",
+        "cardNumber": "S0651022529",
+        "registeredAt": null
+      }
+    ]
+  }
+]

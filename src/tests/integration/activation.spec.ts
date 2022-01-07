@@ -28,7 +28,7 @@ describe("Activation", () => {
     expect(cy.contains(/no longer/i)).to.exist;
   });
 
-  it.only("should prompt confirm use app, given no local settings is detected", () => {
+  it("should prompt confirm use app, given no local settings is detected", () => {
     cy.visit("http://localhost:3000/activate?callback=https://someurl.io");
 
     expect(cy.contains(/confirm you want to use app/i)).to.exist;

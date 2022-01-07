@@ -3,6 +3,7 @@ import { ArrowBack, EmailOutlined, PhoneOutlined } from "@material-ui/icons";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { client } from "../../helpers/api-client";
+import { getMembershipDetails } from "../../helpers/membership";
 
 type Props = {
   onDone: () => void;
@@ -104,7 +105,8 @@ function Index({
                   ].programId,
                   person?.activeMemberships[
                     person?.activeMemberships?.length - 1
-                  ]?.tierLevel
+                  ]?.tierLevel,
+                  programs
                 )?.card?.image?.thumbnail
               }`}
             />
@@ -258,32 +260,6 @@ function Index({
     }, 200);
   }
 
-  function getMembershipDetails(programId: string, tierLevel: number) {
-    if (!programs || !programs.length) return null;
-
-    const currentProgram = programs.filter(
-      (program) => program.programId === programId
-    )[0];
-
-    // @ts-ignore
-    if (currentProgram && currentProgram?.tiers) {
-      // @ts-ignore
-      const { tiers } = currentProgram;
-
-      if (tiers && tiers.length) {
-        const currentMembership = tiers.filter(
-          (tier) => tier.level == tierLevel
-        )[0];
-
-        return currentMembership;
-      }
-
-      return null;
-    }
-
-    return null;
-  }
-
   function handleSelectMatchedPerson(personData: any) {
     setPerson(personData);
     setIsPersonFound(true);
@@ -394,7 +370,8 @@ function Index({
                           src={`${
                             getMembershipDetails(
                               person?.membership.programId,
-                              person?.membership.tierLevel
+                              person?.membership.tierLevel,
+                              programs
                             )?.card?.image?.thumbnail
                           }`}
                         />
