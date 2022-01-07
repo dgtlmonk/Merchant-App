@@ -56,13 +56,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [data, setData] = useState<any>({});
-  const [matchData, setMatchData] = useState<any>({});
+  const [selectedPerson, setSelectedPerson] = useState<any>({});
 
   const formDataRef = useRef<any>();
-  const familyNameRef = useRef<any>();
-  const givenNameRef = useRef<any>();
-  const birthDateRef = useRef<any>();
-  const mobileRef = useRef<any>();
+  const searchQueryRef = useRef<any>();
   const prevViewRef = useRef<VIEW>();
   const programRef = useRef<any>(null);
 
@@ -128,16 +125,16 @@ function Index({ onDone, programs, location, installationId }: Props) {
   }, [data]);
 
   useEffect(() => {
-    if (matchData) {
+    if (selectedPerson) {
       setData({
         ...data,
       });
       formDataRef.current = {
         ...data,
-        mobile: matchData?.person?.mobile?.fullNumber,
+        mobile: selectedPerson?.person?.mobile?.fullNumber,
       };
     }
-  }, [matchData]);
+  }, [selectedPerson]);
 
   useEffect(() => {
     if (!toggleDisplayName) {
@@ -202,7 +199,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
           if (res?.qualify === QUALIFY_TYPES.CONFIRM) {
             setData({ ...formData });
             setMatchStatus(MATCH_STATUS.confirm);
-            setMatchData(res?.persons);
+            setSelectedPerson(res?.persons);
             setViewState(VIEW.confirm);
             return;
           }
@@ -319,21 +316,20 @@ function Index({ onDone, programs, location, installationId }: Props) {
     setViewState(VIEW.card_select);
   }
 
-  function handleMatchPerson() {
-    const payload = {
-      giveName: givenNameRef.current.value,
-      familyName: familyNameRef.current.value,
-      mobile: mobileRef.current.value,
-    };
+  function handleSearchPerson() {
+    if (!searchQueryRef.current.value) {
+      searchQueryRef.current.focus();
+      return;
+    }
 
     setMatchStatus(MATCH_STATUS.searching);
-
     client
-      .post(`${host}/memberships/match`, {
+      .get(`${host}/person/search?q=${searchQueryRef.current.value}`, {
         headers: {
+          "content-type": "application/json",
           "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
         },
-        body: JSON.stringify(payload),
       })
       .then((res: any[]) => {
         if (res.length) {
@@ -347,7 +343,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
           personMembership && setSelectedMembership(personMembership);
 
           setMatchStatus(MATCH_STATUS.found);
-          setMatchData(program);
+          setSelectedPerson(program);
         } else {
           setMatchStatus(MATCH_STATUS.not_found);
         }
@@ -358,7 +354,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
     prevViewRef.current = VIEW.search;
 
     const params = Object.assign(Object.create(null, {}), {
-      membershipId: matchData?.membershipId,
+      membershipId: selectedPerson?.membershipId,
       placeId: payload.placeId,
     });
 
@@ -419,16 +415,18 @@ function Index({ onDone, programs, location, installationId }: Props) {
                 <div className="flex flex-col w-3/5  items-center">
                   <div className="flex flex-row p-8">
                     <button
+                      data-test="person-search"
                       className="h-16 justify-around flex border items-center
                     p-2 rounded-md px-8 text-gray-700"
                       onClick={() => {
                         setViewState(VIEW.search);
                         setMatchStatus(MATCH_STATUS.idle);
+                        setTimeout(() => {
+                          searchQueryRef?.current.focus();
+                        }, 500);
                       }}
                     >
-                      <span className="mr-4" data-test="person-search">
-                        Existing Member
-                      </span>
+                      <span className="mr-4">Existing Member</span>
                       <MdPersonSearch className="opacity-70 text-gray-800 w-6 h-6" />
                     </button>
                   </div>
@@ -438,123 +436,109 @@ function Index({ onDone, programs, location, installationId }: Props) {
                 </div>
               ),
               [VIEW.search]: (
-                <div className={`flex flex-col  h-full  w-full`}>
-                  <div
-                    className={`flex pt-4 flex-col justify-center items-center ${
-                      matchStatus === MATCH_STATUS.not_found
-                        ? "visible"
-                        : "hidden"
-                    }`}
-                  >
-                    <span
-                      className="text-red-600  p-2"
-                      style={{ fontSize: "1.4rem" }}
-                    >
-                      Member not found
-                    </span>
-                  </div>
-
-                  {/* match confirm start */}
-                  <div
-                    className={`flex pt-4 flex-col justify-center items-center ${
-                      matchStatus === MATCH_STATUS.idle ||
-                      matchStatus === MATCH_STATUS.not_found ||
-                      matchStatus === MATCH_STATUS.searching
-                        ? "hidden"
-                        : "visible"
-                    }`}
-                    style={{ backgroundColor: "#ffea8a" }}
-                  >
-                    <h2>Existing member found: </h2>
-                    <div className="flex flex-col  items-center">
-                      <h1 className="text-2xl text-gray-500">
-                        {matchData.person?.fullName}
-                      </h1>
-                      <span className="font-light text-sm text-gray-400">
-                        with the same mobile number
-                      </span>
-                    </div>
-
-                    <div className="w-96 mt-4">
-                      <img
-                        loading="lazy"
-                        src={selectedMembership?.digitalCard?.image.front}
-                      />
-                    </div>
-                    <div className="w-4/6 flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4 ">
-                      {/* <div className="flex px-2 w-full h-full justify-center"> */}
-
-                      <div
-                        className="flex  items-center mb-4"
-                        style={{ width: "350px" }}
-                      >
-                        {/* @ts-ignore */}
-                        <Barcode
-                          value={`${matchData?.cardNumber || "..."}`}
-                          width={3}
-                          height={130}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-4 mb-4 flex flex-col items-center">
-                      <h2>Is this the same person?</h2>
-                      <div className="flex flex-row w-full p-2 justify-around ">
-                        <button
-                          className="px-2 py-1 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
-                          onClick={handleConfirmMatch(true)}
-                        >
-                          Yes
-                        </button>
-
-                        <button
-                          className="px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium"
-                          onClick={handleConfirmMatch(false)}
-                        >
-                          No
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  {/* match confirm ends */}
-
-                  <div className="flex flex-col justify-center  items-center px-4 mt-4">
-                    <TextField
-                      style={{ marginBottom: "1rem" }}
-                      className="w-4/6"
-                      label="family name"
-                      inputRef={familyNameRef}
-                    />
-                    <TextField
-                      style={{ marginBottom: "1rem" }}
-                      className="w-4/6 mb-4"
-                      label="given name"
-                      inputRef={givenNameRef}
-                    />
-                    <TextField
-                      style={{ marginBottom: "1rem" }}
-                      className="w-4/6"
-                      label="birth date"
-                      inputRef={birthDateRef}
-                    />
-                    <TextField
-                      className="w-4/6"
-                      label="mobile"
-                      inputRef={mobileRef}
-                    />
-                  </div>
-                  <div className="flex w-full mt-8 px-8">
-                    <span
-                      className={`w-full flex justify-center ${
-                        matchStatus === MATCH_STATUS.searching
+                <div className={`flex flex-col  h-full w-full`}>
+                  <div className="flex flex-col  justify-center  items-center">
+                    <div
+                      className={`flex pt-4 flex-col justify-center items-center ${
+                        matchStatus === MATCH_STATUS.not_found
                           ? "visible"
                           : "hidden"
                       }`}
                     >
-                      <CircularProgress size="2rem" />
-                    </span>
-                    <button
-                      className={`p-2 border w-full rounded-md bg-blue-400 text-white font-medium
+                      <span
+                        className="text-red-600  p-2"
+                        style={{ fontSize: "1.4rem" }}
+                      >
+                        Member not found
+                      </span>
+                    </div>
+
+                    {/* match confirm start */}
+                    <div
+                      className={`flex  w-full pt-4 flex-col justify-center items-center ${
+                        matchStatus === MATCH_STATUS.idle ||
+                        matchStatus === MATCH_STATUS.not_found ||
+                        matchStatus === MATCH_STATUS.searching
+                          ? "hidden"
+                          : "visible"
+                      }`}
+                      style={{ backgroundColor: "#ffea8a" }}
+                    >
+                      <h2>Existing member found: </h2>
+                      <div className="flex flex-col  items-center">
+                        <h1 className="text-2xl text-gray-500">
+                          {selectedPerson.person?.fullName}
+                        </h1>
+                      </div>
+
+                      <div className="w-96 mt-4">
+                        <img
+                          loading="lazy"
+                          src={selectedMembership?.digitalCard?.image.front}
+                        />
+                      </div>
+                      <div className="w-4/6 flex flex-col  border justify-center align-center  bg-white shadow-md rounded-md mt-4 ">
+                        {/* <div className="flex px-2 w-full h-full justify-center"> */}
+
+                        <div
+                          className="flex  items-center mb-4"
+                          style={{ width: "350px" }}
+                        >
+                          {/* @ts-ignore */}
+                          <Barcode
+                            value={`${selectedPerson?.cardNumber || "..."}`}
+                            width={3}
+                            height={130}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-4 mb-4 flex flex-col items-center">
+                        <h2>Is this the same person?</h2>
+                        <div className="flex flex-row w-full p-2 justify-around ">
+                          <button
+                            className="px-2 py-1 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                            onClick={handleConfirmMatch(true)}
+                          >
+                            Yes
+                          </button>
+
+                          <button
+                            className="px-2 py-1 border rounded-md w-full bg-slate-400 text-white font-medium"
+                            onClick={handleConfirmMatch(false)}
+                          >
+                            No
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    {/* match confirm ends */}
+
+                    <div className="flex flex-col justify-center items-center">
+                      <div className="flex flex-col justify-center  items-center px-4 mt-4 w-full">
+                        <TextField
+                          label="card or mobile number"
+                          InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
+                          inputProps={{
+                            style: { fontSize: "2rem" },
+                            ["data-test"]: "seach-mobile-input",
+                          }}
+                          inputRef={searchQueryRef}
+                        />
+                      </div>
+                      <div className="flex w-full mt-8 px-8">
+                        <span
+                          className={`w-full flex justify-center ${
+                            matchStatus === MATCH_STATUS.searching
+                              ? "visible"
+                              : "hidden"
+                          }`}
+                        >
+                          <CircularProgress size="2rem" />
+                        </span>
+                        <button
+                          data-test="person-query-btn"
+                          className={`p-2 border w-full rounded-md bg-blue-400 text-white font-medium
                       ${
                         matchStatus !== MATCH_STATUS.searching
                           ? "visible"
@@ -562,10 +546,12 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       }
                       
                       `}
-                      onClick={handleMatchPerson}
-                    >
-                      Search
-                    </button>
+                          onClick={handleSearchPerson}
+                        >
+                          Search
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ),
@@ -606,7 +592,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
               [VIEW.confirm]: (
                 <CardConfirm
                   getMembershipDetails={getMembershipDetails}
-                  matchedPersons={matchData}
+                  matchedPersons={selectedPerson}
                   displayName={displayName}
                   onDone={handleDone}
                   onToggleDisplayName={() =>
