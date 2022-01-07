@@ -79,6 +79,11 @@ function Index({ onDone, programs, location, installationId }: Props) {
       return;
     }
 
+    if (viewState === VIEW.card_select) {
+      onDone();
+      return;
+    }
+
     if (viewState === VIEW.confirm) {
       setViewState(VIEW.fillup);
       return;
