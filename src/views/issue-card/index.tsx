@@ -56,7 +56,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
   const [displayName, setDisplayName] = useState<string>("");
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [data, setData] = useState<any>({});
-  const [selectedPerson, setSelectedPerson] = useState<any>({});
+  const [currentPerson, setCurrentPerson] = useState<any>({});
 
   const formDataRef = useRef<any>();
   const searchQueryRef = useRef<any>();
@@ -125,16 +125,16 @@ function Index({ onDone, programs, location, installationId }: Props) {
   }, [data]);
 
   useEffect(() => {
-    if (selectedPerson) {
+    if (currentPerson) {
       setData({
         ...data,
       });
       formDataRef.current = {
         ...data,
-        mobile: selectedPerson?.person?.mobile?.fullNumber,
+        mobile: currentPerson?.person?.mobile?.fullNumber,
       };
     }
-  }, [selectedPerson]);
+  }, [currentPerson]);
 
   useEffect(() => {
     if (!toggleDisplayName) {
@@ -199,7 +199,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
           if (res?.qualify === QUALIFY_TYPES.CONFIRM) {
             setData({ ...formData });
             setMatchStatus(MATCH_STATUS.confirm);
-            setSelectedPerson(res?.persons);
+            setCurrentPerson(res?.persons);
             setViewState(VIEW.confirm);
             return;
           }
@@ -343,7 +343,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
           personMembership && setSelectedMembership(personMembership);
 
           setMatchStatus(MATCH_STATUS.found);
-          setSelectedPerson(program);
+          setCurrentPerson(program);
         } else {
           setMatchStatus(MATCH_STATUS.not_found);
         }
@@ -354,7 +354,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
     prevViewRef.current = VIEW.search;
 
     const params = Object.assign(Object.create(null, {}), {
-      membershipId: selectedPerson?.membershipId,
+      membershipId: currentPerson?.membershipId,
       placeId: payload.placeId,
     });
 
@@ -467,7 +467,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       <h2>Existing member found: </h2>
                       <div className="flex flex-col  items-center">
                         <h1 className="text-2xl text-gray-500">
-                          {selectedPerson.person?.fullName}
+                          {currentPerson.person?.fullName}
                         </h1>
                       </div>
 
@@ -486,7 +486,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                         >
                           {/* @ts-ignore */}
                           <Barcode
-                            value={`${selectedPerson?.cardNumber || "..."}`}
+                            value={`${currentPerson?.cardNumber || "..."}`}
                             width={3}
                             height={130}
                           />
@@ -592,7 +592,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
               [VIEW.confirm]: (
                 <CardConfirm
                   getMembershipDetails={getMembershipDetails}
-                  matchedPersons={selectedPerson}
+                  matchedPersons={currentPerson}
                   displayName={displayName}
                   onDone={handleDone}
                   onToggleDisplayName={() =>

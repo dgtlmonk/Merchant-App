@@ -31,7 +31,7 @@ const Index = ({
 }: Props) => {
   const [previewDetails, setPreviewDetails] = useState<any>(null);
   const [isListView, setIsListView] = useState(false);
-  const [selectedPerson, setSelectedPerson] = useState<any>(null);
+  const [currentPerson, setCurrentPerson] = useState<any>(null);
 
   useEffect(() => {
     if (matchedPersons && matchedPersons?.length) {
@@ -48,7 +48,7 @@ const Index = ({
       setIsListView(true);
     } else {
       // @ts-ignore
-      setSelectedPerson(matchedPersons[0]);
+      setCurrentPerson(matchedPersons[0]);
     }
   }, [matchedPersons]);
 
@@ -147,7 +147,7 @@ const Index = ({
                       className="px-4 py-2 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
                       onClick={() => {
                         if (matchedPersons.length == 1) {
-                          onMatch(selectedPerson);
+                          onMatch(currentPerson);
                         }
                       }}
                     >
@@ -194,7 +194,7 @@ const Index = ({
               matchedPersons?.map((match, i) => (
                 <MatchItem
                   onSelectDataIndex={() => {
-                    setSelectedPerson(matchedPersons[i]);
+                    setCurrentPerson(matchedPersons[i]);
                     onMatch(matchedPersons[i]);
                   }}
                   key={match.id}

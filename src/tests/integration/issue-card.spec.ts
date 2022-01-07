@@ -241,7 +241,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it.only("should prompt confirmation, given existing member is found", () => {
+  it("should prompt confirmation, given existing member is found", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.intercept(`${apiServer}/membership/qualify`, {
