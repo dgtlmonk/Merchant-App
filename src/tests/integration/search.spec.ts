@@ -74,9 +74,9 @@ describe("Search Existing Member", () => {
     cy.viewport("ipad-2");
   });
 
-  it("should enable user to search for existing member", () => {
+  it("should display existing member prompt, given search returns a result", () => {
     cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
-      fixture: "query-mobile-result.json",
+      fixture: "search-result-single.json",
     }).as("search");
 
     cy.visit("http://localhost:3000/?module=1");
@@ -87,6 +87,63 @@ describe("Search Existing Member", () => {
     cy.get("input").type("919455");
     cy.get('[data-test="person-query-btn"]').click();
     cy.wait("@search");
+
+    expect(cy.contains(/existing member/i)).to.exist;
+  });
+
+  it("should prompt card already issued, given search result is the same person the user is searching", () => {
+    cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
+      fixture: "search-result-single.json",
+    }).as("search");
+
+    cy.visit("http://localhost:3000/?module=1");
+
+    const searchBtn = cy.get('[data-test="person-search"]');
+    searchBtn.click();
+
+    cy.get("input").type("919455");
+    cy.get('[data-test="person-query-btn"]').click();
+    cy.wait("@search");
+
+    expect(cy.contains(/existing member/i)).to.exist;
+    cy.get('[data-test="person-query-same-person-btn"]').click(); // user clicked 'Yes'  for matched result
+
+    expect(cy.contains(/card already issued/i)).to.exist;
+  });
+
+  it.only("should proceed to issue card, given search result is not the same person the user is searching", () => {
+    cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
+      fixture: "search-result-single.json",
+    }).as("search");
+
+    cy.visit("http://localhost:3000/?module=1");
+
+    const searchBtn = cy.get('[data-test="person-search"]');
+    searchBtn.click();
+
+    cy.get("input").type("919455");
+    cy.get('[data-test="person-query-btn"]').click();
+    cy.wait("@search");
+
+    expect(cy.contains(/existing member/i)).to.exist;
+    cy.get('[data-test="person-query-same-person-btn"]').click(); // user clicked 'Yes'  for matched result
+
+    expect(cy.contains(/card already issued/i)).to.exist;
+  });
+
+  it("should display list of matched result, given search returns more than one result", () => {
+    cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
+      fixture: "search-result-single.json",
+    }).as("search");
+
+    cy.visit("http://localhost:3000/?module=1");
+
+    const searchBtn = cy.get('[data-test="person-search"]');
+    searchBtn.click();
+
+    cy.get("input").type("919455");
+    // cy.get('[data-test="person-query-btn"]').click();
+    // cy.wait("@search");
   });
 });
 

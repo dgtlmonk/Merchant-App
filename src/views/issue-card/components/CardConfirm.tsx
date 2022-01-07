@@ -1,6 +1,7 @@
 import { TextField } from "@material-ui/core";
-import { EmailOutlined, Loop, PhoneOutlined } from "@material-ui/icons";
+import { Loop } from "@material-ui/icons";
 import { Fragment, useEffect, useState } from "react";
+import MembershipCard from "../../../components/MembershipCard";
 
 type Props = {
   cardImg: string;
@@ -18,7 +19,7 @@ type Props = {
 
 const Index = ({
   cardImg,
-  mobile,
+  mobile, // coming from form
   displayName,
   onToggleDisplayName,
   onDone,
@@ -32,6 +33,8 @@ const Index = ({
   const [previewDetails, setPreviewDetails] = useState<any>(null);
   const [isListView, setIsListView] = useState(false);
   const [currentPerson, setCurrentPerson] = useState<any>(null);
+
+  console.log(" matched persons ", matchedPersons);
 
   useEffect(() => {
     if (matchedPersons && matchedPersons?.length) {
@@ -51,56 +54,6 @@ const Index = ({
       setCurrentPerson(matchedPersons[0]);
     }
   }, [matchedPersons]);
-
-  type MatchItemProps = {
-    onSelectDataIndex: () => void;
-    person: {
-      fullName: string;
-      phones: any[];
-      activeMemberships: any[];
-      emails: any[];
-    };
-  };
-
-  const MatchItem = ({ onSelectDataIndex, person }: MatchItemProps) => {
-    return (
-      <div
-        className="flex flex-row w-full justify-between p-8 border-b"
-        data-test="match-person"
-        onClick={onSelectDataIndex}
-      >
-        <div className="flex flex-col w-full">
-          <h1 className="text-2xl font-bold">{person?.fullName}</h1>
-          <div className="flex flex-row items-center">
-            <PhoneOutlined className="opacity-50 mr-2 text-blue-400" />{" "}
-            {person?.phones[0]?.fullNumber}
-          </div>
-          <div className="flex flex-row items-center">
-            <EmailOutlined className="opacity-50 mr-2 text-blue-400" />
-            {(person?.emails && person?.emails[0]?.address) || "no email"}
-          </div>
-        </div>
-        <div className="relative rounded-lg overflow-hidden w-48">
-          <div className="rounded-sm">
-            <img
-              loading="lazy"
-              className="object-fill"
-              src={`${
-                getMembershipDetails(
-                  person?.activeMemberships[
-                    person?.activeMemberships?.length - 1
-                  ].programId,
-                  person?.activeMemberships[
-                    person?.activeMemberships?.length - 1
-                  ]?.tierLevel
-                )?.card?.image?.thumbnail
-              }`}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="flex flex-col w-full">
@@ -192,7 +145,17 @@ const Index = ({
           <div className="flex flex-col w-full justify-center">
             {matchedPersons &&
               matchedPersons?.map((match, i) => (
-                <MatchItem
+                <MembershipCard
+                  cardImageSrc={`${
+                    getMembershipDetails(
+                      match?.activeMemberships[
+                        match?.activeMemberships?.length - 1
+                      ].programId,
+                      match?.activeMemberships[
+                        match?.activeMemberships?.length - 1
+                      ]?.tierLevel
+                    )?.card?.image?.thumbnail
+                  }`}
                   onSelectDataIndex={() => {
                     setCurrentPerson(matchedPersons[i]);
                     onMatch(matchedPersons[i]);
@@ -234,7 +197,11 @@ const Index = ({
             </div>
             <div>
               <div className="flex w-full justify-center items-center p-4">
-                <TextField label="mobile" value={mobile} disabled />
+                <TextField
+                  label="mobile"
+                  value={mobile || matchedPersons}
+                  disabled
+                />
               </div>
             </div>
             <div className="flex flex-row w-full items-center justify-center mt-8">
