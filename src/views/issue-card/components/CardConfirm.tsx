@@ -97,7 +97,7 @@ const Index = ({
                   <div className="flex flex-row w-full p-2 justify-around ">
                     <button
                       data-test="confirm-person-btn"
-                      className="px-4 py-2 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                      className="h-12 px-4 py-2 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
                       onClick={() => {
                         if (matchedPersons.length == 1) {
                           onMatch(currentPerson);
@@ -109,7 +109,7 @@ const Index = ({
 
                     <button
                       data-test="confirm-false-btn"
-                      className="px-4 py-2 border rounded-md w-full bg-slate-400 text-white font-medium"
+                      className="h-12 px-4 py-2 border rounded-md w-full bg-slate-400 text-white font-medium"
                       onClick={onJoin}
                     >
                       No
@@ -130,7 +130,7 @@ const Index = ({
                 <div>
                   <button
                     data-test="no-match-btn"
-                    className="px-4 py-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                    className="h-12 px-4 py-2 border rounded-md w-full bg-blue-400 text-white font-medium"
                     onClick={onConfirm}
                   >
                     No Match
@@ -206,14 +206,14 @@ const Index = ({
             </div>
             <div className="flex flex-row w-full items-center justify-center mt-8">
               <button
-                className="p-2 px-4 border rounded-md  bg-slate-400 text-white mr-4"
+                className="h-12 p-2 px-4 border rounded-md  bg-slate-400 text-white mr-4"
                 onClick={onDone}
               >
                 Cancel
               </button>
               <button
                 data-test="issue-confirm-btn"
-                className="p-2 px-4 border rounded-md  bg-blue-400 text-white"
+                className="h-12 p-2 px-4 border rounded-md  bg-blue-400 text-white"
                 onClick={onConfirm}
               >
                 Confirm

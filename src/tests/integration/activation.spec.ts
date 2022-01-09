@@ -17,12 +17,12 @@ describe("Activation", () => {
     cy.viewport("ipad-2");
   });
 
-  it("should display access denied notice, given no settings is detected and activate url is not present", () => {
+  it("should display invalid link notice, given no settings is detected and activate url is not present", () => {
     cy.visit("http://localhost:3000");
     expect(cy.contains(/no longer valid/i)).to.exist;
   });
 
-  it("should display access denied notice, given activate callback url fails", () => {
+  it("should display invalid link notice, given activate callback url fails", () => {
     cy.visit("http://localhost:3000/activate?callaback=idontexist");
 
     expect(cy.contains(/no longer/i)).to.exist;

@@ -26,14 +26,14 @@ export default ({ onActivate }: Props) => (
           </span>
           <div className="flex flex-row w-full p-2 justify-center items-center">
             <button
-              className="px-2 py-1 mr-4 border rounded-md w-full bg-slate-400 text-white font-medium"
+              className="px-2  h-12 py-1 mr-4 border rounded-md w-full bg-slate-400 text-white font-medium"
               onClick={() => window.location.assign("https://perkd.me")}
             >
               Cancel
             </button>
             <button
               data-test="activate-btn"
-              className="px-2 py-1  border rounded-md w-full bg-blue-400 text-white font-medium"
+              className="px-2 py-1 h-12  border rounded-md w-full bg-blue-400 text-white font-medium"
               onClick={onActivate}
             >
               Activate

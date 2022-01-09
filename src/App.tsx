@@ -6,6 +6,7 @@ import ActivationHero from "./components/ActivationHero";
 import AppMenu from "./components/AppMenu";
 import { getSettings, setSettings } from "./helpers/activation";
 import { client } from "./helpers/api-client";
+import { getToken } from "./helpers/auth";
 import { activateParams, VIEWS } from "./types";
 import AddSales from "./views/add-sales";
 import IssueCard from "./views/issue-card";
@@ -40,18 +41,16 @@ function App(props) {
       return;
     }
 
-    const isActivated = getSettings();
-
-    if (isActivated) {
+    if (getSettings()) {
       setLocalSettings(getSettings());
 
       if (mod && mod === "1") {
-        setViewState(VIEWS.ISSUE_CARD);
+        validateAccessToken(VIEWS.ISSUE_CARD);
         return;
       }
 
       if (mod && mod === "2") {
-        setViewState(VIEWS.ADD_SALES);
+        validateAccessToken(VIEWS.ADD_SALES);
         return;
       }
 
@@ -60,6 +59,15 @@ function App(props) {
       setViewState(VIEWS.DENIED);
     }
   }, [pathname, search]);
+
+  function validateAccessToken(viewOnSuccess: VIEWS) {
+    if (getToken()) {
+      setViewState(viewOnSuccess);
+      return;
+    }
+
+    setViewState(VIEWS.LOGIN);
+  }
 
   const handleBackToMenu = () => {
     setViewState(VIEWS.MENU);
@@ -111,7 +119,7 @@ function App(props) {
                   <div>You are attempting to change it</div>
                   <div className="flex flex-row w-full mt-8">
                     <button
-                      className={`mr-4 p-2 px-8 border rounded-md  text-white`}
+                      className={`mr-4 h-12 p-2 px-8 border rounded-md  text-white`}
                       style={{ backgroundColor: "red" }}
                       id="update-settings"
                       onClick={handleUpdateSettings}
@@ -119,7 +127,7 @@ function App(props) {
                       Change
                     </button>
                     <button
-                      className={`p-2 px-8 border rounded-md  bg-blue-400 text-white`}
+                      className={`p-2 h-12  px-8 border rounded-md  bg-blue-400 text-white`}
                       onClick={() => setViewState(VIEWS.LOGIN)}
                       id="update-cancel"
                     >

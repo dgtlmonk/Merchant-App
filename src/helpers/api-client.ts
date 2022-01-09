@@ -2,6 +2,14 @@ import "whatwg-fetch";
 
 const host = import.meta.env.VITE_API_HOST;
 
+export function getHeaders() {
+  return {
+    "content-type": "application/json",
+    "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+    "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
+  };
+}
+
 const fetcher = (url: string, options?: RequestInit) =>
   window
     .fetch(url, {
@@ -9,6 +17,7 @@ const fetcher = (url: string, options?: RequestInit) =>
         // Accept: "application/json",
         "Content-Type": "application/json",
       },
+      credentials: "include",
       method: options?.method || "GET",
       ...options,
     })
