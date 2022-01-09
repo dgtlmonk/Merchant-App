@@ -6,6 +6,7 @@ import ActivationHero from "./components/ActivationHero";
 import AppMenu from "./components/AppMenu";
 import { getSettings, setSettings } from "./helpers/activation";
 import { client } from "./helpers/api-client";
+import { getToken } from "./helpers/auth";
 import { activateParams, VIEWS } from "./types";
 import AddSales from "./views/add-sales";
 import IssueCard from "./views/issue-card";
@@ -23,7 +24,6 @@ function App(props) {
     const cb = new URLSearchParams(search).get("callback");
     const mod = new URLSearchParams(search).get("module");
     const activateUrl = new URLSearchParams(search).get("a");
-
     const isActivating = (pathname === "/activate" && cb) || activateUrl;
     const callbackUrl = cb || activateUrl;
 
@@ -40,18 +40,16 @@ function App(props) {
       return;
     }
 
-    const isActivated = getSettings();
-
-    if (isActivated) {
+    if (getSettings()) {
       setLocalSettings(getSettings());
 
       if (mod && mod === "1") {
-        setViewState(VIEWS.ISSUE_CARD);
+        validateAccessToken(VIEWS.ISSUE_CARD);
         return;
       }
 
       if (mod && mod === "2") {
-        setViewState(VIEWS.ADD_SALES);
+        validateAccessToken(VIEWS.ADD_SALES);
         return;
       }
 
@@ -60,6 +58,15 @@ function App(props) {
       setViewState(VIEWS.DENIED);
     }
   }, [pathname, search]);
+
+  function validateAccessToken(viewOnSuccess: VIEWS) {
+    if (getToken()) {
+      setViewState(viewOnSuccess);
+      return;
+    }
+
+    setViewState(VIEWS.LOGIN);
+  }
 
   const handleBackToMenu = () => {
     setViewState(VIEWS.MENU);

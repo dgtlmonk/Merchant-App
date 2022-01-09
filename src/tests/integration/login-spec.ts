@@ -122,6 +122,16 @@ describe("Login", () => {
     cy.wait("@login");
     expect(cy.contains(/issue card/i)).to.exist;
   });
+
+  it("should redirect to login, given no token is detected", () => {
+    cy.visit("http://localhost:3000/?module=1");
+    expect(cy.contains(/login/i)).to.exist;
+
+    cy.visit("http://localhost:3000/?module=2");
+    expect(cy.get('[data-test="login-btn"]')).to.exist;
+  });
+
+  it("should redirect to menu, given token is detected", () => {});
 });
 
 export {};

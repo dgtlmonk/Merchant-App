@@ -1,7 +1,7 @@
 // import { client } from "@/helpers/api-client";
-import jwtDecode from "jwt-decode";
 import { useState } from "react";
-import { client } from "../../helpers/api-client";
+import { client, getHeaders } from "../../helpers/api-client";
+import { setToken } from "../../helpers/auth";
 import LoginForm from "./form";
 
 const host = import.meta.env.VITE_API_HOST;
@@ -21,11 +21,7 @@ export default ({ onSuccess, settings }: Props) => {
 
     client
       .post(`${host}/login?tenant_code=${settings.business?.tenantCode}`, {
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
-        },
+        headers: { ...getHeaders() },
         body: JSON.stringify({
           username,
           password,
@@ -39,11 +35,13 @@ export default ({ onSuccess, settings }: Props) => {
         }
 
         if (res.token) {
-          console.log(" jwt decoded ", jwtDecode(res.token));
+          setToken(res.token);
         }
         setTimeout(() => onSuccess(), 700);
       })
-      .finally(() => setIsAuthenticating(false));
+      .finally(() => {
+        setIsAuthenticating(false);
+      });
   }
 
   return (
