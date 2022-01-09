@@ -1,5 +1,6 @@
 import "cypress-localstorage-commands";
 import { setSettings } from "../../helpers/activation";
+import { setToken } from "../../helpers/auth";
 
 const apiServer = Cypress.env("api_server");
 
@@ -71,12 +72,11 @@ describe("Add Sales", () => {
 
   beforeEach(() => {
     setSettings(mockSettings);
-    cy.viewport("ipad-2");
-  });
+    setToken(
+      "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDQxNTE1MzAsInRlbmFudCI6eyJjb2RlIjoic2Ftc29uaXRlc2cifSwidXNlciI6eyJpZCI6IjYxZDNjYjg5NmJhNDg2MDAxZTExZGFiZiIsInVzZXJuYW1lIjoiYnVnaXMiLCJlbWFpbCI6ImJ1Z2lzQHdhdmVvLmNvbSIsInJvbGVzIjpbeyJuYW1lIjoiTWVyY2hhbnQifV19LCJhY2Nlc3NUb2tlbiI6IkszemdDTkJsdjlaM1hyYWFIMHNMTndMTFh0YUY5QUxCOXJqQ0hpYU1RMUFzZHoyRFpLcUtWbUdHTURRak91OWgifQ.j83nzx_qn5j_uyPeVlEMo7Gltb6mYS18n-6EaMerit8"
+    );
 
-  it.skip("should display login, given unauthenticated", () => {
-    cy.visit("http://localhost:3000/?mod=1");
-    expect(cy.contains(/login/i)).to.exist;
+    cy.viewport("ipad-2");
   });
 
   it("should show no match notice, given no result is returned from search", () => {

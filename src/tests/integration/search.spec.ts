@@ -1,10 +1,8 @@
 import "cypress-localstorage-commands";
 import { setSettings } from "../../helpers/activation";
+import { setToken } from "../../helpers/auth";
 
 const apiServer = Cypress.env("api_server");
-
-// cy.intercept(`${apiServer}/person/search`, {
-
 const mockSettings = {
   installation: {
     id: "61cba27f6bbf03002050a2ba",
@@ -71,6 +69,9 @@ describe("Search Existing Member", () => {
 
   beforeEach(() => {
     setSettings(mockSettings);
+    setToken(
+      "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDQxNTE1MzAsInRlbmFudCI6eyJjb2RlIjoic2Ftc29uaXRlc2cifSwidXNlciI6eyJpZCI6IjYxZDNjYjg5NmJhNDg2MDAxZTExZGFiZiIsInVzZXJuYW1lIjoiYnVnaXMiLCJlbWFpbCI6ImJ1Z2lzQHdhdmVvLmNvbSIsInJvbGVzIjpbeyJuYW1lIjoiTWVyY2hhbnQifV19LCJhY2Nlc3NUb2tlbiI6IkszemdDTkJsdjlaM1hyYWFIMHNMTndMTFh0YUY5QUxCOXJqQ0hpYU1RMUFzZHoyRFpLcUtWbUdHTURRak91OWgifQ.j83nzx_qn5j_uyPeVlEMo7Gltb6mYS18n-6EaMerit8"
+    );
     cy.viewport("ipad-2");
   });
 

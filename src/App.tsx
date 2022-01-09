@@ -24,6 +24,7 @@ function App(props) {
     const cb = new URLSearchParams(search).get("callback");
     const mod = new URLSearchParams(search).get("module");
     const activateUrl = new URLSearchParams(search).get("a");
+
     const isActivating = (pathname === "/activate" && cb) || activateUrl;
     const callbackUrl = cb || activateUrl;
 
