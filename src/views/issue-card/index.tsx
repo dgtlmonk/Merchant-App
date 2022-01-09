@@ -58,6 +58,8 @@ function Index({ onDone, programs, location, installationId }: Props) {
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [data, setData] = useState<any>({});
   const [matchedPerson, setMatchedPerson] = useState<any[]>([]);
+  const [isMultipleMatchedPerson, setIsMultipleMatchedPerson] =
+    useState<boolean>(false);
 
   const formDataRef = useRef<any>();
   const searchQueryRef = useRef<any>();
@@ -125,14 +127,20 @@ function Index({ onDone, programs, location, installationId }: Props) {
   }, [data]);
 
   useEffect(() => {
-    if (matchedPerson) {
-      setData({
-        ...data,
-      });
-      formDataRef.current = {
-        ...data,
-        mobile: matchedPerson[0]?.phones[0]?.fullNumber,
-      };
+    if (matchedPerson.length > 1) {
+      setIsMultipleMatchedPerson(true);
+    } else {
+      setIsMultipleMatchedPerson(false);
+      // for single match
+      if (matchedPerson) {
+        setData({
+          ...data,
+        });
+        formDataRef.current = {
+          ...data,
+          mobile: matchedPerson[0]?.phones[0]?.fullNumber,
+        };
+      }
     }
   }, [matchedPerson]);
 
@@ -294,7 +302,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
     setViewState(VIEW.card_select);
   }
 
-  function handleSearchPerson() {
+  function handleSearchExistingMember() {
     if (!searchQueryRef.current.value) {
       searchQueryRef.current.focus();
       return;
@@ -494,7 +502,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                           <div className="flex flex-row w-full p-2 justify-around ">
                             <button
                               data-test="person-query-same-person-btn"
-                              className="h-12  px-2 py-1 h-12 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                              className="px-2 py-1 h-12 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
                               onClick={handleConfirmMatch(true)}
                             >
                               Yes
@@ -510,7 +518,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
                         </div>
                       </div>
                     ) : null}
-
                     {/* match confirm ends */}
 
                     <div className="flex flex-col justify-center items-center">
@@ -545,7 +552,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       }
                       
                       `}
-                          onClick={handleSearchPerson}
+                          onClick={handleSearchExistingMember}
                         >
                           Search
                         </button>

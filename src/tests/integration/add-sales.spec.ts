@@ -202,6 +202,7 @@ describe("Add Sales", () => {
 
       expect(c).to.equals(2);
       expect(cy.contains(/joel pablo/i)).to.exist;
+
       el[1].click();
       cy.get('[data-test="sales-receipt"]').type("abc");
       cy.get('[data-test="sales-qtty"]').type("10");

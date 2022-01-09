@@ -112,7 +112,7 @@ describe("Search Existing Member", () => {
     expect(cy.contains(/card already issued/i)).to.exist;
   });
 
-  it.only("should proceed to issue card, given search result is not the same person the user is searching", () => {
+  it("should proceed to issue card, given search result is not the same person the user is searching", () => {
     cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
       fixture: "search-result-single.json",
     }).as("search");

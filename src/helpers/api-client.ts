@@ -17,7 +17,7 @@ const fetcher = (url: string, options?: RequestInit) =>
         // Accept: "application/json",
         "Content-Type": "application/json",
       },
-      credentials: "include",
+      // credentials: "include",
       method: options?.method || "GET",
       ...options,
     })
