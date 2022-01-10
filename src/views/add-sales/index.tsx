@@ -206,7 +206,6 @@ function Index({
       orderSummary: {
         receipt: receiptRef.current.value,
         quantity: Number(qttyRef.current.value),
-        // TODO: get actual currency from activation
         currency: currency || "SGD",
         amount: Number(amountRef.current.value),
       },

@@ -166,7 +166,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
       location,
       // TODO: get from login
       staff: {},
-      // TODO: where to get?
       installation: {
         id: `${installationId}`,
       },
@@ -224,11 +223,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
       programId: programRef?.current?.programId,
       tierLevel: selectedMembership.level,
       installation: {
-        id: installationId,
+        id: `${installationId}`,
       },
       location,
       profile: { ...data },
-
       // TODO:  get this value after staff login
       staff: {
         id: "dev123",
@@ -323,8 +321,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
       .then((res: any[]) => {
         console.log(" search response ", res);
 
-        // single result
-        // TODO:  handle multiple result
         if (res.length) {
           // WATCHOUT: this block has both single and multiple result logic
           const [program] = res;
