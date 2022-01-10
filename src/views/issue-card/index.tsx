@@ -7,6 +7,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
 import { useMediaQuery } from "react-responsive";
+import MembershipCard from "../../components/MembershipCard";
 // import PhoneInput from "react-phone-input-2";
 // import "react-phone-input-2/lib/material.css";
 import { client, qualifySvcUrl } from "../../helpers/api-client";
@@ -298,6 +299,8 @@ function Index({ onDone, programs, location, installationId }: Props) {
 
   function handleDone() {
     formDataRef.current = null;
+    setMembership(null);
+    setIsMultipleMatchedPerson(false);
     setData(null);
     setViewState(VIEW.card_select);
   }
@@ -322,9 +325,9 @@ function Index({ onDone, programs, location, installationId }: Props) {
 
         // single result
         // TODO:  handle multiple result
-        if (res.length === 1) {
+        if (res.length) {
+          // WATCHOUT: this block has both single and multiple result logic
           const [program] = res;
-
           const personMembership = getMembershipDetails(
             program.programId,
             program.tierLevel,
@@ -345,12 +348,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
     prevViewRef.current = VIEW.search;
 
     const [person] = matchedPerson;
-
     setMatchStatus(MATCH_STATUS.idle);
-
-    // const params = Object.assign(Object.create(null, {}), {
-    //   membershipId: person?.membershipId,
-    // });
 
     // revoke
     if (!confirm) {
@@ -519,36 +517,93 @@ function Index({ onDone, programs, location, installationId }: Props) {
                         </div>
                       </div>
                     ) : (
-                      isMultipleMatchedPerson &&
-                      matchedPerson && <div>list</div>
+                      isMultipleMatchedPerson && (
+                        <Fragment>
+                          <div
+                            className={`flex w-full p-4 flex-col justify-around items-center`}
+                            style={{ backgroundColor: "#ffea8a" }}
+                          >
+                            <div className="flex flex-row w-full justify-between items-center">
+                              <div className="flex flex-col">
+                                <div className="flex font-semibold text-xl">
+                                  Select a matching member
+                                </div>
+                                <span className="text-gray-600">
+                                  or 'No Match' if none matches
+                                </span>
+                              </div>
+                              <div>
+                                <button
+                                  data-test="no-match-btn"
+                                  className="h-12 px-4 py-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                                  onClick={() => console.log("no matching")}
+                                >
+                                  No Match
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col w-full justify-center">
+                            {matchedPerson?.map((match, i) => (
+                              <MembershipCard
+                                cardImageSrc={`${
+                                  getMembershipDetailsProxy(
+                                    match?.activeMemberships[
+                                      match?.activeMemberships?.length - 1
+                                    ].programId,
+                                    match?.activeMemberships[
+                                      match?.activeMemberships?.length - 1
+                                    ]?.tierLevel
+                                  )?.card?.image?.thumbnail
+                                }`}
+                                onSelectDataIndex={() => {
+                                  setMembership(matchedPerson[i]);
+                                  setMatchStatus(MATCH_STATUS.not_qualified);
+                                  setViewState(VIEW.fullfilled);
+                                }}
+                                key={match.id}
+                                person={{
+                                  fullName: match.fullName,
+                                  phones: match.phones,
+                                  activeMemberships: match.activeMemberships,
+                                  emails: match.emails,
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </Fragment>
+                      )
                     )}
                     {/* match confirm ends */}
 
-                    <div className="flex flex-col justify-center items-center">
-                      <div className="flex flex-col justify-center  items-center px-4 mt-4 w-full">
-                        <TextField
-                          label="card or mobile number"
-                          InputLabelProps={{ style: { fontSize: 20 } }} // font size of input text
-                          inputProps={{
-                            style: { fontSize: "2rem" },
-                            ["data-test"]: "seach-mobile-input",
-                          }}
-                          inputRef={searchQueryRef}
-                        />
-                      </div>
-                      <div className="flex w-full mt-8 px-8">
-                        <span
-                          className={`w-full flex justify-center ${
-                            matchStatus === MATCH_STATUS.searching
-                              ? "visible"
-                              : "hidden"
-                          }`}
-                        >
-                          <CircularProgress size="2rem" />
-                        </span>
-                        <button
-                          data-test="person-query-btn"
-                          className={`h-12 p-2 border w-full rounded-md bg-blue-400 text-white font-medium
+                    {/* Search form */}
+                    {isMultipleMatchedPerson ? null : (
+                      <div className="flex flex-col justify-center items-center">
+                        <div className="flex flex-col justify-center  items-center px-4 mt-4 w-full">
+                          <TextField
+                            label="card or mobile number"
+                            InputLabelProps={{ style: { fontSize: 20 } }} // font size of input text
+                            inputProps={{
+                              style: { fontSize: "2rem" },
+                              ["data-test"]: "seach-mobile-input",
+                            }}
+                            inputRef={searchQueryRef}
+                          />
+                        </div>
+                        <div className="flex w-full mt-8 px-8">
+                          <span
+                            className={`w-full flex justify-center ${
+                              matchStatus === MATCH_STATUS.searching
+                                ? "visible"
+                                : "hidden"
+                            }`}
+                          >
+                            <CircularProgress size="2rem" />
+                          </span>
+                          <button
+                            data-test="person-query-btn"
+                            className={`h-12 p-2 border w-full rounded-md bg-blue-400 text-white font-medium
                       ${
                         matchStatus !== MATCH_STATUS.searching
                           ? "visible"
@@ -556,12 +611,14 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       }
                       
                       `}
-                          onClick={handleSearchExistingMember}
-                        >
-                          Search
-                        </button>
+                            onClick={handleSearchExistingMember}
+                          >
+                            Search
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    {/* end Search form*/}
                   </div>
                 </div>
               ),

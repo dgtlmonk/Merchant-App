@@ -112,7 +112,7 @@ describe("Search Existing Member", () => {
     expect(cy.contains(/card already issued/i)).to.exist;
   });
 
-  it("should proceed to issue card, given search result is not the same person the user is searching", () => {
+  it.only("should proceed to issue card, given search result is not the same person the user is searching", () => {
     cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
       fixture: "search-result-single.json",
     }).as("search");
@@ -145,7 +145,12 @@ describe("Search Existing Member", () => {
     cy.get("input").type("919455");
     cy.get('[data-test="person-query-btn"]').click();
     cy.wait("@search");
-    expect(cy.contains(/list/i)).to.exist;
+
+    cy.get('[data-test="match-person"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+    });
   });
 });
 
