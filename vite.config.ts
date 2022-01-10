@@ -10,7 +10,7 @@ export default defineConfig(({ command, mode }) => {
     root: "./",
     build: {
       outDir: "dist",
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 500,
       rollupOptions: {
         output: {
           manualChunks: (id) => {
@@ -18,8 +18,13 @@ export default defineConfig(({ command, mode }) => {
               if (id.includes("@material-ui")) {
                 return "vendor_mui";
               }
-              if (id.includes("react")) {
-                return "vendor_react";
+
+              if (id.includes("react-router")) {
+                return "vendor_react-router";
+              }
+
+              if (id.includes("react-dom")) {
+                return "vendor_react-dom";
               }
 
               return "vendor"; // all other package goes here
