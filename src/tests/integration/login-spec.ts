@@ -131,7 +131,24 @@ describe("Login", () => {
     expect(cy.get('[data-test="login-btn"]')).to.exist;
   });
 
-  it("should redirect to menu, given token is detected", () => {});
+  it.only("should redirect to menu, given token is detected", () => {
+    cy.intercept(`${apiServer}/login?tenant_code=samsonitesg`, {
+      token:
+        "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDQxNTE1MzAsInRlbmFudCI6eyJjb2RlIjoic2Ftc29uaXRlc2cifSwidXNlciI6eyJpZCI6IjYxZDNjYjg5NmJhNDg2MDAxZTExZGFiZiIsInVzZXJuYW1lIjoiYnVnaXMiLCJlbWFpbCI6ImJ1Z2lzQHdhdmVvLmNvbSIsInJvbGVzIjpbeyJuYW1lIjoiTWVyY2hhbnQifV19LCJhY2Nlc3NUb2tlbiI6IkszemdDTkJsdjlaM1hyYWFIMHNMTndMTFh0YUY5QUxCOXJqQ0hpYU1RMUFzZHoyRFpLcUtWbUdHTURRak91OWgifQ.j83nzx_qn5j_uyPeVlEMo7Gltb6mYS18n-6EaMerit8",
+    }).as("login");
+
+    cy.visit("http://localhost:3000/");
+    expect(cy.get('[data-test="login-btn"]')).to.exist;
+
+    cy.get('[data-test="login-username"]').type("abc");
+    cy.get('[data-test="login-password"]').type("abc");
+    cy.get('[data-test="login-btn"]').click();
+
+    cy.wait("@login");
+
+    cy.visit("http://localhost:3000/");
+    expect(cy.contains(/issue card/i)).to.exist;
+  });
 });
 
 export {};

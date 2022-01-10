@@ -54,6 +54,11 @@ function App(props) {
         return;
       }
 
+      if (getToken()) {
+        setViewState(VIEWS.MENU);
+        return;
+      }
+
       setViewState(VIEWS.LOGIN);
     } else {
       setViewState(VIEWS.DENIED);
@@ -78,7 +83,6 @@ function App(props) {
   };
 
   function handleUpdateSettings() {
-    console.log("handleUpdate settings");
     client
       .post(`${settingsUrl}`, {
         body: JSON.stringify(activateParams),
