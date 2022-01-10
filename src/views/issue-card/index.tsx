@@ -285,7 +285,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
           key={i}
           role="button"
           onClick={() => {
-            console.log(" membership ", membership);
             setSelectedMembership(membership);
             setViewState(VIEW.fillup);
           }}
@@ -296,12 +295,14 @@ function Index({ onDone, programs, location, installationId }: Props) {
     });
   }
 
-  function handleDone() {
+  function handleResetSearch() {
     formDataRef.current = null;
     setMembership(null);
     setIsMultipleMatchedPerson(false);
     setData(null);
+    setMatchedPerson([]);
     setViewState(VIEW.card_select);
+    setMatchStatus(MATCH_STATUS.idle);
   }
 
   function handleSearchExistingMember() {
@@ -415,8 +416,8 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       className="h-16 justify-around flex border items-center
                     p-2 rounded-md px-8 text-gray-700"
                       onClick={() => {
+                        handleResetSearch();
                         setViewState(VIEW.search);
-                        setMatchStatus(MATCH_STATUS.idle);
                         setTimeout(() => {
                           searchQueryRef?.current?.focus();
                         }, 500);
@@ -434,20 +435,37 @@ function Index({ onDone, programs, location, installationId }: Props) {
               [VIEW.search]: (
                 <div className={`flex flex-col  h-full w-full`}>
                   <div className="flex flex-col  justify-center  items-center">
-                    <div
-                      className={`flex pt-4 flex-col justify-center items-center ${
-                        matchStatus === MATCH_STATUS.not_found
-                          ? "visible"
-                          : "hidden"
-                      }`}
-                    >
-                      <span
-                        className="text-red-600  p-2"
-                        style={{ fontSize: "1.4rem" }}
-                      >
-                        Member not found
-                      </span>
-                    </div>
+                    {matchStatus === MATCH_STATUS.not_found ? (
+                      <Fragment>
+                        <div
+                          className={`flex w-full p-4 flex-col justify-around items-center`}
+                          style={{ backgroundColor: "#ffea8a" }}
+                        >
+                          <div className="flex flex-row w-full justify-between items-center">
+                            <div className="flex flex-col">
+                              <div className="flex font-semibold text-xl">
+                                No Matching Member
+                              </div>
+                              <span className="text-gray-600">
+                                Search again or Issue a new card
+                              </span>
+                            </div>
+                            <div>
+                              <button
+                                data-test="no-match-btn"
+                                className="h-12 px-4 py-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                                onClick={() => {
+                                  setSelectedMembership(memberTiers[0]);
+                                  setViewState(VIEW.fillup);
+                                }}
+                              >
+                                Issue New Card
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </Fragment>
+                    ) : null}
 
                     {/* existing member match confirm */}
                     {!isMultipleMatchedPerson &&
@@ -665,7 +683,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                   getMembershipDetails={getMembershipDetailsProxy}
                   matchedPersons={matchedPerson}
                   displayName={displayName}
-                  onDone={handleDone}
+                  onDone={handleResetSearch}
                   onToggleDisplayName={() =>
                     setToggleDisplayName(!toggleDisplayName)
                   }
@@ -687,7 +705,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                 <CardIssued
                   isNotQualified={matchStatus === MATCH_STATUS.not_qualified}
                   membership={membership}
-                  onDone={handleDone}
+                  onDone={handleResetSearch}
                 />
               ),
             }[viewState]

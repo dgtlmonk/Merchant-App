@@ -177,7 +177,7 @@ describe("Search Existing Member", () => {
     });
   });
 
-  it.only("should proceed to issue card, given 'No Match' button is clicked ", () => {
+  it("should proceed to issue card, given 'No Match' button is clicked ", () => {
     cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
       fixture: "search-result-multiple.json",
     }).as("search");
@@ -199,6 +199,21 @@ describe("Search Existing Member", () => {
 
     cy.get('[data-test="no-match-btn"]').click();
     expect(cy.get('[data-test="issue-next-btn"]')).to.exist;
+  });
+
+  it.only("should show no matching member, given no result from search query ", () => {
+    cy.intercept("GET", `${apiServer}/person/search?q=919455`, []).as("search");
+
+    cy.visit("http://localhost:3000/?module=1");
+
+    const searchBtn = cy.get('[data-test="person-search"]');
+    searchBtn.click();
+
+    cy.get("input").type("919455");
+    cy.get('[data-test="person-query-btn"]').click();
+    cy.wait("@search");
+
+    expect(cy.contains(/no match/i)).to.exist;
   });
 });
 
