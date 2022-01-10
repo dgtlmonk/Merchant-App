@@ -112,7 +112,7 @@ describe("Search Existing Member", () => {
     expect(cy.contains(/card already issued/i)).to.exist;
   });
 
-  it.only("should proceed to issue card, given search result is not the same person the user is searching", () => {
+  it("should proceed to issue card, given search result is not the same person the user is searching", () => {
     cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
       fixture: "search-result-single.json",
     }).as("search");
@@ -132,7 +132,7 @@ describe("Search Existing Member", () => {
     expect(cy.contains(/card already issued/i)).to.exist;
   });
 
-  it.only("should display list of matched result, given search returns more than one result", () => {
+  it("should display list of matched result, given search returns more than one result", () => {
     cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
       fixture: "search-result-multiple.json",
     }).as("search");
@@ -151,6 +151,54 @@ describe("Search Existing Member", () => {
 
       expect(c).to.equals(2);
     });
+  });
+
+  it("should prompt card already issued, given search result item is clicked ", () => {
+    cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
+      fixture: "search-result-multiple.json",
+    }).as("search");
+
+    cy.visit("http://localhost:3000/?module=1");
+
+    const searchBtn = cy.get('[data-test="person-search"]');
+    searchBtn.click();
+
+    cy.get("input").type("919455");
+    cy.get('[data-test="person-query-btn"]').click();
+    cy.wait("@search");
+
+    cy.get('[data-test="match-person"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+      el[0].click();
+
+      expect(cy.contains(/card already issued/i)).to.exist;
+    });
+  });
+
+  it.only("should proceed to issue card, given 'No Match' button is clicked ", () => {
+    cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
+      fixture: "search-result-multiple.json",
+    }).as("search");
+
+    cy.visit("http://localhost:3000/?module=1");
+
+    const searchBtn = cy.get('[data-test="person-search"]');
+    searchBtn.click();
+
+    cy.get("input").type("919455");
+    cy.get('[data-test="person-query-btn"]').click();
+    cy.wait("@search");
+
+    cy.get('[data-test="match-person"]').then((el) => {
+      const c = el.length;
+
+      expect(c).to.equals(2);
+    });
+
+    cy.get('[data-test="no-match-btn"]').click();
+    expect(cy.get('[data-test="issue-next-btn"]')).to.exist;
   });
 });
 

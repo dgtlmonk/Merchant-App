@@ -285,6 +285,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
           key={i}
           role="button"
           onClick={() => {
+            console.log(" membership ", membership);
             setSelectedMembership(membership);
             setViewState(VIEW.fillup);
           }}
@@ -309,6 +310,11 @@ function Index({ onDone, programs, location, installationId }: Props) {
       return;
     }
 
+    // save mobile for 'no match'
+    setData({
+      ...data,
+      mobile: searchQueryRef?.current?.value,
+    });
     setMatchStatus(MATCH_STATUS.searching);
     client
       .get(`${host}/person/search?q=${searchQueryRef.current.value}`, {
@@ -319,8 +325,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
         },
       })
       .then((res: any[]) => {
-        console.log(" search response ", res);
-
         if (res.length) {
           // WATCHOUT: this block has both single and multiple result logic
           const [program] = res;
@@ -414,7 +418,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                         setViewState(VIEW.search);
                         setMatchStatus(MATCH_STATUS.idle);
                         setTimeout(() => {
-                          searchQueryRef?.current.focus();
+                          searchQueryRef?.current?.focus();
                         }, 500);
                       }}
                     >
@@ -532,7 +536,11 @@ function Index({ onDone, programs, location, installationId }: Props) {
                                 <button
                                   data-test="no-match-btn"
                                   className="h-12 px-4 py-2 border rounded-md w-full bg-blue-400 text-white font-medium"
-                                  onClick={() => console.log("no matching")}
+                                  onClick={() => {
+                                    setSelectedMembership(memberTiers[0]);
+
+                                    setViewState(VIEW.fillup);
+                                  }}
                                 >
                                   No Match
                                 </button>

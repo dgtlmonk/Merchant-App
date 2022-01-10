@@ -33,7 +33,6 @@ function Index({
   const amountRef = useRef<any>();
 
   const [viewState, setViewState] = useState<VIEW>(VIEW.search);
-
   const [isSearching, setIsSearching] = useState(false);
   const [isListMatch, setIsListMatch] = useState(false);
   const [isPersonFound, setIsPersonFound] = useState(false);
