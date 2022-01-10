@@ -13,6 +13,11 @@ import { QUALIFY_TYPES, schema, uiSchema } from "../../types";
 import CardConfirm from "./components/CardConfirm";
 import CardIssued from "./components/CardIssued";
 
+export enum NAMEORDER {
+  gf = "givenFamily",
+  fg = "familyGiven",
+}
+
 enum MATCH_STATUS {
   found = "found",
   not_found = "not found",
@@ -54,6 +59,7 @@ function Index({
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
   const [memberTiers, setMemberTiers] = useState([]);
+  const [nameOrder, setNameOrder] = useState<NAMEORDER>(NAMEORDER.gf);
   const [membership, setMembership] = useState<any>({});
   const [selectedMembership, setSelectedMembership] = useState<any>(null);
   const [matchStatus, setMatchStatus] = useState<MATCH_STATUS>(
@@ -147,8 +153,10 @@ function Index({
 
   useEffect(() => {
     if (!toggleDisplayName) {
+      setNameOrder(NAMEORDER.gf);
       setDisplayName(`${data?.givenName} ${data?.familyName}`);
     } else {
+      setNameOrder(NAMEORDER.fg);
       setDisplayName(`${data?.familyName} ${data?.givenName}`);
     }
   }, [toggleDisplayName]);
@@ -160,6 +168,7 @@ function Index({
     const params = {
       profile: {
         ...formData,
+        nameOrder,
       },
       tierLevel: selectedMembership.level,
       programId: programs[0].programId,
@@ -226,7 +235,7 @@ function Index({
         id: `${installationId}`,
       },
       location,
-      profile: { ...data },
+      profile: { ...data, nameOrder },
       // TODO:  get this value after staff login
       staff: {
         id: "dev123",
