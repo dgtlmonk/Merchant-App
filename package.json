@@ -1,6 +1,10 @@
 {
   "name": "perkd-merchant-app-react-vite",
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "engines": {
+    "npm": ">=8.0.0",
+    "node": ">16.13.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
