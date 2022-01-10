@@ -39,6 +39,10 @@ export default ({ onSuccess, settings }: Props) => {
         }
         setTimeout(() => onSuccess(), 700);
       })
+      .catch(() => {
+        // TODO: set appropriate error message
+        setIsLoginFailed(true);
+      })
       .finally(() => {
         setIsAuthenticating(false);
       });

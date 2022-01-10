@@ -22,7 +22,7 @@ export default ({ onActivate }: Props) => (
             Please confirm you want to use app on this device
           </span>
           <span className="text-gray-400 mt-2">
-            This link can only used once
+            This link can only be used once
           </span>
           <div className="flex flex-row w-full p-2 justify-center items-center">
             <button

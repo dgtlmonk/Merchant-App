@@ -33,7 +33,6 @@ function Index({
   const amountRef = useRef<any>();
 
   const [viewState, setViewState] = useState<VIEW>(VIEW.search);
-
   const [isSearching, setIsSearching] = useState(false);
   const [isListMatch, setIsListMatch] = useState(false);
   const [isPersonFound, setIsPersonFound] = useState(false);
@@ -206,7 +205,6 @@ function Index({
       orderSummary: {
         receipt: receiptRef.current.value,
         quantity: Number(qttyRef.current.value),
-        // TODO: get actual currency from activation
         currency: currency || "SGD",
         amount: Number(amountRef.current.value),
       },

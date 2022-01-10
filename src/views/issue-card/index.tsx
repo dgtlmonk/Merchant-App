@@ -7,6 +7,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
 import { useMediaQuery } from "react-responsive";
+import MembershipCard from "../../components/MembershipCard";
 // import PhoneInput from "react-phone-input-2";
 // import "react-phone-input-2/lib/material.css";
 import { client, qualifySvcUrl } from "../../helpers/api-client";
@@ -58,6 +59,8 @@ function Index({ onDone, programs, location, installationId }: Props) {
   const [toggleDisplayName, setToggleDisplayName] = useState<boolean>(false);
   const [data, setData] = useState<any>({});
   const [matchedPerson, setMatchedPerson] = useState<any[]>([]);
+  const [isMultipleMatchedPerson, setIsMultipleMatchedPerson] =
+    useState<boolean>(false);
 
   const formDataRef = useRef<any>();
   const searchQueryRef = useRef<any>();
@@ -125,14 +128,20 @@ function Index({ onDone, programs, location, installationId }: Props) {
   }, [data]);
 
   useEffect(() => {
-    if (matchedPerson) {
-      setData({
-        ...data,
-      });
-      formDataRef.current = {
-        ...data,
-        mobile: matchedPerson[0]?.phones[0]?.fullNumber,
-      };
+    if (matchedPerson.length > 1) {
+      setIsMultipleMatchedPerson(true);
+    } else {
+      setIsMultipleMatchedPerson(false);
+      // for single match
+      if (matchedPerson) {
+        setData({
+          ...data,
+        });
+        formDataRef.current = {
+          ...data,
+          mobile: matchedPerson[0]?.phones[0]?.fullNumber,
+        };
+      }
     }
   }, [matchedPerson]);
 
@@ -157,7 +166,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
       location,
       // TODO: get from login
       staff: {},
-      // TODO: where to get?
       installation: {
         id: `${installationId}`,
       },
@@ -215,11 +223,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
       programId: programRef?.current?.programId,
       tierLevel: selectedMembership.level,
       installation: {
-        id: installationId,
+        id: `${installationId}`,
       },
       location,
       profile: { ...data },
-
       // TODO:  get this value after staff login
       staff: {
         id: "dev123",
@@ -288,18 +295,27 @@ function Index({ onDone, programs, location, installationId }: Props) {
     });
   }
 
-  function handleDone() {
+  function handleResetSearch() {
     formDataRef.current = null;
+    setMembership(null);
+    setIsMultipleMatchedPerson(false);
     setData(null);
+    setMatchedPerson([]);
     setViewState(VIEW.card_select);
+    setMatchStatus(MATCH_STATUS.idle);
   }
 
-  function handleSearchPerson() {
+  function handleSearchExistingMember() {
     if (!searchQueryRef.current.value) {
       searchQueryRef.current.focus();
       return;
     }
 
+    // save mobile for 'no match'
+    setData({
+      ...data,
+      mobile: searchQueryRef?.current?.value,
+    });
     setMatchStatus(MATCH_STATUS.searching);
     client
       .get(`${host}/person/search?q=${searchQueryRef.current.value}`, {
@@ -310,13 +326,9 @@ function Index({ onDone, programs, location, installationId }: Props) {
         },
       })
       .then((res: any[]) => {
-        console.log(" search response ", res);
-
-        // single result
-        // TODO:  handle multiple result
-        if (res.length === 1) {
+        if (res.length) {
+          // WATCHOUT: this block has both single and multiple result logic
           const [program] = res;
-
           const personMembership = getMembershipDetails(
             program.programId,
             program.tierLevel,
@@ -337,12 +349,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
     prevViewRef.current = VIEW.search;
 
     const [person] = matchedPerson;
-
     setMatchStatus(MATCH_STATUS.idle);
-
-    // const params = Object.assign(Object.create(null, {}), {
-    //   membershipId: person?.membershipId,
-    // });
 
     // revoke
     if (!confirm) {
@@ -409,10 +416,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       className="h-16 justify-around flex border items-center
                     p-2 rounded-md px-8 text-gray-700"
                       onClick={() => {
+                        handleResetSearch();
                         setViewState(VIEW.search);
-                        setMatchStatus(MATCH_STATUS.idle);
                         setTimeout(() => {
-                          searchQueryRef?.current.focus();
+                          searchQueryRef?.current?.focus();
                         }, 500);
                       }}
                     >
@@ -428,24 +435,42 @@ function Index({ onDone, programs, location, installationId }: Props) {
               [VIEW.search]: (
                 <div className={`flex flex-col  h-full w-full`}>
                   <div className="flex flex-col  justify-center  items-center">
-                    <div
-                      className={`flex pt-4 flex-col justify-center items-center ${
-                        matchStatus === MATCH_STATUS.not_found
-                          ? "visible"
-                          : "hidden"
-                      }`}
-                    >
-                      <span
-                        className="text-red-600  p-2"
-                        style={{ fontSize: "1.4rem" }}
-                      >
-                        Member not found
-                      </span>
-                    </div>
+                    {matchStatus === MATCH_STATUS.not_found ? (
+                      <Fragment>
+                        <div
+                          className={`flex w-full p-4 flex-col justify-around items-center`}
+                          style={{ backgroundColor: "#ffea8a" }}
+                        >
+                          <div className="flex flex-row w-full justify-between items-center">
+                            <div className="flex flex-col">
+                              <div className="flex font-semibold text-xl">
+                                No Matching Member
+                              </div>
+                              <span className="text-gray-600">
+                                Search again or Issue a new card
+                              </span>
+                            </div>
+                            <div>
+                              <button
+                                data-test="no-match-btn"
+                                className="h-12 px-4 py-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                                onClick={() => {
+                                  setSelectedMembership(memberTiers[0]);
+                                  setViewState(VIEW.fillup);
+                                }}
+                              >
+                                Issue New Card
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </Fragment>
+                    ) : null}
 
-                    {/* match confirm start */}
-                    {/* refactor on next iteration */}
-                    {matchedPerson[0] && matchedPerson[0]?.activeMemberships ? (
+                    {/* existing member match confirm */}
+                    {!isMultipleMatchedPerson &&
+                    matchedPerson[0] &&
+                    matchedPerson[0]?.activeMemberships ? (
                       <div
                         className={`flex w-full p-4 mb-4 flex-col justify-around items-center ${
                           matchStatus === MATCH_STATUS.idle ||
@@ -494,7 +519,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                           <div className="flex flex-row w-full p-2 justify-around ">
                             <button
                               data-test="person-query-same-person-btn"
-                              className="h-12  px-2 py-1 h-12 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                              className="px-2 py-1 h-12 mr-2 border rounded-md w-full bg-blue-400 text-white font-medium"
                               onClick={handleConfirmMatch(true)}
                             >
                               Yes
@@ -509,35 +534,98 @@ function Index({ onDone, programs, location, installationId }: Props) {
                           </div>
                         </div>
                       </div>
-                    ) : null}
+                    ) : (
+                      isMultipleMatchedPerson && (
+                        <Fragment>
+                          <div
+                            className={`flex w-full p-4 flex-col justify-around items-center`}
+                            style={{ backgroundColor: "#ffea8a" }}
+                          >
+                            <div className="flex flex-row w-full justify-between items-center">
+                              <div className="flex flex-col">
+                                <div className="flex font-semibold text-xl">
+                                  Select a matching member
+                                </div>
+                                <span className="text-gray-600">
+                                  or 'No Match' if none matches
+                                </span>
+                              </div>
+                              <div>
+                                <button
+                                  data-test="no-match-btn"
+                                  className="h-12 px-4 py-2 border rounded-md w-full bg-blue-400 text-white font-medium"
+                                  onClick={() => {
+                                    setSelectedMembership(memberTiers[0]);
 
+                                    setViewState(VIEW.fillup);
+                                  }}
+                                >
+                                  No Match
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col w-full justify-center">
+                            {matchedPerson?.map((match, i) => (
+                              <MembershipCard
+                                cardImageSrc={`${
+                                  getMembershipDetailsProxy(
+                                    match?.activeMemberships[
+                                      match?.activeMemberships?.length - 1
+                                    ].programId,
+                                    match?.activeMemberships[
+                                      match?.activeMemberships?.length - 1
+                                    ]?.tierLevel
+                                  )?.card?.image?.thumbnail
+                                }`}
+                                onSelectDataIndex={() => {
+                                  setMembership(matchedPerson[i]);
+                                  setMatchStatus(MATCH_STATUS.not_qualified);
+                                  setViewState(VIEW.fullfilled);
+                                }}
+                                key={match.id}
+                                person={{
+                                  fullName: match.fullName,
+                                  phones: match.phones,
+                                  activeMemberships: match.activeMemberships,
+                                  emails: match.emails,
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </Fragment>
+                      )
+                    )}
                     {/* match confirm ends */}
 
-                    <div className="flex flex-col justify-center items-center">
-                      <div className="flex flex-col justify-center  items-center px-4 mt-4 w-full">
-                        <TextField
-                          label="card or mobile number"
-                          InputLabelProps={{ style: { fontSize: 20 } }} // font size of input text
-                          inputProps={{
-                            style: { fontSize: "2rem" },
-                            ["data-test"]: "seach-mobile-input",
-                          }}
-                          inputRef={searchQueryRef}
-                        />
-                      </div>
-                      <div className="flex w-full mt-8 px-8">
-                        <span
-                          className={`w-full flex justify-center ${
-                            matchStatus === MATCH_STATUS.searching
-                              ? "visible"
-                              : "hidden"
-                          }`}
-                        >
-                          <CircularProgress size="2rem" />
-                        </span>
-                        <button
-                          data-test="person-query-btn"
-                          className={`h-12 p-2 border w-full rounded-md bg-blue-400 text-white font-medium
+                    {/* Search form */}
+                    {isMultipleMatchedPerson ? null : (
+                      <div className="flex flex-col justify-center items-center">
+                        <div className="flex flex-col justify-center  items-center px-4 mt-4 w-full">
+                          <TextField
+                            label="card or mobile number"
+                            InputLabelProps={{ style: { fontSize: 20 } }} // font size of input text
+                            inputProps={{
+                              style: { fontSize: "2rem" },
+                              ["data-test"]: "seach-mobile-input",
+                            }}
+                            inputRef={searchQueryRef}
+                          />
+                        </div>
+                        <div className="flex w-full mt-8 px-8">
+                          <span
+                            className={`w-full flex justify-center ${
+                              matchStatus === MATCH_STATUS.searching
+                                ? "visible"
+                                : "hidden"
+                            }`}
+                          >
+                            <CircularProgress size="2rem" />
+                          </span>
+                          <button
+                            data-test="person-query-btn"
+                            className={`h-12 p-2 border w-full rounded-md bg-blue-400 text-white font-medium
                       ${
                         matchStatus !== MATCH_STATUS.searching
                           ? "visible"
@@ -545,12 +633,14 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       }
                       
                       `}
-                          onClick={handleSearchPerson}
-                        >
-                          Search
-                        </button>
+                            onClick={handleSearchExistingMember}
+                          >
+                            Search
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    {/* end Search form*/}
                   </div>
                 </div>
               ),
@@ -593,7 +683,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                   getMembershipDetails={getMembershipDetailsProxy}
                   matchedPersons={matchedPerson}
                   displayName={displayName}
-                  onDone={handleDone}
+                  onDone={handleResetSearch}
                   onToggleDisplayName={() =>
                     setToggleDisplayName(!toggleDisplayName)
                   }
@@ -615,7 +705,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
                 <CardIssued
                   isNotQualified={matchStatus === MATCH_STATUS.not_qualified}
                   membership={membership}
-                  onDone={handleDone}
+                  onDone={handleResetSearch}
                 />
               ),
             }[viewState]
