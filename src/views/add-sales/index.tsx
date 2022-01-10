@@ -49,6 +49,7 @@ function Index({
 
   const handlePreviousView = () => {
     if (viewState === VIEW.search) {
+      onDone();
       return;
     }
 

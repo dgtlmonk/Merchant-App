@@ -6,7 +6,7 @@ import ActivationHero from "./components/ActivationHero";
 import AppMenu from "./components/AppMenu";
 import { getSettings, setSettings } from "./helpers/activation";
 import { client } from "./helpers/api-client";
-import { getToken } from "./helpers/auth";
+import { deleteToken, getToken } from "./helpers/auth";
 import { activateParams, VIEWS } from "./types";
 import AddSales from "./views/add-sales";
 import IssueCard from "./views/issue-card";
@@ -102,6 +102,11 @@ function App(props) {
       });
   }
 
+  function handleLogout() {
+    deleteToken();
+    setViewState(VIEWS.LOGIN);
+  }
+
   return (
     <div className="flex flex-col items-center h-full w-full">
       {
@@ -156,7 +161,9 @@ function App(props) {
               }}
             />
           ),
-          [VIEWS.MENU]: <AppMenu onMenuSelect={handleMenuChange} />,
+          [VIEWS.MENU]: (
+            <AppMenu onMenuSelect={handleMenuChange} onLogout={handleLogout} />
+          ),
           [VIEWS.ADD_SALES]: (
             <AddSales
               currency={localSettings?.business?.currency}

@@ -3,6 +3,7 @@ import jwtDecode from "jwt-decode";
 export const jwtKey = btoa("perkd__merchant__jwt");
 
 export function getToken() {
+  // TODO: handle broken token
   // @ts-ignore
   const jwt = localStorage.getItem(jwtKey) || null;
 

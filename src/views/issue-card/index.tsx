@@ -386,6 +386,7 @@ function Index({
             >
               <ArrowBack className="opacity-50" />
             </button>
+
             <div className="p-4">
               Issue Card
               {`${selectedMembership ? ` : ${selectedMembership?.name}` : ""}`}

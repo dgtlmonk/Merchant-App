@@ -1,10 +1,13 @@
+import { MdLogout } from "react-icons/md";
+
 type Props = {
   label: string;
-  iconCls: string;
+  iconCls?: string;
+  isLogout?: boolean;
   onSelect?: () => void;
 };
 
-export default ({ label, onSelect, iconCls }: Props) => {
+export default ({ label, onSelect, iconCls, isLogout }: Props) => {
   return (
     <div
       style={{ minHeight: "110px", minWidth: "150px" }}
@@ -13,7 +16,13 @@ export default ({ label, onSelect, iconCls }: Props) => {
       onClick={onSelect}
     >
       <span>{label}</span>
-      <span className={`${iconCls} icon-menu`}></span>
+      {isLogout ? (
+        <span>
+          <MdLogout className="w-16 h-16" />
+        </span>
+      ) : (
+        <span className={`${iconCls} icon-menu`}></span>
+      )}
     </div>
   );
 };
