@@ -1,4 +1,3 @@
-// import { client } from "@/helpers/api-client";
 import { useState } from "react";
 import { client, getHeaders } from "../../helpers/api-client";
 import { setToken } from "../../helpers/auth";

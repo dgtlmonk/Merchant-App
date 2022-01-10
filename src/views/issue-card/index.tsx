@@ -3,13 +3,10 @@ import { ArrowBack } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { Fragment, useEffect, useRef, useState } from "react";
-// import Barcode from "react-barcode";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
-import { useMediaQuery } from "react-responsive";
+// import { useMediaQuery } from "react-responsive";
 import MembershipCard from "../../components/MembershipCard";
-// import PhoneInput from "react-phone-input-2";
-// import "react-phone-input-2/lib/material.css";
 import { client, qualifySvcUrl } from "../../helpers/api-client";
 import { getMembershipDetails } from "../../helpers/membership";
 import { QUALIFY_TYPES, schema, uiSchema } from "../../types";
@@ -44,8 +41,8 @@ function Index({ onDone, programs, location, installationId }: Props) {
     search = "search",
   }
 
-  // const isTabletOrMobile = useMediaQuery({ query: "(max-width: 1224px)" });
-  const isPortrait = useMediaQuery({ query: "(orientation: portrait)" });
+  // TODO: use for Barcode orientation?
+  // const isPortrait = useMediaQuery({ query: "(orientation: portrait)" });
 
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
@@ -66,10 +63,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
   const searchQueryRef = useRef<any>();
   const prevViewRef = useRef<VIEW>();
   const programRef = useRef<any>(null);
-
-  useEffect(() => {
-    console.log("is port ", isPortrait);
-  }, [isPortrait]);
 
   function handleFormChange(e) {
     formDataRef.current = e.formData;
@@ -356,18 +349,6 @@ function Index({ onDone, programs, location, installationId }: Props) {
       console.log("not the same member");
       setMatchStatus(MATCH_STATUS.idle);
       setViewState(VIEW.confirm);
-
-      // client
-      //   .post(`${host}/cards/revoke`, {
-      //     headers: {
-      //       "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-      //     },
-      //     body: JSON.stringify(params),
-      //   })
-      //   .then(() => {
-      //     setMatchStatus(MATCH_STATUS.idle);
-      //     setViewState(VIEW.confirm);
-      //   });
     } else {
       setMembership(person);
       setMatchStatus(MATCH_STATUS.not_qualified);
