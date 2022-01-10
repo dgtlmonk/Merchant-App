@@ -4,9 +4,7 @@ import { VitePWA } from "vite-plugin-pwa";
 const path = require("path");
 
 export default defineConfig(({ command, mode }) => {
-  // if (command === "serve") {
   return {
-    // dev specific config
     root: "./",
     build: {
       outDir: "dist",
