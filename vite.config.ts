@@ -10,6 +10,23 @@ export default defineConfig(({ command, mode }) => {
     root: "./",
     build: {
       outDir: "dist",
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (id.includes("node_modules")) {
+              if (id.includes("@material-ui")) {
+                return "vendor_mui";
+              }
+              if (id.includes("react")) {
+                return "vendor_react";
+              }
+
+              return "vendor"; // all other package goes here
+            }
+          },
+        },
+      },
     },
     resolve: {
       alias: {
