@@ -171,6 +171,7 @@ function App(props) {
               onDone={handleBackToMenu}
               programs={localSettings?.programs}
               location={localSettings?.location}
+              tenantCode={localSettings?.business?.tenantCode}
               installationId={localSettings?.installation?.id}
             />
           ),

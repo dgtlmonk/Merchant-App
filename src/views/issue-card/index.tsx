@@ -30,9 +30,16 @@ type Props = {
   location: any;
   programs?: any;
   installationId: string;
+  tenantCode: string;
 };
 
-function Index({ onDone, programs, location, installationId }: Props) {
+function Index({
+  onDone,
+  programs,
+  location,
+  installationId,
+  tenantCode,
+}: Props) {
   enum VIEW {
     fillup = "fillup",
     card_select = "card_select",
@@ -170,7 +177,7 @@ function Index({ onDone, programs, location, installationId }: Props) {
         headers: {
           "content-type": "application/json",
           "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-          "tenant-code": `${import.meta.env.VITE_TENANT_CODE}`,
+          "tenant-code": `${tenantCode}`,
           "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
         },
       })
