@@ -132,9 +132,9 @@ describe("Search Existing Member", () => {
     expect(cy.contains(/card already issued/i)).to.exist;
   });
 
-  it("should display list of matched result, given search returns more than one result", () => {
+  it.only("should display list of matched result, given search returns more than one result", () => {
     cy.intercept("GET", `${apiServer}/person/search?q=919455`, {
-      fixture: "search-result-single.json",
+      fixture: "search-result-multiple.json",
     }).as("search");
 
     cy.visit("http://localhost:3000/?module=1");
@@ -143,8 +143,9 @@ describe("Search Existing Member", () => {
     searchBtn.click();
 
     cy.get("input").type("919455");
-    // cy.get('[data-test="person-query-btn"]').click();
-    // cy.wait("@search");
+    cy.get('[data-test="person-query-btn"]').click();
+    cy.wait("@search");
+    expect(cy.contains(/list/i)).to.exist;
   });
 });
 

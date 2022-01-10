@@ -451,9 +451,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
                       </span>
                     </div>
 
-                    {/* match confirm start */}
-                    {/* refactor on next iteration */}
-                    {matchedPerson[0] && matchedPerson[0]?.activeMemberships ? (
+                    {/* existing member match confirm */}
+                    {!isMultipleMatchedPerson &&
+                    matchedPerson[0] &&
+                    matchedPerson[0]?.activeMemberships ? (
                       <div
                         className={`flex w-full p-4 mb-4 flex-col justify-around items-center ${
                           matchStatus === MATCH_STATUS.idle ||
@@ -517,7 +518,10 @@ function Index({ onDone, programs, location, installationId }: Props) {
                           </div>
                         </div>
                       </div>
-                    ) : null}
+                    ) : (
+                      isMultipleMatchedPerson &&
+                      matchedPerson && <div>list</div>
+                    )}
                     {/* match confirm ends */}
 
                     <div className="flex flex-col justify-center items-center">

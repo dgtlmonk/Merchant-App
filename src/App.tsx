@@ -109,7 +109,7 @@ function App(props) {
           [VIEWS.IDLE]: (
             <div className="flex flex-col justify-center items-center h-full">
               {isReactivating ? (
-                <div>
+                <div className="flex flex-col justify-center w-full items-center">
                   <div>This app is currently setup for</div>
                   <div>
                     <span
@@ -120,8 +120,10 @@ function App(props) {
                     </span>
                     store
                   </div>
-                  <div>You are attempting to change it</div>
-                  <div className="flex flex-row w-full mt-8">
+                  <div className="mt-4 text-gray-500">
+                    You are attempting to change it
+                  </div>
+                  <div className="flex flex-row w-full mt-4">
                     <button
                       className={`mr-4 h-12 p-2 px-8 border rounded-md  text-white`}
                       style={{ backgroundColor: "red" }}
