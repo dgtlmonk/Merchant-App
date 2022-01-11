@@ -142,7 +142,7 @@ function App(props) {
                     </button>
                     <button
                       className={`p-2 h-12  px-8 border rounded-md  bg-blue-400 text-white`}
-                      onClick={() => setViewState(VIEWS.LOGIN)}
+                      onClick={() => navigate("/")}
                       id="update-cancel"
                     >
                       Cancel

@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "engines": {
     "npm": ">=8.0.0",
-    "node": ">16.13.x"
+    "node": ">=16.13.x"
   },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test:cypress": "./node_modules/.bin/cypress open",
-    "test:cypress:headless": "./node_modules/.bin/cypress run --spec src/tests/integration/*.ts --config video=false"
+    "test:e2e": "./node_modules/.bin/cypress open",
+    "test:e2e:no-browser": "./node_modules/.bin/cypress run --spec src/tests/integration/*.ts --config video=false"
   },
   "dependencies": {
     "@material-ui/core": "^4.12.3",
@@ -39,7 +39,7 @@
     "@types/react-dom": "^17.0.10",
     "@vitejs/plugin-react": "^1.0.7",
     "autoprefixer": "^10.4.0",
-    "cypress": "^9.2.0",
+    "cypress": "^9.2.1",
     "cypress-localstorage-commands": "^1.6.1",
     "postcss": "^8.4.5",
     "tailwindcss": "^3.0.4",
