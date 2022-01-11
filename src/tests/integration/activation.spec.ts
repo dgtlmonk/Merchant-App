@@ -34,7 +34,7 @@ describe("Activation", () => {
     expect(cy.contains(/confirm you want to use app/i)).to.exist;
   });
 
-  it("should store new settings, given no local settings is detected", () => {
+  it.only("should store new settings, given no local settings is detected", () => {
     cy.intercept("POST", "https://someurl.io", {
       statusCode: 200,
       body: {
@@ -57,6 +57,7 @@ describe("Activation", () => {
 
     expect(cy.contains(/login/i)).to.exist;
     expect(cy.contains(/new dev/i)).to.exist;
+    cy.url().should("eq", "http://localhost:3000/");
   });
 
   it("should redirect to login by default, given local settings is detected", () => {
