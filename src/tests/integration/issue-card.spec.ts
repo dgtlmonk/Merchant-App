@@ -419,7 +419,7 @@ describe("Issue Card", () => {
     expect(cy.contains(/S0651022524/i)).to.exist;
   });
 
-  it.only("should show membership detail, give a search result item was selected", () => {
+  it("should show membership detail, give a search result item was selected", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.intercept(`${apiServer}/membership/qualify`, {

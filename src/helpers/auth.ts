@@ -26,20 +26,20 @@ export function deleteToken() {
   localStorage.removeItem(jwtKey);
 }
 
-export function isValidToken() {
-  try {
-    const token = getToken() as any;
-    let isExpired = false;
+// export function isValidToken() {
+//   try {
+//     const token = getToken() as any;
+//     let isExpired = false;
 
-    if (!token) {
-      return false;
-    }
+//     if (!token) {
+//       return false;
+//     }
 
-    console.log("token exp ", token.exp);
-    isExpired = Date.now() >= token?.exp * 1000;
+//     console.log("token exp ", token.exp);
+//     isExpired = Date.now() >= token?.exp * 1000;
 
-    return isExpired;
-  } catch {
-    return false;
-  }
-}
+//     return isExpired;
+//   } catch {
+//     return false;
+//   }
+// }

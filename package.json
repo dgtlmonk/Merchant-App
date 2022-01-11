@@ -10,7 +10,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test:cypress": "./node_modules/.bin/cypress open",
-    "test:cypress:headless": "./node_modules/.bin/cypress run"
+    "test:cypress:headless": "./node_modules/.bin/cypress run --spec src/tests/integration/*.ts --config video=false"
   },
   "dependencies": {
     "@material-ui/core": "^4.12.3",
