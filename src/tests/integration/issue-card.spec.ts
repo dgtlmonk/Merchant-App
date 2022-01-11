@@ -191,7 +191,7 @@ describe("Issue Card", () => {
       });
   });
 
-  it("should issue a card, given customer is qualified.", () => {
+  it.only("should issue a card, given customer is qualified.", () => {
     cy.visit("http://localhost:3000/?module=1");
 
     cy.get('[data-test="shop-card"]')

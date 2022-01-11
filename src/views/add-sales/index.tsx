@@ -235,7 +235,7 @@ function Index({
         setIsSalesSubmitSuccess(true);
         setTimeout(() => {
           onDone();
-        }, 1000);
+        }, 2000);
       })
       .finally(() => setIsSubmitting(false));
   };

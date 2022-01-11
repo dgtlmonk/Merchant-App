@@ -101,7 +101,7 @@ describe("Add Sales", () => {
     cy.get('[data-test="no-match-notice"]').should("exist");
   });
 
-  it.only("should show match, given a result is returned from search", () => {
+  it("should show match, given a result is returned from search", () => {
     cy.intercept("GET", `${apiServer}/person/search?cardNumber=123451`, {
       fixture: "card-number-search-result",
     }).as("search");
@@ -123,7 +123,7 @@ describe("Add Sales", () => {
     // expect(cy.contains(/teng austen/i)).to.exist;
   });
 
-  it("should proceed to order, given a result is returned from search and form is completed", () => {
+  it.only("should proceed to order, given a result is returned from search and form is completed", () => {
     cy.intercept("GET", `${apiServer}/person/search?cardNumber=123451`, {
       fixture: "card-number-search-result",
     }).as("search");

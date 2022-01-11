@@ -36,7 +36,7 @@ export default ({ onSuccess, settings }: Props) => {
         if (res.token) {
           setToken(res.token);
         }
-        setTimeout(() => onSuccess(), 700);
+        setTimeout(() => onSuccess(), 500);
       })
       .catch(() => {
         // TODO: set appropriate error message
