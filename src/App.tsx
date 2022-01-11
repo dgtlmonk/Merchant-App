@@ -1,16 +1,16 @@
 import "@/styles/App.css";
 import { CircularProgress } from "@material-ui/core";
+import ActivationHero from "components/ActivationHero";
+import AppMenu from "components/AppMenu";
+import { getSettings, setSettings } from "helpers/activation";
+import { client } from "helpers/api-client";
+import { deleteToken, getToken } from "helpers/auth";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import ActivationHero from "./components/ActivationHero";
-import AppMenu from "./components/AppMenu";
-import { getSettings, setSettings } from "./helpers/activation";
-import { client } from "./helpers/api-client";
-import { deleteToken, getToken } from "./helpers/auth";
+import AddSales from "views/add-sales";
+import IssueCard from "views/issue-card";
+import LoginForm from "views/login";
 import { activateParams, VIEWS } from "./types";
-import AddSales from "./views/add-sales";
-import IssueCard from "./views/issue-card";
-import LoginForm from "./views/login";
 
 function App(props) {
   console.log("app props ", props);

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
@@ -17,7 +18,6 @@
     "noEmit": true,
     "noUnusedLocals": true,
     "jsx": "react-jsx",
-    "baseUrl": "./src",
     "types": ["cypress", "@testing-library/cypress", "vite-plugin-pwa/client"],
     "paths": {
       "*": ["src/*", "node_modules/*"]

@@ -3,6 +3,12 @@ import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 const path = require("path");
 
+const pathAliasMap = {
+  "/": "./src/",
+  "components/": "./src/components/",
+  "views/": "./src/views/",
+};
+
 export default defineConfig(({ command, mode }) => {
   return {
     root: "./",
@@ -17,6 +23,10 @@ export default defineConfig(({ command, mode }) => {
                 return "vendor_react-router";
               }
 
+              if (id.includes("@material-ui")) {
+                return "vendor_mui";
+              }
+
               if (id.includes("react-dom")) {
                 return "vendor_react-dom";
               }
@@ -29,9 +39,24 @@ export default defineConfig(({ command, mode }) => {
     },
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": path.resolve(__dirname, "src"),
+        ["components"]: path.resolve(__dirname, "src/components"),
+        ["views"]: path.resolve(__dirname, "src/views"),
+        ["helpers"]: path.resolve(__dirname, "src/helpers"),
+        ["types"]: path.resolve(__dirname, "src/types"),
       },
     },
+    resolvers: [
+      {
+        alias(path: string) {
+          for (const [slug, res] of Object.entries(pathAliasMap)) {
+            if (path.startsWith(slug)) {
+              return path.replace(slug, res);
+            }
+          }
+        },
+      },
+    ],
     publicDir: command === "serve" ? "public/assets" : "public",
     plugins: [
       react(),
