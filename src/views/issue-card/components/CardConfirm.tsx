@@ -34,8 +34,6 @@ const Index = ({
   const [isListView, setIsListView] = useState(false);
   const [currentPerson, setCurrentPerson] = useState<any>(null);
 
-  console.log(" matched persons ", matchedPersons);
-
   useEffect(() => {
     if (matchedPersons && matchedPersons?.length) {
       const [membership] = matchedPersons[0].activeMemberships;
