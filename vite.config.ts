@@ -17,9 +17,9 @@ export default defineConfig(({ command, mode }) => {
                 return "vendor_react-router";
               }
 
-              if (id.includes("@material-ui")) {
-                return "vendor_mui";
-              }
+              // if (id.includes("@material-ui")) {
+              //   return "vendor_mui";
+              // }
 
               if (id.includes("react-dom")) {
                 return "vendor_react-dom";

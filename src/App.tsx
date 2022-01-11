@@ -30,15 +30,16 @@ function App(props) {
     const callbackUrl = cb || activateUrl;
 
     if (isActivating) {
+      setSettingsUrl(callbackUrl as string);
+
       if (!getSettings()) {
         setViewState(VIEWS.CONFIRM_INSTALL);
-        setSettingsUrl(callbackUrl as string);
       } else {
         // @ts-ignore
-        setSettingsUrl(callbackUrl);
         setLocalSettings(getSettings());
         setIsReactivating(true);
       }
+
       return;
     }
 
@@ -76,11 +77,12 @@ function App(props) {
   }
 
   const handleBackToMenu = () => {
-    setViewState(VIEWS.MENU);
+    validateAccessToken(VIEWS.MENU);
   };
 
   const handleMenuChange = (menu: VIEWS) => {
-    setViewState(menu);
+    validateAccessToken(menu);
+    // setViewState(menu);
   };
 
   function handleUpdateSettings() {
