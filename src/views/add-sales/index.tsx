@@ -1,5 +1,6 @@
 import { CircularProgress, InputAdornment, TextField } from "@material-ui/core";
 import { ArrowBack, EmailOutlined, PhoneOutlined } from "@material-ui/icons";
+import { getToken } from "helpers/auth";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { client } from "../../helpers/api-client";
@@ -215,7 +216,9 @@ function Index({
         id: installationId,
       },
       // TODO: get from login
-      staff: {},
+      staff: {
+        id: getToken()?.user.staffId || "no-id-found",
+      },
     };
 
     setIsSubmitting(true);

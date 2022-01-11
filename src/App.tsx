@@ -13,7 +13,6 @@ import LoginForm from "views/login";
 import { activateParams, VIEWS } from "./types";
 
 function App(props) {
-  console.log("app props ", props);
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
 

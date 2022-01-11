@@ -1,13 +1,7 @@
 import react from "@vitejs/plugin-react";
+import path, { resolve } from "path";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
-const path = require("path");
-
-const pathAliasMap = {
-  "/": "./src/",
-  "components/": "./src/components/",
-  "views/": "./src/views/",
-};
 
 export default defineConfig(({ command, mode }) => {
   return {
@@ -44,19 +38,9 @@ export default defineConfig(({ command, mode }) => {
         ["views"]: path.resolve(__dirname, "src/views"),
         ["helpers"]: path.resolve(__dirname, "src/helpers"),
         ["types"]: path.resolve(__dirname, "src/types"),
+        "~": resolve(__dirname, "src"),
       },
     },
-    resolvers: [
-      {
-        alias(path: string) {
-          for (const [slug, res] of Object.entries(pathAliasMap)) {
-            if (path.startsWith(slug)) {
-              return path.replace(slug, res);
-            }
-          }
-        },
-      },
-    ],
     publicDir: command === "serve" ? "public/assets" : "public",
     plugins: [
       react(),

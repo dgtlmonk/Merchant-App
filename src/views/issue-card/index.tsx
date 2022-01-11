@@ -2,6 +2,7 @@ import { CircularProgress, TextField } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
+import { getToken } from "helpers/auth";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
@@ -173,8 +174,9 @@ function Index({
       tierLevel: selectedMembership.level,
       programId: programs[0].programId,
       location,
-      // TODO: get from login
-      staff: {},
+      staff: {
+        id: getToken()?.user.staffId || "no-id-found",
+      },
       installation: {
         id: `${installationId}`,
       },
@@ -236,9 +238,8 @@ function Index({
       },
       location,
       profile: { ...data, nameOrder },
-      // TODO:  get this value after staff login
       staff: {
-        id: "dev123",
+        id: getToken()?.user.staffId || "no-id-found",
       },
     });
 
