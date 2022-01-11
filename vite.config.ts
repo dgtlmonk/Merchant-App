@@ -13,6 +13,10 @@ export default defineConfig(({ command, mode }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules")) {
+              if (id.includes("react-dom")) {
+                return "vendor_react-dom";
+              }
+
               if (id.includes("react-router")) {
                 return "vendor_react-router";
               }
@@ -20,10 +24,6 @@ export default defineConfig(({ command, mode }) => {
               // if (id.includes("@material-ui")) {
               //   return "vendor_mui";
               // }
-
-              if (id.includes("react-dom")) {
-                return "vendor_react-dom";
-              }
 
               return "vendor"; // all other package goes here
             }

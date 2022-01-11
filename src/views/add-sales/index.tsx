@@ -302,21 +302,25 @@ function Index({
                   >
                     <div className="flex flex-col">
                       <div className="flex font-semibold text-xl">
-                        No matching member.
+                        No matching member
                       </div>
                       <span className="text-gray-600">
                         Seach again or issue a new card.
                       </span>
                     </div>
-                    <div>
+                    {/* <div>
                       <button
                         data-test="ok-no-match-btn"
                         className="px-4 py-2 border rounded-md w-12 h-12   bg-blue-400 text-white font-medium"
-                        onClick={() => setIsSearchingSuccess(false)}
+
+
+                        onClick={() => setIsSearchingSuccess(false)
+                        
+                        }
                       >
                         Ok
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
@@ -432,7 +436,7 @@ function Index({
                   InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
                 />
               </span>
-              <span className="flex mr-4 w-2/5">
+              <span className="flex mr-4 w-1/5">
                 <TextField
                   inputRef={qttyRef}
                   disabled={isSalesSubmitSuccess}
@@ -442,7 +446,7 @@ function Index({
                   type="number"
                 />
               </span>
-              <span className="flex mr-2 w-2/5">
+              <span className="flex mr-2 w-3/5">
                 <TextField
                   inputRef={amountRef}
                   disabled={isSalesSubmitSuccess}
