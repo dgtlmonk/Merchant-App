@@ -418,9 +418,10 @@ function Index({
               }[viewState]
             }
 
-            <div className="flex flex-row mt-8">
-              <span className="flex mr-2  leading-tight">
+            <div className="flex flex-row mt-8 w-full">
+              <span className="flex mr-4  leading-tight w-full">
                 <TextField
+                  className="w-full"
                   label="Receipt Number"
                   inputRef={receiptRef}
                   disabled={isSalesSubmitSuccess}
@@ -428,7 +429,7 @@ function Index({
                   InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
                 />
               </span>
-              <span className="flex mr-2 w-1/5">
+              <span className="flex mr-4 w-2/5">
                 <TextField
                   inputRef={qttyRef}
                   disabled={isSalesSubmitSuccess}
@@ -438,7 +439,7 @@ function Index({
                   type="number"
                 />
               </span>
-              <span>
+              <span className="flex mr-2 w-2/5">
                 <TextField
                   inputRef={amountRef}
                   disabled={isSalesSubmitSuccess}
