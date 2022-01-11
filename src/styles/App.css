@@ -22,7 +22,7 @@ body {
 
 @font-face {
   font-family: "picon";
-  src: local("Picon"), url("fonts/Picon.ttf?ybt6q0") format("truetype");
+  src: local("Picon"), url("fonts/Picon.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
