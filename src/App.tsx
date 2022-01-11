@@ -94,7 +94,6 @@ function App(props) {
         if (!res.error) {
           setSettings(res);
           setLocalSettings(res);
-          navigate("/");
           setViewState(VIEWS.LOGIN);
           return;
         }
