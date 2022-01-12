@@ -5,6 +5,7 @@ import AppMenu from "components/AppMenu";
 import { getSettings, setSettings } from "helpers/activation";
 import { client } from "helpers/api-client";
 import { deleteToken, getToken } from "helpers/auth";
+import { getOrderFormSchema } from "helpers/settings";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AddSales from "views/add-sales";
@@ -44,6 +45,9 @@ function App(props) {
     }
 
     if (getSettings()) {
+      // console.dir(getSettings());
+      console.log(getOrderFormSchema());
+
       setLocalSettings(getSettings());
 
       if (mod && mod === "1") {

@@ -72,3 +72,8 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+#addSalesForm .MuiGrid-root {
+  display: flex;
+  flex-flow: row;
+}

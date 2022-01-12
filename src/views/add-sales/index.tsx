@@ -1,10 +1,15 @@
 import { CircularProgress, InputAdornment, TextField } from "@material-ui/core";
 import { ArrowBack, EmailOutlined, PhoneOutlined } from "@material-ui/icons";
+import { withTheme } from "@rjsf/core";
+import { Theme } from "@rjsf/material-ui";
+import { client, getHeaders } from "helpers/api-client";
 import { getToken } from "helpers/auth";
+import { getMembershipDetails } from "helpers/membership";
+import { getOrderFormSchema } from "helpers/settings";
 import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import { client } from "../../helpers/api-client";
-import { getMembershipDetails } from "../../helpers/membership";
+import { FormProps } from "react-jsonschema-form";
+import { uiSchemaAddSales } from "types";
 
 type Props = {
   onDone: () => void;
@@ -27,12 +32,16 @@ function Index({
     selected = "selected",
   }
 
+  const Form = withTheme(Theme);
+
   const host = import.meta.env.VITE_API_HOST;
   const cardNumberRef = useRef<any>();
   const qttyRef = useRef<any>();
   const receiptRef = useRef<any>();
   const amountRef = useRef<any>();
+  const formDataRef = useRef<any>();
 
+  const [data, setData] = useState<any>({});
   const [viewState, setViewState] = useState<VIEW>(VIEW.search);
   const [isSearching, setIsSearching] = useState(false);
   const [isListMatch, setIsListMatch] = useState(false);
@@ -66,6 +75,10 @@ function Index({
       }
     }
   };
+
+  function handleFormChange(e) {
+    formDataRef.current = e.formData;
+  }
 
   type MatchItemProps = {
     onSelectDataIndex: () => void;
@@ -128,11 +141,7 @@ function Index({
     setIsSearching(true);
     client
       .get(`${host}/person/search?cardNumber=${cardNumberRef?.current.value}`, {
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
-        },
+        headers: { ...getHeaders() },
       })
       .then((res: any) => {
         if (res && res.length) {
@@ -164,7 +173,23 @@ function Index({
       .finally(() => setIsSearching(false));
   };
 
-  const handleConfirm = () => {
+  const handleSubmit = (
+    { formData }: FormProps<any>,
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    setData({ ...formData });
+
+    if (!cardNumberRef?.current?.value && !isPersonFound) {
+      // @ts-ignore
+      cardNumberRef?.current?.focus();
+      return;
+    }
+
+    if (!isPersonFound) {
+      handleSearchMemberCard();
+      return;
+    }
+
     if (isSalesSubmitSuccess) {
       // new sales
       setIsSalesSubmitSuccess(false);
@@ -175,40 +200,10 @@ function Index({
       return;
     }
 
-    // @ts-ignore
-    if (!cardNumberRef?.current?.value && !setIsSearchingSuccess) {
-      // @ts-ignore
-      cardNumberRef?.current?.focus();
-      return;
-    }
-
-    // @ts-ignore
-    if (!receiptRef?.current?.value) {
-      // @ts-ignore
-      receiptRef?.current?.focus();
-      return;
-    }
-
-    // @ts-ignore
-    if (!qttyRef?.current?.value || qttyRef?.current?.value == 0) {
-      // @ts-ignore
-      qttyRef?.current?.focus();
-      return;
-    }
-
-    // @ts-ignore
-    if (!amountRef?.current?.value) {
-      // @ts-ignore
-      amountRef?.current?.focus();
-      return;
-    }
-
     const params = {
       orderSummary: {
-        receipt: receiptRef.current.value,
-        quantity: Number(qttyRef.current.value),
         currency: currency || "SGD",
-        amount: Number(amountRef.current.value),
+        ...formData,
       },
       membershipId: person?.membership?.membershipId,
       location,
@@ -220,6 +215,8 @@ function Index({
         id: getToken()?.user.staffId || "no-id-found",
       },
     };
+
+    console.log("getToken ", getToken());
 
     setIsSubmitting(true);
     client
@@ -241,6 +238,7 @@ function Index({
   };
 
   function handleReset() {
+    setData(null);
     setIsPersonFound(false);
     setIsSalesSubmitSuccess(false);
     setIsSubmitting(false);
@@ -425,71 +423,53 @@ function Index({
               }[viewState]
             }
 
-            <div className="flex flex-row mt-8 w-full">
-              <span className="flex mr-4  leading-tight w-full">
-                <TextField
-                  className="w-full"
-                  label="Receipt Number"
-                  inputRef={receiptRef}
-                  disabled={isSalesSubmitSuccess}
-                  inputProps={{ ["data-test"]: "sales-receipt" }}
-                  InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
-                />
-              </span>
-              <span className="flex mr-4 w-1/5">
-                <TextField
-                  inputRef={qttyRef}
-                  disabled={isSalesSubmitSuccess}
-                  inputProps={{ ["data-test"]: "sales-qtty" }}
-                  InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
-                  label="Quantity"
-                  type="number"
-                />
-              </span>
-              <span className="flex mr-2 w-3/5">
-                <TextField
-                  inputRef={amountRef}
-                  disabled={isSalesSubmitSuccess}
-                  inputProps={{ ["data-test"]: "sales-amount" }}
-                  InputLabelProps={{ style: { fontSize: 15 } }} // font size of input text
-                  label="Total Amount"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="end">
-                        <span className="mr-2 text-gray-400">$</span>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </span>
+            <div className="flex flex-col mt-8 w-full">
+              {getOrderFormSchema() ? (
+                <div className="flex flex-row w-full">
+                  {/* @ts-ignore */}
+                  <Form
+                    className="flex flex-col  w-full"
+                    id="addSalesForm"
+                    key="addSalesForm"
+                    schema={getOrderFormSchema()}
+                    uiSchema={uiSchemaAddSales}
+                    onChange={handleFormChange}
+                    onSubmit={handleSubmit}
+                    formData={data}
+                  >
+                    <div className="flex flex-row w-full items-center justify-center mt-8">
+                      <button
+                        type="reset"
+                        data-test="sales-reset-btn"
+                        disabled={isSubmitting}
+                        className="h-12  p-2 px-8 border rounded-md  bg-slate-400 text-white mr-4 w-full"
+                        onClick={() => {
+                          handleReset();
+                        }}
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting || isSearching}
+                        data-test="sales-confirm-btn"
+                        className="h-12 p-2 border rounded-md  bg-blue-400 text-white font-medium w-full"
+                      >
+                        Confirm
+                      </button>
+                    </div>
+                  </Form>
+                </div>
+              ) : (
+                <div className="flex w-full">
+                  Failed to render Issue Card form. Please re-activate this
+                  device.
+                </div>
+              )}
             </div>
           </div>
         )}
-        <div className="flex flex-row w-full items-center justify-center ">
-          {isSubmitting ? (
-            <div className="flex flex-row w-full items-center justify-center mt-8">
-              <CircularProgress size="1.5rem" />
-            </div>
-          ) : isSearchingSuccess && !isSalesSubmitSuccess && isPersonFound ? (
-            <div className="flex flex-row w-full items-center justify-center mt-8">
-              <button
-                data-test="sales-reset-btn"
-                disabled={isSubmitting}
-                className={`h-12  p-2 px-8 border rounded-md  bg-slate-400 text-white mr-4`}
-                onClick={handleReset}
-              >
-                Cancel
-              </button>
-              <button
-                data-test="sales-confirm-btn"
-                className={`h-12  p-2 px-8 border rounded-md  bg-blue-400 text-white`}
-                onClick={handleConfirm}
-              >
-                {isSalesSubmitSuccess ? "New Sales" : "Confirm"}
-              </button>
-            </div>
-          ) : null}
-        </div>
       </div>
     </div>
   );

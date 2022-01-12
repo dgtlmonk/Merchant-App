@@ -1,17 +1,23 @@
 {
-  "installationId": "61cba27f6bbf03002050a2ba",
+  "installation": {
+    "id": "61db758cae300b001f1829c2"
+  },
   "location": {
     "id": "5d1b019745828f10b6c5eed1",
     "name": "ION Orchard"
   },
   "business": {
     "tenantCode": "samsonitesg",
+    "name": "Samsonite Singapore",
     "currency": "SGD",
     "style": {
       "light": {},
       "dark": {}
     },
-    "logo": {}
+    "logo": {
+      "original": "https://s3-ap-southeast-1.amazonaws.com/c3.perkd.me/logo/f41f3406-9701-40ba-b6c4-8153392f6f8c.jpg",
+      "thumbnail": "https://s3-ap-southeast-1.amazonaws.com/c3.perkd.me/logo/f41f3406-9701-40ba-b6c4-8153392f6f8c-thumbnail.jpg"
+    }
   },
   "programs": [
     {
@@ -42,5 +48,61 @@
         }
       ]
     }
-  ]
+  ],
+  "settings": {
+    "modules": {
+      "membership": {
+        "join": true
+      },
+      "orders": {
+        "search": true,
+        "create": true,
+        "cancel": true
+      }
+    },
+    "membership": {
+      "allowSalesQualify": false
+    },
+    "orders": {},
+    "forms": {
+      "membership-join": {
+        "type": "object",
+        "required": ["familyName", "givenName", "mobile"],
+        "properties": {
+          "familyName": {
+            "type": "string",
+            "title": "Family Name"
+          },
+          "givenName": {
+            "type": "string",
+            "min": 1,
+            "title": "Given Name"
+          },
+          "mobile": {
+            "type": "string",
+            "title": "Mobile"
+          }
+        }
+      },
+      "order-create": {
+        "type": "object",
+        "required": ["receipt"],
+        "properties": {
+          "receipt": {
+            "type": "string",
+            "title": "Receipt"
+          },
+          "quantity": {
+            "type": "number",
+            "min": 1,
+            "title": "Quantity"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          }
+        }
+      }
+    }
+  }
 }

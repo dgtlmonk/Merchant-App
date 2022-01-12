@@ -4,7 +4,7 @@ export function deleteSettings() {
   localStorage.removeItem(settingsKey);
 }
 
-export function getSettings() {
+export function getSettings(): Record<string, any> | null {
   // @ts-ignore
   return JSON.parse(localStorage.getItem(settingsKey)) || null;
 }

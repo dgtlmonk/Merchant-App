@@ -14,14 +14,14 @@ export enum VIEWS {
 
 export const uiSchema = {
   "ui:options": { label: false },
-  // done: {
-  //   "ui:widget": "select", // could also be "select"
-  // },
-  // mobile: {
-  //   phoneNumber: {
-  //     "ui:widget": "select", // could also be "select"
-  //   },
-  // },
+};
+
+// TODO: add custom field width
+export const uiSchemaAddSales = {
+  ...uiSchema,
+  receipt: {
+    classNames: "w-3/5",
+  },
 };
 
 export const schema = {

@@ -3,6 +3,7 @@ import { ArrowBack } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
 import { getToken } from "helpers/auth";
+import { getMembershipJoinFormSchema } from "helpers/settings";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
@@ -10,7 +11,7 @@ import { FormProps } from "react-jsonschema-form";
 import MembershipCard from "../../components/MembershipCard";
 import { client, qualifySvcUrl } from "../../helpers/api-client";
 import { getMembershipDetails } from "../../helpers/membership";
-import { QUALIFY_TYPES, schema, uiSchema } from "../../types";
+import { QUALIFY_TYPES, uiSchema } from "../../types";
 import CardConfirm from "./components/CardConfirm";
 import CardIssued from "./components/CardIssued";
 
@@ -655,23 +656,30 @@ function Index({
                       </div>
 
                       <div className="w-5/6 flex px-12 justify-center">
-                        {/* @ts-ignore */}
-                        <Form
-                          key="cardIssueForm"
-                          schema={schema}
-                          uiSchema={uiSchema}
-                          onChange={handleFormChange}
-                          onSubmit={handleSubmit}
-                          formData={data}
-                        >
-                          <button
-                            type="submit"
-                            data-test="issue-next-btn"
-                            className="h-12 p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-4"
+                        {getMembershipJoinFormSchema() ? (
+                          /* @ts-ignore */
+                          <Form
+                            key="cardIssueForm"
+                            schema={getMembershipJoinFormSchema()}
+                            uiSchema={uiSchema}
+                            onChange={handleFormChange}
+                            onSubmit={handleSubmit}
+                            formData={data}
                           >
-                            Next
-                          </button>
-                        </Form>
+                            <button
+                              type="submit"
+                              data-test="issue-next-btn"
+                              className="h-12 p-2 border rounded-md w-full bg-blue-400 text-white font-medium mt-4"
+                            >
+                              Next
+                            </button>
+                          </Form>
+                        ) : (
+                          <div>
+                            Failed to render Issue Card form. Please re-activate
+                            this device.
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
