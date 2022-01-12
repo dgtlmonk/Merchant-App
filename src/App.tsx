@@ -20,6 +20,7 @@ function App(props) {
   const [localSettings, setLocalSettings] = useState<any>(null);
   const [viewState, setViewState] = useState<string>(VIEWS.IDLE);
   const [isReactivating, setIsReactivating] = useState<boolean>(false);
+  const [isSettingsUpdating, setIsSettingsUpdating] = useState<boolean>(false);
   const [settingsUrl, setSettingsUrl] = useState<string>();
 
   useEffect(() => {
@@ -90,6 +91,8 @@ function App(props) {
   };
 
   function handleUpdateSettings() {
+    setIsSettingsUpdating(true);
+
     client
       .post(`${settingsUrl}`, {
         body: JSON.stringify(activateParams),
@@ -98,7 +101,11 @@ function App(props) {
         if (!res.error) {
           setSettings(res);
           setLocalSettings(res);
-          setViewState(VIEWS.LOGIN);
+          setTimeout(() => {
+            setIsSettingsUpdating(false);
+            navigate("/");
+          }, 1500);
+
           return;
         }
 
@@ -106,7 +113,8 @@ function App(props) {
       })
       .catch(() => {
         setViewState(VIEWS.DENIED);
-      });
+      })
+      .finally(() => {});
   }
 
   function handleLogout() {
@@ -135,23 +143,31 @@ function App(props) {
                   <div className="mt-4 text-gray-500">
                     You are attempting to change it
                   </div>
-                  <div className="flex flex-row w-full mt-4">
-                    <button
-                      className={`mr-4 h-12 p-2 px-8 border rounded-md  text-white`}
-                      style={{ backgroundColor: "red" }}
-                      id="update-settings"
-                      onClick={handleUpdateSettings}
-                    >
-                      Change
-                    </button>
-                    <button
-                      className={`p-2 h-12  px-8 border rounded-md  bg-blue-400 text-white`}
-                      onClick={() => navigate("/")}
-                      id="update-cancel"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+
+                  {isSettingsUpdating ? (
+                    <div className="flex flex-col w-full p-2 justify-center items-center">
+                      <div className="mb-4">Updating settings ..</div>
+                      <CircularProgress size="2rem" />
+                    </div>
+                  ) : (
+                    <div className="flex flex-row w-full mt-4">
+                      <button
+                        className={`mr-4 h-12 p-2 px-8 border rounded-md  text-white`}
+                        style={{ backgroundColor: "red" }}
+                        id="update-settings"
+                        onClick={handleUpdateSettings}
+                      >
+                        Change
+                      </button>
+                      <button
+                        className={`p-2 h-12  px-8 border rounded-md  bg-blue-400 text-white`}
+                        onClick={() => navigate("/")}
+                        id="update-cancel"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <span>
@@ -190,7 +206,10 @@ function App(props) {
             />
           ),
           [VIEWS.CONFIRM_INSTALL]: (
-            <ActivationHero onActivate={handleUpdateSettings} />
+            <ActivationHero
+              isActivating={isSettingsUpdating}
+              onActivate={handleUpdateSettings}
+            />
           ),
           [VIEWS.DENIED]: <ActivationHero />,
         }[viewState]

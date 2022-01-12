@@ -16,8 +16,8 @@ import CardConfirm from "./components/CardConfirm";
 import CardIssued from "./components/CardIssued";
 
 export enum NAMEORDER {
-  gf = "givenFamily",
-  fg = "familyGiven",
+  gf = "givenfamily",
+  fg = "familygiven",
 }
 
 enum MATCH_STATUS {
@@ -54,9 +54,6 @@ function Index({
     fullfilled = "fullfilled",
     search = "search",
   }
-
-  // TODO: use for Barcode orientation?
-  // const isPortrait = useMediaQuery({ query: "(orientation: portrait)" });
 
   const host = import.meta.env.VITE_API_HOST;
   const [viewState, setViewState] = useState<VIEW>(VIEW.card_select);
@@ -323,10 +320,11 @@ function Index({
     }
 
     // save mobile for 'no match'
-    setData({
-      ...data,
-      mobile: searchQueryRef?.current?.value,
-    });
+    // setData({
+    //   ...data,
+    //   mobile: searchQueryRef?.current?.value,
+    // });
+
     setMatchStatus(MATCH_STATUS.searching);
     client
       .get(`${host}/person/search?q=${searchQueryRef.current.value}`, {
@@ -611,6 +609,12 @@ function Index({
                               ["data-test"]: "seach-mobile-input",
                             }}
                             inputRef={searchQueryRef}
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                handleSearchExistingMember();
+                                e.preventDefault();
+                              }
+                            }}
                           />
                         </div>
                         <div className="flex w-full mt-8 px-8">

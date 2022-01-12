@@ -85,7 +85,7 @@ describe("Activation", () => {
     expect(cy.contains(/dev 123/i)).to.exist;
   });
 
-  it("should override local settings, given user accept change settings source", () => {
+  it.only("should override local settings, given user accept change settings source", () => {
     setSettings({
       installationId: "61cba27f6bbf03002050a2ba",
       location: {
