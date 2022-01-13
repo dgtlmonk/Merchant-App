@@ -43,17 +43,17 @@ export default ({
       <div className="flex flex-col items-center">
         {
           // @ts-ignore
-          getSettings().business.style.light.primary && (
+          getSettings() && getSettings().business?.logo ? (
             <div className="flex flex-row justify-between items-center mb-8">
               <img
                 loading="lazy"
                 aria-label="membership card image"
                 className="w-full"
                 // @ts-ignore
-                src={`${getSettings().business.logo.original}`}
+                src={`${getSettings().business?.logo.original}`}
               />
             </div>
-          )
+          ) : null
         }
 
         <div className="mb-8 text-3xl font-semibold">{locationName}</div>
