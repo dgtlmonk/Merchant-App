@@ -1,13 +1,16 @@
 import "whatwg-fetch";
+import { getJWTToken } from "./auth";
 
 const host = import.meta.env.VITE_API_HOST;
 
 export function getHeaders() {
-  return {
+  const headers = {
     "content-type": "application/json",
     "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-    "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
+    "x-access-token": `${getJWTToken()}`,
   };
+
+  return headers;
 }
 
 const fetcher = (url: string, options?: RequestInit) =>

@@ -2,16 +2,16 @@ import { CircularProgress, TextField } from "@material-ui/core";
 import { ArrowBack } from "@material-ui/icons";
 import { withTheme } from "@rjsf/core";
 import { Theme } from "@rjsf/material-ui";
+// import { useMediaQuery } from "react-responsive";
+import MembershipCard from "components/MembershipCard";
+import { client, getHeaders, qualifySvcUrl } from "helpers/api-client";
 import { getToken } from "helpers/auth";
+import { getMembershipDetails } from "helpers/membership";
 import { getMembershipJoinFormSchema } from "helpers/settings";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
-// import { useMediaQuery } from "react-responsive";
-import MembershipCard from "../../components/MembershipCard";
-import { client, qualifySvcUrl } from "../../helpers/api-client";
-import { getMembershipDetails } from "../../helpers/membership";
-import { QUALIFY_TYPES, uiSchema } from "../../types";
+import { QUALIFY_TYPES, uiSchema } from "types";
 import CardConfirm from "./components/CardConfirm";
 import CardIssued from "./components/CardIssued";
 
@@ -184,10 +184,8 @@ function Index({
       .post(`${qualifySvcUrl}`, {
         body: JSON.stringify(params),
         headers: {
-          "content-type": "application/json",
-          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
+          ...getHeaders(),
           "tenant-code": `${tenantCode}`,
-          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
         },
       })
       .then((res) => {
@@ -247,11 +245,7 @@ function Index({
   function asyncJoin(params: any) {
     client
       .post(`${host}/membership/join`, {
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
-        },
+        headers: { ...getHeaders() },
         body: JSON.stringify(params),
       })
       .then((res) => {
@@ -319,20 +313,10 @@ function Index({
       return;
     }
 
-    // save mobile for 'no match'
-    // setData({
-    //   ...data,
-    //   mobile: searchQueryRef?.current?.value,
-    // });
-
     setMatchStatus(MATCH_STATUS.searching);
     client
       .get(`${host}/person/search?q=${searchQueryRef.current.value}`, {
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": `${import.meta.env.VITE_API_KEY}`,
-          "x-access-token": `${import.meta.env.VITE_API_TOKEN}`,
-        },
+        headers: { ...getHeaders() },
       })
       .then((res: any[]) => {
         if (res.length) {

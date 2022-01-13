@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { client, getHeaders } from "../../helpers/api-client";
+import { client } from "../../helpers/api-client";
 import { setToken } from "../../helpers/auth";
 import LoginForm from "./form";
 
@@ -20,7 +20,6 @@ export default ({ onSuccess, settings }: Props) => {
 
     client
       .post(`${host}/login?tenant_code=${settings.business?.tenantCode}`, {
-        headers: { ...getHeaders() },
         body: JSON.stringify({
           username,
           password,
