@@ -1,4 +1,5 @@
 import { CircularProgress, TextField } from "@material-ui/core";
+import { getSettings } from "helpers/activation";
 import { useRef } from "react";
 
 type Props = {
@@ -29,49 +30,75 @@ export default ({
   }
 
   return (
-    <div className="flex flex-col p-12 items-center justify-center max-w-md h-full">
-      <div className="mb-8 text-3xl font-semibold">{locationName}</div>
-      <form className="flex flex-col" onSubmit={handleLogin}>
-        <TextField
-          required
-          label="username"
-          inputRef={usernameRef}
-          disabled={isAuthenticating}
-          inputProps={{
-            ["data-test"]: "login-username",
-          }}
-        />
-        <span className="flex mt-4">
+    <div
+      className="flex flex-col p-12 items-center justify-center h-full w-full"
+      style={{
+        // @ts-ignore
+        backgroundColor: `${getSettings().business.style.light.background}`,
+
+        // @ts-ignore
+        color: `${getSettings().business.style.light.primary}`,
+      }}
+    >
+      <div className="flex flex-col items-center">
+        {
+          // @ts-ignore
+          getSettings().business.style.light.primary && (
+            <div className="flex flex-row justify-between items-center mb-8">
+              <img
+                loading="lazy"
+                aria-label="membership card image"
+                className="w-full"
+                // @ts-ignore
+                src={`${getSettings().business.logo.original}`}
+              />
+            </div>
+          )
+        }
+
+        <div className="mb-8 text-3xl font-semibold">{locationName}</div>
+        <form className="flex flex-col" onSubmit={handleLogin}>
           <TextField
-            label="password"
-            type="password"
-            inputRef={passwordRef}
             required
+            label="username"
+            inputRef={usernameRef}
             disabled={isAuthenticating}
             inputProps={{
-              ["data-test"]: "login-password",
+              ["data-test"]: "login-username",
             }}
           />
-        </span>
-        {isAuthenticating ? (
-          <div className="flex justify-center pt-4">
-            <CircularProgress size="1.5em" />
-          </div>
-        ) : (
-          <button
-            data-test="login-btn"
-            type="submit"
-            className="p-2 mt-4 h-12 rounded-md w-full bg-blue-400 text-white font-medium"
-          >
-            Login
-          </button>
-        )}
-        {isLoginFailed && (
-          <div className="flex justify-center p-2 prose-sm text-red-600">
-            Login failed
-          </div>
-        )}
-      </form>
+          <span className="flex mt-4">
+            <TextField
+              label="password"
+              type="password"
+              inputRef={passwordRef}
+              required
+              disabled={isAuthenticating}
+              inputProps={{
+                ["data-test"]: "login-password",
+              }}
+            />
+          </span>
+          {isAuthenticating ? (
+            <div className="flex justify-center pt-4">
+              <CircularProgress size="1.5em" />
+            </div>
+          ) : (
+            <button
+              data-test="login-btn"
+              type="submit"
+              className="p-2 mt-4 h-12 rounded-md w-full bg-blue-400 text-white font-bold"
+            >
+              Login
+            </button>
+          )}
+          {isLoginFailed && (
+            <div className="flex justify-center p-2 prose-sm text-red-600">
+              Login failed
+            </div>
+          )}
+        </form>
+      </div>
     </div>
   );
 };

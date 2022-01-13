@@ -31,7 +31,12 @@ const MembershipCard = ({ onSelectDataIndex, person, cardImageSrc }: Props) => {
       </div>
       <div className="relative rounded-lg overflow-hidden w-48">
         <div className="rounded-sm">
-          <img loading="lazy" className="object-fill" src={cardImageSrc} />
+          <img
+            aria-label="membership card image"
+            loading="lazy"
+            className="object-fill"
+            src={cardImageSrc}
+          />
         </div>
       </div>
     </div>

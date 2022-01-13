@@ -291,7 +291,11 @@ function Index({
             setViewState(VIEW.fillup);
           }}
         >
-          <img loading="lazy" src={membership.card.image.original} />
+          <img
+            loading="lazy"
+            aria-label="membership card image"
+            src={membership.card.image.original}
+          />
         </div>
       );
     });
@@ -476,6 +480,7 @@ function Index({
                           </div>
                           <div className="p-2">
                             <img
+                              aria-label="membership card image"
                               loading="lazy"
                               src={`${
                                 getMembershipDetailsProxy(
@@ -638,6 +643,7 @@ function Index({
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
                       <div className="w-96">
                         <img
+                          aria-label="membership card image"
                           loading="lazy"
                           src={selectedMembership?.card?.image?.original}
                         />

@@ -77,3 +77,13 @@ input[type="number"] {
   display: flex;
   flex-flow: row;
 }
+
+.MuiInputLabel-formControl,
+.MuiInputBase-root {
+  font-family: melbourne !important;
+  font-weight: 500 !important;
+}
+
+button {
+  font-weight: 600;
+}

@@ -171,7 +171,12 @@ const Index = ({
         ) : (
           <Fragment>
             <div className="mt-8">
-              <img loading="lazy" src={cardImg} className="w-96" />
+              <img
+                aria-label="membership card image"
+                loading="lazy"
+                src={cardImg}
+                className="w-96"
+              />
             </div>
 
             <div className="mt-6">

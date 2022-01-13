@@ -111,6 +111,7 @@ function Index({
         <div className="relative rounded-lg overflow-hidden w-48">
           <div className="rounded-sm">
             <img
+              aria-label="membership card image"
               className="object-fill"
               src={`${
                 getMembershipDetails(
@@ -369,6 +370,7 @@ function Index({
                     <div className="relative rounded-lg overflow-hidden w-32">
                       <div className="rounded-sm">
                         <img
+                          aria-label="membership card image"
                           loading="lazy"
                           className="object-fill"
                           src={`${
