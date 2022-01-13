@@ -35,9 +35,6 @@ export default ({
       style={{
         // @ts-ignore
         backgroundColor: `${getSettings().business.style.light.background}`,
-
-        // @ts-ignore
-        color: `${getSettings().business.style.light.primary}`,
       }}
     >
       <div className="flex flex-col items-center">
@@ -49,14 +46,26 @@ export default ({
                 loading="lazy"
                 aria-label="membership card image"
                 className="w-full"
-                // @ts-ignore
-                src={`${getSettings().business?.logo.original}`}
+                src={`${
+                  // @ts-ignore
+                  getSettings() && getSettings().business?.logo.original
+                }`}
               />
             </div>
           ) : null
         }
 
-        <div className="mb-8 text-3xl font-semibold">{locationName}</div>
+        <div
+          className="mb-8 text-3xl font-semibold"
+          style={{
+            color: `${
+              // @ts-ignore
+              getSettings() && getSettings().business.style.light.primary
+            }`,
+          }}
+        >
+          {locationName}
+        </div>
         <form className="flex flex-col" onSubmit={handleLogin}>
           <TextField
             required
@@ -87,7 +96,13 @@ export default ({
             <button
               data-test="login-btn"
               type="submit"
-              className="p-2 mt-4 h-12 rounded-md w-full bg-blue-400 text-white font-bold"
+              className="p-2 mt-4 h-12 rounded-md w-ful text-white font-bold"
+              style={{
+                backgroundColor: `${
+                  // @ts-ignore
+                  getSettings() && getSettings().business.style.light.accent
+                }`,
+              }}
             >
               Login
             </button>

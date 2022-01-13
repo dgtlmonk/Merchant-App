@@ -21,9 +21,9 @@ export default defineConfig(({ command, mode }) => {
                 return "vendor_react-router";
               }
 
-              // if (id.includes("@material-ui")) {
-              //   return "vendor_mui";
-              // }
+              if (id.includes("material-ui")) {
+                return "vendor_mui";
+              }
 
               return "vendor"; // all other package goes here
             }
