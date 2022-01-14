@@ -71,7 +71,7 @@ export default ({
         <form className="flex flex-col" onSubmit={handleLogin}>
           <TextField
             required
-            label="username"
+            placeholder="username"
             inputRef={usernameRef}
             disabled={isAuthenticating}
             InputLabelProps={{
@@ -93,15 +93,16 @@ export default ({
           />
           <span className="flex mt-4">
             <TextField
-              label="password"
+              placeholder="password"
               type="password"
               inputRef={passwordRef}
               required
               disabled={isAuthenticating}
               InputLabelProps={{
+                shrink: false,
                 style: {
                   color: "#c0c0c0",
-                  zIndex: 10,
+                  // zIndex: 10,
                   paddingLeft: "4px",
                   pointerEvents: "none",
                 },
