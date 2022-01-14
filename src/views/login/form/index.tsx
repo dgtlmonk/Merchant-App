@@ -77,6 +77,7 @@ export default ({
                 color: "#c0c0c0",
                 zIndex: 10,
                 paddingLeft: "4px",
+                pointerEvents: "none",
               },
             }}
             inputProps={{
@@ -100,6 +101,7 @@ export default ({
                   color: "#c0c0c0",
                   zIndex: 10,
                   paddingLeft: "4px",
+                  pointerEvents: "none",
                 },
               }}
               inputProps={{
