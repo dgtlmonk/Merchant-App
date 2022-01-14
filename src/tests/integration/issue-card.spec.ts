@@ -56,6 +56,62 @@ const mockSettings = {
       ],
     },
   ],
+  settings: {
+    modules: {
+      membership: {
+        join: true,
+      },
+      orders: {
+        search: true,
+        create: true,
+        cancel: true,
+      },
+    },
+    membership: {
+      allowSalesQualify: false,
+    },
+    orders: {},
+    forms: {
+      "membership-join": {
+        type: "object",
+        required: ["familyName", "givenName", "mobile"],
+        properties: {
+          familyName: {
+            type: "string",
+            title: "Family Name",
+          },
+          givenName: {
+            type: "string",
+            min: 1,
+            title: "Given Name",
+          },
+          mobile: {
+            type: "string",
+            title: "Mobile",
+          },
+        },
+      },
+      "order-create": {
+        type: "object",
+        required: ["receipt"],
+        properties: {
+          receipt: {
+            type: "string",
+            title: "Receipt",
+          },
+          quantity: {
+            type: "number",
+            min: 1,
+            title: "Quantity",
+          },
+          amount: {
+            type: "number",
+            title: "Amount",
+          },
+        },
+      },
+    },
+  },
 };
 
 describe("Issue Card", () => {

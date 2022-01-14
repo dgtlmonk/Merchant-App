@@ -275,7 +275,7 @@ function Index({
     <div className="flex flex-col w-full h-full items-center">
       <div
         className="module__header sticky top-0 w-full z-20 "
-        style={{ backgroundColor: "#f8f8ff" }}
+        style={{ backgroundColor: "#FFB300" }}
       >
         <div className="flex flex-row justify-center items-center relative w-full h-16">
           <button
@@ -284,7 +284,9 @@ function Index({
           >
             <ArrowBack className="opacity-50" />
           </button>
-          <div className="p-4">Sales</div>
+          <div className="p-4 font-bold" style={{ color: "#954700" }}>
+            Sales
+          </div>
         </div>
       </div>
 

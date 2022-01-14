@@ -31,7 +31,7 @@ export default ({
 
   return (
     <div
-      className="flex flex-col p-12 items-center justify-center h-full w-full"
+      className="flex flex-col p-12 h-full w-full"
       style={{
         backgroundColor: `${
           // @ts-ignore
@@ -39,11 +39,11 @@ export default ({
         }`,
       }}
     >
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center w-full">
         {
           // @ts-ignore
           getSettings() && getSettings().business?.logo ? (
-            <div className="flex flex-row justify-between items-center mb-8">
+            <div className="flex flex-row justify-between items-center mb-8 w-48">
               <img
                 loading="lazy"
                 aria-label="membership card image"
@@ -57,41 +57,42 @@ export default ({
           ) : null
         }
 
-        <div
-          className="mb-8 text-3xl font-semibold"
-          style={{
-            color: `${
-              // @ts-ignore
-              getSettings() && getSettings().business.style.light.primary
-            }`,
-          }}
-        >
-          {locationName}
-        </div>
-        <form className="flex flex-col" onSubmit={handleLogin}>
-          <TextField
-            required
-            placeholder="username"
-            inputRef={usernameRef}
-            disabled={isAuthenticating}
-            InputLabelProps={{
-              style: {
-                color: "#c0c0c0",
-                zIndex: 10,
-                paddingLeft: "4px",
-                pointerEvents: "none",
-              },
+        <div className="flex  flex-col w-full items-center">
+          <div
+            className="mb-12 text-4xl font-semibold"
+            style={{
+              color: `${
+                // @ts-ignore
+                getSettings() && getSettings().business.style.light.primary
+              }`,
             }}
-            inputProps={{
-              ["data-test"]: "login-username",
-              style: {
-                color: "#000",
-                backgroundColor: "#fff",
-                paddingLeft: "4px",
-              },
-            }}
-          />
-          <span className="flex mt-4">
+          >
+            {locationName}
+          </div>
+          <form className="flex flex-col w-2/4" onSubmit={handleLogin}>
+            <TextField
+              required
+              placeholder="username"
+              inputRef={usernameRef}
+              disabled={isAuthenticating}
+              InputLabelProps={{
+                style: {
+                  color: "#c0c0c0",
+                  zIndex: 10,
+                  paddingLeft: "4px",
+                  pointerEvents: "none",
+                },
+              }}
+              inputProps={{
+                ["data-test"]: "login-username",
+                style: {
+                  color: "#000",
+                  backgroundColor: "#fff",
+                  paddingLeft: "4px",
+                  fontSize: "1.5rem",
+                },
+              }}
+            />
             <TextField
               placeholder="password"
               type="password"
@@ -112,37 +113,39 @@ export default ({
                 style: {
                   backgroundColor: "#fff",
                   color: "#000",
-
+                  fontSize: "1.5rem",
                   paddingLeft: "4px",
+                  marginTop: ".5rem",
                 },
               }}
             />
-          </span>
-          {isAuthenticating ? (
-            <div className="flex justify-center pt-4">
-              <CircularProgress size="1.5em" />
-            </div>
-          ) : (
-            <button
-              data-test="login-btn"
-              type="submit"
-              className="p-2 mt-4 h-12 rounded-md w-ful text-white font-bold"
-              style={{
-                backgroundColor: `${
-                  // @ts-ignore
-                  getSettings() && getSettings().business.style.light.accent
-                }`,
-              }}
-            >
-              Login
-            </button>
-          )}
-          {isLoginFailed && (
-            <div className="flex justify-center p-2 prose-sm text-red-600">
-              Login failed
-            </div>
-          )}
-        </form>
+            {isAuthenticating ? (
+              <div className="flex justify-center pt-4">
+                <CircularProgress size="1.5em" />
+              </div>
+            ) : (
+              <button
+                data-test="login-btn"
+                type="submit"
+                className="p-2 mt-4 h-14 rounded-md w-ful text-white font-bold"
+                style={{
+                  fontSize: "1.5rem",
+                  backgroundColor: `${
+                    // @ts-ignore
+                    getSettings() && getSettings().business.style.light.accent
+                  }`,
+                }}
+              >
+                Login
+              </button>
+            )}
+            {isLoginFailed && (
+              <div className="flex justify-center p-2 prose-sm text-red-600">
+                Login failed
+              </div>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );

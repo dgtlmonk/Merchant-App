@@ -372,7 +372,7 @@ function Index({
       >
         <div
           className="module__header col-span-1 row-start-1 z-20"
-          style={{ backgroundColor: "#f8f8ff" }}
+          style={{ backgroundColor: "#FFB300" }}
         >
           <div className="flex flex-row justify-center items-center relative w-full h-16 border">
             <button
@@ -384,7 +384,7 @@ function Index({
               <ArrowBack className="opacity-50" />
             </button>
 
-            <div className="p-4">
+            <div className="p-4 font-bold" style={{ color: "#954700" }}>
               Issue Card
               {`${selectedMembership ? ` : ${selectedMembership?.name}` : ""}`}
             </div>
@@ -639,9 +639,9 @@ function Index({
               ),
               [VIEW.fillup]: (
                 <Fragment>
-                  <div className="flex flex-col mt-8">
+                  <div className="flex flex-col mt-8 w-full items-center">
                     <div className="flex flex-col max-w-sm  justify-center  items-center">
-                      <div className="w-96">
+                      <div className="w-96 mb-4">
                         <img
                           aria-label="membership card image"
                           loading="lazy"
@@ -649,7 +649,7 @@ function Index({
                         />
                       </div>
 
-                      <div className="w-5/6 flex px-12 justify-center">
+                      <div className="w-full flex px-12 justify-center">
                         {getMembershipJoinFormSchema() ? (
                           /* @ts-ignore */
                           <Form
@@ -669,7 +669,7 @@ function Index({
                             </button>
                           </Form>
                         ) : (
-                          <div>
+                          <div className="pt-8 w-full flex">
                             Failed to render Issue Card form. Please re-activate
                             this device.
                           </div>

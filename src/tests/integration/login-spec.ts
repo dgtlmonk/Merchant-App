@@ -80,7 +80,7 @@ describe("Login", () => {
     expect(cy.contains(/no longer valid/i)).to.exist;
   });
 
-  it("should display login, given unauthenticated ", () => {
+  it.only("should display login, given unauthenticated ", () => {
     cy.visit("http://localhost:3000");
     cy.get('[data-test="login-btn"]').should("be.visible");
     // cy.wait("@login");
@@ -131,7 +131,7 @@ describe("Login", () => {
     expect(cy.get('[data-test="login-btn"]')).to.exist;
   });
 
-  it.only("should redirect to menu, given token is detected", () => {
+  it("should redirect to menu, given token is detected", () => {
     cy.intercept(`${apiServer}/login?tenant_code=samsonitesg`, {
       token:
         "eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NDQxNTE1MzAsInRlbmFudCI6eyJjb2RlIjoic2Ftc29uaXRlc2cifSwidXNlciI6eyJpZCI6IjYxZDNjYjg5NmJhNDg2MDAxZTExZGFiZiIsInVzZXJuYW1lIjoiYnVnaXMiLCJlbWFpbCI6ImJ1Z2lzQHdhdmVvLmNvbSIsInJvbGVzIjpbeyJuYW1lIjoiTWVyY2hhbnQifV19LCJhY2Nlc3NUb2tlbiI6IkszemdDTkJsdjlaM1hyYWFIMHNMTndMTFh0YUY5QUxCOXJqQ0hpYU1RMUFzZHoyRFpLcUtWbUdHTURRak91OWgifQ.j83nzx_qn5j_uyPeVlEMo7Gltb6mYS18n-6EaMerit8",
