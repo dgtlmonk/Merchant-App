@@ -72,8 +72,20 @@ export default ({
             label="username"
             inputRef={usernameRef}
             disabled={isAuthenticating}
+            InputLabelProps={{
+              style: {
+                color: "#c0c0c0",
+                zIndex: 10,
+                paddingLeft: "4px",
+              },
+            }}
             inputProps={{
               ["data-test"]: "login-username",
+              style: {
+                color: "#000",
+                backgroundColor: "#fff",
+                paddingLeft: "4px",
+              },
             }}
           />
           <span className="flex mt-4">
@@ -83,8 +95,21 @@ export default ({
               inputRef={passwordRef}
               required
               disabled={isAuthenticating}
+              InputLabelProps={{
+                style: {
+                  color: "#c0c0c0",
+                  zIndex: 10,
+                  paddingLeft: "4px",
+                },
+              }}
               inputProps={{
                 ["data-test"]: "login-password",
+                style: {
+                  backgroundColor: "#fff",
+                  color: "#000",
+
+                  paddingLeft: "4px",
+                },
               }}
             />
           </span>

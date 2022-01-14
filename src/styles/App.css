@@ -87,3 +87,7 @@ input[type="number"] {
 button {
   font-weight: 600;
 }
+
+.MuiInputLabel-shrink {
+  color: rgb(73, 74, 83) !important;
+}
