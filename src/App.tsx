@@ -105,6 +105,11 @@ function App(props) {
           setLocalSettings(res);
           setTimeout(() => {
             setIsSettingsUpdating(false);
+
+            if (isReactivating) {
+              deleteToken(); // force login
+            }
+
             navigate("/");
           }, 1500);
 

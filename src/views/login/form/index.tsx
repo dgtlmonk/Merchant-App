@@ -33,8 +33,10 @@ export default ({
     <div
       className="flex flex-col p-12 items-center justify-center h-full w-full"
       style={{
-        // @ts-ignore
-        backgroundColor: `${getSettings().business.style.light.background}`,
+        backgroundColor: `${
+          // @ts-ignore
+          getSettings() && getSettings().business.style.light.background
+        }`,
       }}
     >
       <div className="flex flex-col items-center">
