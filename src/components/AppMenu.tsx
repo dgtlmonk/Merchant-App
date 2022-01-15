@@ -41,12 +41,27 @@ export default ({ onMenuSelect, onLogout }: Props) => (
     </div>
 
     <div
-      className="flex w-full items-center font-bold px-4"
+      className="flex flex-row w-full items-center justify-between  px-4 font-bold tracking-tighter"
       style={{ backgroundColor: "#7B7B7B", color: "#FFFFFF" }}
     >
-      <div className="flex items-center">
+      <div className="flex items-center ">
         <Person style={{ minWidth: "32px", minHeight: "32px" }} />
-        <span className="font-extrabold">Admin</span>
+        <span style={{ fontFamily: "melbourne-bold" }}>admin</span>
+      </div>
+      <div className="flex flex-row tracking-tighter items-center justify-center">
+        <span style={{ color: "#C0C0C0" }}>powered by </span>
+        <div
+          className="flex items-center justify-center "
+          style={{
+            fontFamily: "melbourne-bold",
+            fontSize: "1.4rem",
+            marginLeft: "4px",
+            paddingBottom: "4px",
+          }}
+        >
+          <span style={{ color: "#fff" }}>perk</span>
+          <span style={{ color: "#ffb300" }}>d</span>
+        </div>
       </div>
     </div>
   </div>

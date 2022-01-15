@@ -21,6 +21,11 @@ body {
 }
 
 @font-face {
+  font-family: "melbourne-bold";
+  src: local("Melbourne-Bold"), url("fonts/Melbourne_bold.otf");
+}
+
+@font-face {
   font-family: "picon";
   src: local("Picon"), url("fonts/Picon.ttf") format("truetype");
   font-weight: normal;
