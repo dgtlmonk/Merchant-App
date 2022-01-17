@@ -36,10 +36,10 @@ export const schema = {
       title: "family name",
       type: "string",
     },
-    mobile: {
-      type: "string",
-      title: "mobile",
-    },
+    // mobile: {
+    //   type: "string",
+    //   title: "mobile",
+    // },
   },
 };
 

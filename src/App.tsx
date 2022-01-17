@@ -54,7 +54,8 @@ function App(props) {
       setLocalSettings(getSettings());
 
       if (mod && mod === "1") {
-        validateAccessToken(VIEWS.ISSUE_CARD);
+        // validateAccessToken(VIEWS.ISSUE_CARD);
+        setViewState(VIEWS.ISSUE_CARD);
         return;
       }
 
