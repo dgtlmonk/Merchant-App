@@ -7,11 +7,13 @@ import MembershipCard from "components/MembershipCard";
 import { client, getHeaders, qualifySvcUrl } from "helpers/api-client";
 import { getToken } from "helpers/auth";
 import { getMembershipDetails } from "helpers/membership";
-import { getMembershipJoinFormSchema } from "helpers/settings";
+// import { getMembershipJoinFormSchema } from "helpers/settings";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { MdPersonSearch } from "react-icons/md";
 import { FormProps } from "react-jsonschema-form";
-import { QUALIFY_TYPES, uiSchema } from "types";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+import { QUALIFY_TYPES, schema, uiSchema } from "types";
 import CardConfirm from "./components/CardConfirm";
 import CardIssued from "./components/CardIssued";
 
@@ -650,16 +652,19 @@ function Index({
                       </div>
 
                       <div className="w-full flex px-12 justify-center">
-                        {getMembershipJoinFormSchema() ? (
+                        {schema ? (
                           /* @ts-ignore */
                           <Form
                             key="cardIssueForm"
-                            schema={getMembershipJoinFormSchema()}
+                            // schema={getMembershipJoinFormSchema()}
+                            schema={schema}
                             uiSchema={uiSchema}
                             onChange={handleFormChange}
                             onSubmit={handleSubmit}
                             formData={data}
                           >
+                            <span>mobile</span>
+                            <PhoneInput country={"sg"} />
                             <button
                               type="submit"
                               data-test="issue-next-btn"
